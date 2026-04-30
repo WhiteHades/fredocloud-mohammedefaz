@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { apiUrl } from "@/lib/runtime";
 import { useAuthStore } from "@/stores/auth-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { GoalsPanel } from "./goals-panel";
 
 export function DashboardShell({ user, memberships, pendingInvitations }) {
   const router = useRouter();
@@ -387,6 +388,7 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
               </p>
             </div>
           </div>
+          <GoalsPanel activeWorkspace={activeMembership?.workspace || null} />
         </div>
 
         <div className="col-span-12 flex flex-col justify-between border border-stone-200 bg-[#c8102e] p-6 text-stone-50 dark:border-stone-800 md:col-span-4 md:p-8 lg:p-10">
