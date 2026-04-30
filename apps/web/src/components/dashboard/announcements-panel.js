@@ -7,6 +7,7 @@ import { apiUrl } from "@/lib/runtime";
 export function AnnouncementsPanel({ activeMembership }) {
   const [announcements, setAnnouncements] = useState([]);
   const [announcementError, setAnnouncementError] = useState("");
+  const [isCommentingId, setIsCommentingId] = useState(null);
   const [isCreatingAnnouncement, setIsCreatingAnnouncement] = useState(false);
   const [isLoadingAnnouncements, setIsLoadingAnnouncements] = useState(false);
 
@@ -106,6 +107,72 @@ export function AnnouncementsPanel({ activeMembership }) {
     );
   }
 
+  async function handleReaction(announcementId, emoji) {
+    const response = await fetch(`${apiUrl}/api/announcements/${announcementId}/reactions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ emoji }),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setAnnouncementError(data.error || "Reaction could not be saved.");
+      return;
+    }
+
+    setAnnouncements((currentAnnouncements) =>
+      currentAnnouncements.map((announcement) => {
+        if (announcement.id !== announcementId) {
+          return announcement;
+        }
+
+        return {
+          ...announcement,
+          reactions: data.reacted
+            ? [...announcement.reactions, { id: `${announcementId}-${emoji}`, emoji }]
+            : announcement.reactions.filter((reaction) => reaction.emoji !== emoji),
+        };
+      }),
+    );
+  }
+
+  async function handleComment(event, announcementId) {
+    event.preventDefault();
+
+    setAnnouncementError("");
+    setIsCommentingId(announcementId);
+
+    const formData = new FormData(event.currentTarget);
+    const response = await fetch(`${apiUrl}/api/announcements/${announcementId}/comments`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ content: formData.get("content") }),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setAnnouncementError(data.error || "Comment could not be posted.");
+      setIsCommentingId(null);
+      return;
+    }
+
+    setAnnouncements((currentAnnouncements) =>
+      currentAnnouncements.map((announcement) =>
+        announcement.id === announcementId
+          ? { ...announcement, comments: [...announcement.comments, data.comment] }
+          : announcement,
+      ),
+    );
+    event.currentTarget.reset();
+    setIsCommentingId(null);
+  }
+
   return (
     <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
       <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
@@ -137,6 +204,48 @@ export function AnnouncementsPanel({ activeMembership }) {
               <p className="mt-4 max-w-[60ch] text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70">
                 {announcement.content}
               </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {["🔥", "👏", "✅", "📌"].map((emoji) => (
+                  <button
+                    key={emoji}
+                    className="min-h-[44px] border border-stone-300 px-3 py-2 text-sm transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-700 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+                    onClick={() => handleReaction(announcement.id, emoji)}
+                    type="button"
+                  >
+                    {emoji} {announcement.reactions.filter((reaction) => reaction.emoji === emoji).length}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-4 grid gap-3">
+                {announcement.comments.length ? (
+                  announcement.comments.map((comment) => (
+                    <div key={comment.id} className="border border-stone-200 px-3 py-3 dark:border-stone-800">
+                      <p className="text-sm leading-relaxed text-stone-900 dark:text-stone-50">
+                        {comment.content}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-stone-900/60 dark:text-stone-50/60">No comments yet.</p>
+                )}
+              </div>
+              <form className="mt-4 grid gap-3" onSubmit={(event) => handleComment(event, announcement.id)}>
+                <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
+                  Add comment
+                  <textarea
+                    className="min-h-[88px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                    name="content"
+                    required
+                  />
+                </label>
+                <button
+                  className="min-h-[44px] border border-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+                  disabled={isCommentingId === announcement.id}
+                  type="submit"
+                >
+                  {isCommentingId === announcement.id ? "Posting…" : "Post comment"}
+                </button>
+              </form>
             </article>
           ))}
           {isLoadingAnnouncements ? (
