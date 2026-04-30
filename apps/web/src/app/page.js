@@ -12,6 +12,20 @@ export default function Home() {
           <p className="mt-6 max-w-[60ch] text-base leading-relaxed text-stone-900/70 dark:text-stone-50/70 md:text-lg">
             A workspace for goals, announcements, and action items, built on a strict grid, a disciplined colour system, and a live collaboration core.
           </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a
+              className="min-h-[44px] border border-[#c8102e] bg-[#c8102e] px-4 py-3 text-sm uppercase tracking-[0.22em] text-stone-50 transition hover:bg-[#9d1028] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c8102e]"
+              href="/register"
+            >
+              Create account
+            </a>
+            <a
+              className="min-h-[44px] border border-stone-300 px-4 py-3 text-sm uppercase tracking-[0.22em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-700 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+              href="/login"
+            >
+              Log in
+            </a>
+          </div>
           <div className="mt-10 grid grid-cols-1 gap-4 text-sm text-stone-900/70 dark:text-stone-50/70 sm:grid-cols-2">
             <div className="border border-stone-200 px-4 py-4 dark:border-stone-800">
               <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
