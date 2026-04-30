@@ -16,8 +16,10 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
   const setActiveWorkspaceId = useWorkspaceStore((state) => state.setActiveWorkspaceId);
   const syncMemberships = useWorkspaceStore((state) => state.syncMemberships);
   const [avatarError, setAvatarError] = useState("");
+  const [invitationError, setInvitationError] = useState("");
   const [workspaceError, setWorkspaceError] = useState("");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isSendingInvitation, setIsSendingInvitation] = useState(false);
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -110,6 +112,60 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
     router.refresh();
     event.currentTarget.reset();
     setIsCreatingWorkspace(false);
+  }
+
+  async function handleSendInvitation(event) {
+    event.preventDefault();
+
+    if (!activeMembership) {
+      return;
+    }
+
+    setInvitationError("");
+    setIsSendingInvitation(true);
+
+    const formData = new FormData(event.currentTarget);
+    const response = await fetch(
+      `${apiUrl}/api/workspaces/${activeMembership.workspace.id}/invitations`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          email: formData.get("email"),
+          role: formData.get("role"),
+        }),
+      },
+    );
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setInvitationError(data.error || "Invitation could not be sent.");
+      setIsSendingInvitation(false);
+      return;
+    }
+
+    event.currentTarget.reset();
+    setIsSendingInvitation(false);
+    router.refresh();
+  }
+
+  async function handleAcceptInvitation(invitationId) {
+    const response = await fetch(`${apiUrl}/api/workspaces/invitations/${invitationId}/accept`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      setInvitationError(data.error || "Invitation could not be accepted.");
+      return;
+    }
+
+    router.refresh();
   }
 
   return (
@@ -221,6 +277,80 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
               </button>
             </form>
           </div>
+          <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
+            <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
+              Pending Invitations
+            </p>
+            {pendingInvitations.length ? (
+              <div className="mt-4 grid gap-3">
+                {pendingInvitations.map((invitation) => (
+                  <div
+                    key={invitation.id}
+                    className="border border-stone-200 bg-stone-50 px-4 py-4 dark:border-stone-800 dark:bg-stone-950"
+                  >
+                    <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
+                      {invitation.role}
+                    </p>
+                    <p className="mt-3 text-xl font-light tracking-tight">
+                      {invitation.workspace.name}
+                    </p>
+                    <button
+                      className="mt-4 min-h-[44px] border border-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+                      onClick={() => handleAcceptInvitation(invitation.id)}
+                      type="button"
+                    >
+                      Accept invitation
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-stone-900/60 dark:text-stone-50/60">
+                No pending invitations.
+              </p>
+            )}
+          </div>
+          {activeMembership?.role === "ADMIN" ? (
+            <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
+              <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
+                Invite Member
+              </p>
+              <form className="mt-4 grid gap-4" onSubmit={handleSendInvitation}>
+                <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
+                  Email
+                  <input
+                    className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                    name="email"
+                    required
+                    type="email"
+                  />
+                </label>
+                <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
+                  Role
+                  <select
+                    className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                    defaultValue="MEMBER"
+                    name="role"
+                  >
+                    <option value="MEMBER">Member</option>
+                    <option value="ADMIN">Admin</option>
+                  </select>
+                </label>
+                {invitationError ? (
+                  <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
+                    {invitationError}
+                  </p>
+                ) : null}
+                <button
+                  className="min-h-[44px] border border-stone-900 bg-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] text-stone-50 transition hover:bg-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950 dark:hover:bg-stone-200 dark:focus-visible:ring-stone-50"
+                  disabled={isSendingInvitation}
+                  type="submit"
+                >
+                  {isSendingInvitation ? "Sending…" : "Send invitation"}
+                </button>
+              </form>
+            </div>
+          ) : null}
           <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
             <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
               Avatar Upload
