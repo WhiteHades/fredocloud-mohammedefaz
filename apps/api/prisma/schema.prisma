@@ -26,6 +26,14 @@ enum InvitationStatus {
   EXPIRED
 }
 
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  AT_RISK
+  COMPLETED
+  ARCHIVED
+}
+
 model User {
   id             String       @id @default(cuid())
   email          String       @unique
@@ -51,6 +59,7 @@ model Workspace {
   createdBy   User         @relation("WorkspaceCreator", fields: [createdById], references: [id], onDelete: Cascade)
   memberships Membership[]
   invitations Invitation[]
+  goals       Goal[]
 }
 
 model Membership {
@@ -64,6 +73,8 @@ model Membership {
   workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   permissions MembershipPermission[]
   invitations Invitation[]  @relation("InvitationSender")
+  ownedGoals  Goal[]        @relation("GoalOwner")
+  goalUpdates GoalUpdate[]
 
   @@unique([userId, workspaceId])
 }
@@ -100,4 +111,43 @@ model Invitation {
   workspace            Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([email])
+}
+
+model Goal {
+  id                String      @id @default(cuid())
+  workspaceId       String
+  ownerMembershipId String
+  title             String
+  description       String?
+  dueDate           DateTime?
+  status            GoalStatus  @default(NOT_STARTED)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  workspace         Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  ownerMembership   Membership  @relation("GoalOwner", fields: [ownerMembershipId], references: [id], onDelete: Cascade)
+  milestones        Milestone[]
+  updates           GoalUpdate[]
+}
+
+model Milestone {
+  id                 String    @id @default(cuid())
+  goalId             String
+  title              String
+  progressPercentage Int       @default(0)
+  dueDate            DateTime?
+  sortOrder          Int       @default(0)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  goal               Goal      @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+model GoalUpdate {
+  id                 String      @id @default(cuid())
+  goalId             String
+  authorMembershipId String
+  content            String
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  goal               Goal        @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  authorMembership   Membership  @relation(fields: [authorMembershipId], references: [id], onDelete: Cascade)
 }
