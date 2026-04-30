@@ -12,6 +12,36 @@ export function ActionItemsPanel({ activeWorkspace }) {
   const [isLoadingActionItems, setIsLoadingActionItems] = useState(false);
   const [viewMode, setViewMode] = useState("list");
 
+  async function handleStatusChange(actionItemId, status) {
+    const response = await fetch(`${apiUrl}/api/action-items/${actionItemId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ status }),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setActionItemError(data.error || "Action item update failed.");
+      return;
+    }
+
+    setActionItems((currentActionItems) =>
+      currentActionItems.map((actionItem) =>
+        actionItem.id === actionItemId ? data.actionItem : actionItem,
+      ),
+    );
+  }
+
+  const boardColumns = {
+    TODO: actionItems.filter((actionItem) => actionItem.status === "TODO"),
+    IN_PROGRESS: actionItems.filter((actionItem) => actionItem.status === "IN_PROGRESS"),
+    BLOCKED: actionItems.filter((actionItem) => actionItem.status === "BLOCKED"),
+    DONE: actionItems.filter((actionItem) => actionItem.status === "DONE"),
+  };
+
   useEffect(() => {
     async function loadPanelData() {
       if (!activeWorkspace) {
@@ -132,6 +162,22 @@ export function ActionItemsPanel({ activeWorkspace }) {
                   <p className="mt-2 text-sm text-stone-900/70 dark:text-stone-50/70">
                     {actionItem.goalId ? "Linked to a goal." : "No goal linked yet."}
                   </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {["TODO", "IN_PROGRESS", "BLOCKED", "DONE"].map((status) => (
+                      <button
+                        key={status}
+                        className={`min-h-[44px] border px-3 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                          actionItem.status === status
+                            ? "border-stone-900 bg-stone-900 text-stone-50 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950"
+                            : "border-stone-300 text-stone-900 hover:bg-stone-900 hover:text-stone-50 dark:border-stone-700 dark:text-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950"
+                        }`}
+                        onClick={() => handleStatusChange(actionItem.id, status)}
+                        type="button"
+                      >
+                        {status.replace("_", " ")}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ))
             ) : (
@@ -140,9 +186,43 @@ export function ActionItemsPanel({ activeWorkspace }) {
               </p>
             )
           ) : (
-            <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
-              Kanban view is coming next in this slice.
-            </p>
+            <div className="grid gap-4 xl:grid-cols-4">
+              {Object.entries(boardColumns).map(([status, items]) => (
+                <div key={status} className="border border-stone-200 p-4 dark:border-stone-800">
+                  <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
+                    {status.replace("_", " ")}
+                  </p>
+                  <div className="mt-4 grid gap-3">
+                    {items.length ? (
+                      items.map((actionItem) => (
+                        <div key={actionItem.id} className="border border-stone-200 px-3 py-3 dark:border-stone-800">
+                          <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
+                            {actionItem.priority}
+                          </p>
+                          <p className="mt-2 text-base font-light tracking-tight text-stone-900 dark:text-stone-50">
+                            {actionItem.title}
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {["TODO", "IN_PROGRESS", "BLOCKED", "DONE"].map((nextStatus) => (
+                              <button
+                                key={nextStatus}
+                                className="min-h-[36px] border border-stone-300 px-2 py-1 text-[10px] uppercase tracking-[0.16em] transition hover:bg-stone-900 hover:text-stone-50 dark:border-stone-700 dark:hover:bg-stone-50 dark:hover:text-stone-950"
+                                onClick={() => handleStatusChange(actionItem.id, nextStatus)}
+                                type="button"
+                              >
+                                {nextStatus.replace("_", " ")}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-stone-900/60 dark:text-stone-50/60">No items.</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
           {isLoadingActionItems ? (
             <p className="text-sm text-stone-900/60 dark:text-stone-50/60">Loading action items…</p>
