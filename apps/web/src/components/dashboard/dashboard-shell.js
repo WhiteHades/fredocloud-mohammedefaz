@@ -8,6 +8,7 @@ import { apiUrl } from "@/lib/runtime";
 import { useAuthStore } from "@/stores/auth-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { AnnouncementsPanel } from "./announcements-panel";
+import { ActionItemsPanel } from "./action-items-panel";
 import { GoalsPanel } from "./goals-panel";
 
 export function DashboardShell({ user, memberships, pendingInvitations }) {
@@ -391,6 +392,7 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
           </div>
           <GoalsPanel activeWorkspace={activeMembership?.workspace || null} />
           <AnnouncementsPanel activeMembership={activeMembership || null} />
+          <ActionItemsPanel activeWorkspace={activeMembership?.workspace || null} />
         </div>
 
         <div className="col-span-12 flex flex-col justify-between border border-stone-200 bg-[#c8102e] p-6 text-stone-50 dark:border-stone-800 md:col-span-4 md:p-8 lg:p-10">
