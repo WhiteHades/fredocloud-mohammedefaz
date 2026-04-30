@@ -146,6 +146,43 @@ announcementActionsRouter.post("/:announcementId/reactions", requireAuth, async 
   return response.status(200).json({ reacted: true });
 });
 
+announcementActionsRouter.patch("/:announcementId", requireAuth, async (request, response) => {
+  const announcement = await getAnnouncementContext(request.params.announcementId);
+
+  if (!announcement) {
+    return response.status(404).json({ error: "Announcement not found." });
+  }
+
+  const membership = await getMembershipContext(request.auth.userId, announcement.workspaceId);
+
+  if (!membership || membership.role !== "ADMIN") {
+    return response.status(403).json({ error: "Only workspace admins can update announcements." });
+  }
+
+  const nextPinnedState = typeof request.body.pinned === "boolean" ? request.body.pinned : announcement.pinned;
+  const nextTitle = typeof request.body.title === "string" && request.body.title.trim() ? request.body.title.trim() : announcement.title;
+  const nextContent = typeof request.body.content === "string" && request.body.content.trim() ? request.body.content.trim() : announcement.content;
+
+  const updatedAnnouncement = await prisma.announcement.update({
+    where: { id: announcement.id },
+    data: {
+      pinned: nextPinnedState,
+      title: nextTitle,
+      content: nextContent,
+    },
+    include: {
+      comments: {
+        orderBy: { createdAt: "asc" },
+      },
+      reactions: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+
+  return response.status(200).json({ announcement: serializeAnnouncement(updatedAnnouncement) });
+});
+
 announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (request, response) => {
   const announcement = await getAnnouncementContext(request.params.announcementId);
 

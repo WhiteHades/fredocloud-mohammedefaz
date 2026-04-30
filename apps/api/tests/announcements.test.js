@@ -57,6 +57,36 @@ describe("announcement routes", () => {
     expect(listResponse.body.announcements[0].title).toBe("Launch Day");
   });
 
+  it("lets an admin toggle an announcement pin state", async () => {
+    const adminAgent = request.agent(app);
+
+    await adminAgent.post("/api/auth/register").send({
+      email: "pin-admin@fredohub.test",
+      password: "password123",
+      displayName: "Pin Admin",
+    });
+
+    const workspaceResponse = await adminAgent.post("/api/workspaces").send({
+      name: "Studio Pin",
+      description: "Pinned announcement workspace.",
+      accentColor: "#f0b429",
+    });
+
+    const createResponse = await adminAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/announcements`)
+      .send({
+        title: "A movable announcement",
+        content: "This starts unpinned.",
+      });
+
+    const toggleResponse = await adminAgent
+      .patch(`/api/announcements/${createResponse.body.announcement.id}`)
+      .send({ pinned: true });
+
+    expect(toggleResponse.statusCode).toBe(200);
+    expect(toggleResponse.body.announcement.pinned).toBe(true);
+  });
+
   it("lets a member react to and comment on an announcement", async () => {
     const adminAgent = request.agent(app);
 
