@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const { Router } = require("express");
+const multer = require("multer");
 
 const {
   REFRESH_COOKIE_NAME,
@@ -12,9 +13,11 @@ const {
   verifyRefreshToken,
 } = require("../../lib/auth");
 const { prisma } = require("../../lib/prisma");
+const { hasCloudinaryConfig, uploadImageBuffer } = require("../../lib/cloudinary");
 const { requireAuth } = require("../../middleware/require-auth");
 
 const authRouter = Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 function normalizeEmail(email) {
   return email.trim().toLowerCase();
@@ -171,6 +174,35 @@ authRouter.patch("/me", requireAuth, async (request, response) => {
       displayName,
       avatarPublicId,
       avatarUrl,
+    },
+  });
+
+  return response.status(200).json({ user: serializeUser(user) });
+});
+
+authRouter.post("/avatar", requireAuth, upload.single("file"), async (request, response) => {
+  if (!hasCloudinaryConfig) {
+    return response.status(503).json({
+      error: "Cloudinary credentials are not configured for this environment.",
+    });
+  }
+
+  if (!request.file) {
+    return response.status(400).json({ error: "Avatar file is required." });
+  }
+
+  const uploadResult = await uploadImageBuffer(request.file.buffer, {
+    folder: "fredohub/avatars",
+    public_id: `user_${request.auth.userId}_${Date.now()}`,
+    overwrite: true,
+    resource_type: "image",
+  });
+
+  const user = await prisma.user.update({
+    where: { id: request.auth.userId },
+    data: {
+      avatarPublicId: uploadResult.public_id,
+      avatarUrl: uploadResult.secure_url,
     },
   });
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -10,6 +11,8 @@ export function DashboardShell({ user }) {
   const router = useRouter();
   const setUser = useAuthStore((state) => state.setUser);
   const clearUser = useAuthStore((state) => state.clearUser);
+  const [avatarError, setAvatarError] = useState("");
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
@@ -28,6 +31,38 @@ export function DashboardShell({ user }) {
     router.push("/login");
     router.refresh();
     setIsLoggingOut(false);
+  }
+
+  async function handleAvatarUpload(event) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setAvatarError("");
+    setIsUploadingAvatar(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch(`${apiUrl}/api/auth/avatar`, {
+      method: "POST",
+      body: formData,
+      credentials: "include",
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      setAvatarError(data.error || "Avatar upload failed.");
+      setIsUploadingAvatar(false);
+      return;
+    }
+
+    setUser(data.user);
+    router.refresh();
+    setIsUploadingAvatar(false);
   }
 
   return (
@@ -59,6 +94,42 @@ export function DashboardShell({ user }) {
               </dd>
             </div>
           </dl>
+          <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
+            <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
+              Avatar Upload
+            </p>
+            <div className="mt-4 flex flex-col gap-4">
+              {user.avatarUrl ? (
+                <Image
+                  alt={`${user.displayName || user.email} avatar`}
+                  className="h-24 w-24 border border-stone-200 object-cover dark:border-stone-800"
+                  src={user.avatarUrl}
+                  width={96}
+                  height={96}
+                />
+              ) : null}
+              <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
+                Upload a profile image
+                <input
+                  accept="image/*"
+                  className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                  disabled={isUploadingAvatar}
+                  onChange={handleAvatarUpload}
+                  type="file"
+                />
+              </label>
+              {avatarError ? (
+                <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
+                  {avatarError}
+                </p>
+              ) : null}
+              <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
+                {isUploadingAvatar
+                  ? "Uploading avatar…"
+                  : "Avatar uploads go straight to Cloudinary when credentials are configured."}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="col-span-12 flex flex-col justify-between border border-stone-200 bg-[#c8102e] p-6 text-stone-50 dark:border-stone-800 md:col-span-4 md:p-8 lg:p-10">
