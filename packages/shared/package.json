@@ -1,0 +1,11 @@
+{
+  "name": "@fredohub/shared",
+  "version": "0.1.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build": "mkdir -p dist && cp index.js dist/index.js",
+    "lint": "node -e \"process.exit(0)\"",
+    "test": "node -e \"process.exit(0)\""
+  }
+}

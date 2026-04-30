@@ -1,0 +1,16 @@
+node_modules/
+.turbo/
+.next/
+coverage/
+dist/
+.env
+.env.*
+!.env.example
+apps/*/node_modules/
+apps/*/.next/
+apps/*/coverage/
+packages/*/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
