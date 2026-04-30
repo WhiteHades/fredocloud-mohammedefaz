@@ -2,6 +2,10 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
+const {
+  actionItemActionsRouter,
+  workspaceActionItemsRouter,
+} = require("./modules/action-items/action-items.routes");
 const { authRouter } = require("./modules/auth/auth.routes");
 const {
   announcementActionsRouter,
@@ -22,9 +26,11 @@ app.use(
 app.use(cookieParser());
 app.use(express.json());
 
+app.use("/api/action-items", actionItemActionsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/announcements", announcementActionsRouter);
 app.use("/api/goals", goalDetailRouter);
+app.use("/api/workspaces/:workspaceId/action-items", workspaceActionItemsRouter);
 app.use("/api/workspaces/:workspaceId/announcements", workspaceAnnouncementsRouter);
 app.use("/api/workspaces/:workspaceId/goals", goalsRouter);
 app.use("/api/workspaces", workspacesRouter);

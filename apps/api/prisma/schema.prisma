@@ -34,6 +34,20 @@ enum GoalStatus {
   ARCHIVED
 }
 
+enum ActionItemStatus {
+  TODO
+  IN_PROGRESS
+  BLOCKED
+  DONE
+}
+
+enum ActionItemPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model User {
   id             String       @id @default(cuid())
   email          String       @unique
@@ -61,6 +75,7 @@ model Workspace {
   invitations Invitation[]
   goals       Goal[]
   announcements Announcement[]
+  actionItems ActionItem[]
 }
 
 model Membership {
@@ -79,6 +94,7 @@ model Membership {
   announcements Announcement[] @relation("AnnouncementAuthor")
   announcementComments AnnouncementComment[]
   announcementReactions AnnouncementReaction[]
+  assignedActionItems ActionItem[] @relation("ActionItemAssignee")
 
   @@unique([userId, workspaceId])
 }
@@ -131,6 +147,7 @@ model Goal {
   ownerMembership   Membership  @relation("GoalOwner", fields: [ownerMembershipId], references: [id], onDelete: Cascade)
   milestones        Milestone[]
   updates           GoalUpdate[]
+  actionItems       ActionItem[]
 }
 
 model Milestone {
@@ -192,4 +209,22 @@ model AnnouncementReaction {
   membership        Membership   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
 
   @@unique([announcementId, membershipId, emoji])
+}
+
+model ActionItem {
+  id                  String             @id @default(cuid())
+  workspaceId         String
+  goalId              String?
+  assigneeMembershipId String?
+  title               String
+  description         String?
+  status              ActionItemStatus   @default(TODO)
+  priority            ActionItemPriority @default(MEDIUM)
+  dueDate             DateTime?
+  position            Int                @default(0)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+  workspace           Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  goal                Goal?              @relation(fields: [goalId], references: [id], onDelete: SetNull)
+  assigneeMembership  Membership?        @relation("ActionItemAssignee", fields: [assigneeMembershipId], references: [id], onDelete: SetNull)
 }
