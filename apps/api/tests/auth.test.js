@@ -41,4 +41,74 @@ describe("auth routes", () => {
     expect(currentUserResponse.statusCode).toBe(200);
     expect(currentUserResponse.body.user.email).toBe("founder@fredohub.test");
   });
+
+  it("refreshes the cookie session and keeps the user signed in", async () => {
+    const agent = request.agent(app);
+
+    await agent.post("/api/auth/register").send({
+      email: "refresh@fredohub.test",
+      password: "password123",
+      displayName: "Refresh User",
+    });
+
+    const refreshResponse = await agent.post("/api/auth/refresh");
+
+    expect(refreshResponse.statusCode).toBe(200);
+    expect(refreshResponse.headers["set-cookie"]).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("fredohub_access_token="),
+        expect.stringContaining("fredohub_refresh_token="),
+      ]),
+    );
+
+    const currentUserResponse = await agent.get("/api/auth/me");
+
+    expect(currentUserResponse.statusCode).toBe(200);
+    expect(currentUserResponse.body.user.email).toBe("refresh@fredohub.test");
+  });
+
+  it("logs out the user and clears the current session", async () => {
+    const agent = request.agent(app);
+
+    await agent.post("/api/auth/register").send({
+      email: "logout@fredohub.test",
+      password: "password123",
+      displayName: "Logout User",
+    });
+
+    const logoutResponse = await agent.post("/api/auth/logout");
+
+    expect(logoutResponse.statusCode).toBe(204);
+
+    const currentUserResponse = await agent.get("/api/auth/me");
+
+    expect(currentUserResponse.statusCode).toBe(401);
+  });
+
+  it("updates the current user profile fields", async () => {
+    const agent = request.agent(app);
+
+    await agent.post("/api/auth/register").send({
+      email: "profile@fredohub.test",
+      password: "password123",
+      displayName: "Profile User",
+    });
+
+    const updateResponse = await agent.patch("/api/auth/me").send({
+      displayName: "Swiss Profile",
+      avatarPublicId: "avatars/profile-user",
+      avatarUrl: "https://res.cloudinary.com/demo/image/upload/v1/avatars/profile-user.jpg",
+    });
+
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.body.user.displayName).toBe("Swiss Profile");
+    expect(updateResponse.body.user.avatarPublicId).toBe("avatars/profile-user");
+
+    const currentUserResponse = await agent.get("/api/auth/me");
+
+    expect(currentUserResponse.body.user.displayName).toBe("Swiss Profile");
+    expect(currentUserResponse.body.user.avatarUrl).toBe(
+      "https://res.cloudinary.com/demo/image/upload/v1/avatars/profile-user.jpg",
+    );
+  });
 });

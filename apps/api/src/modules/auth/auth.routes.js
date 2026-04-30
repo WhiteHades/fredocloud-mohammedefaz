@@ -2,11 +2,14 @@ const bcrypt = require("bcryptjs");
 const { Router } = require("express");
 
 const {
+  REFRESH_COOKIE_NAME,
   REFRESH_TOKEN_MAX_AGE_MS,
+  clearAuthCookies,
   createAccessToken,
   createRefreshToken,
   hashToken,
   setAuthCookies,
+  verifyRefreshToken,
 } = require("../../lib/auth");
 const { prisma } = require("../../lib/prisma");
 const { requireAuth } = require("../../middleware/require-auth");
@@ -52,6 +55,36 @@ async function issueSession(response, user) {
   });
 
   setAuthCookies(response, { accessToken, refreshToken });
+}
+
+async function resolveRefreshSession(request) {
+  const refreshToken = request.cookies[REFRESH_COOKIE_NAME];
+
+  if (!refreshToken) {
+    return null;
+  }
+
+  try {
+    const payload = verifyRefreshToken(refreshToken);
+    const session = await prisma.session.findUnique({ where: { id: payload.sid } });
+
+    if (
+      !session ||
+      session.revokedAt ||
+      session.expiresAt <= new Date() ||
+      session.refreshTokenHash !== hashToken(refreshToken)
+    ) {
+      return null;
+    }
+
+    return {
+      refreshToken,
+      session,
+      payload,
+    };
+  } catch {
+    return null;
+  }
 }
 
 authRouter.post("/register", async (request, response) => {
@@ -116,6 +149,85 @@ authRouter.get("/me", requireAuth, async (request, response) => {
   }
 
   return response.status(200).json({ user: serializeUser(user) });
+});
+
+authRouter.patch("/me", requireAuth, async (request, response) => {
+  const displayName =
+    typeof request.body.displayName === "string" && request.body.displayName.trim()
+      ? request.body.displayName.trim()
+      : null;
+  const avatarPublicId =
+    typeof request.body.avatarPublicId === "string" && request.body.avatarPublicId.trim()
+      ? request.body.avatarPublicId.trim()
+      : null;
+  const avatarUrl =
+    typeof request.body.avatarUrl === "string" && request.body.avatarUrl.trim()
+      ? request.body.avatarUrl.trim()
+      : null;
+
+  const user = await prisma.user.update({
+    where: { id: request.auth.userId },
+    data: {
+      displayName,
+      avatarPublicId,
+      avatarUrl,
+    },
+  });
+
+  return response.status(200).json({ user: serializeUser(user) });
+});
+
+authRouter.post("/refresh", async (request, response) => {
+  const resolvedSession = await resolveRefreshSession(request);
+
+  if (!resolvedSession) {
+    clearAuthCookies(response);
+    return response.status(401).json({ error: "Refresh token is invalid." });
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: resolvedSession.payload.sub } });
+
+  if (!user) {
+    clearAuthCookies(response);
+    return response.status(404).json({ error: "User not found." });
+  }
+
+  const nextRefreshToken = createRefreshToken({
+    userId: user.id,
+    sessionId: resolvedSession.session.id,
+  });
+  const nextAccessToken = createAccessToken(user);
+
+  await prisma.session.update({
+    where: { id: resolvedSession.session.id },
+    data: {
+      refreshTokenHash: hashToken(nextRefreshToken),
+      expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE_MS),
+    },
+  });
+
+  setAuthCookies(response, {
+    accessToken: nextAccessToken,
+    refreshToken: nextRefreshToken,
+  });
+
+  return response.status(200).json({ user: serializeUser(user) });
+});
+
+authRouter.post("/logout", async (request, response) => {
+  const resolvedSession = await resolveRefreshSession(request);
+
+  if (resolvedSession) {
+    await prisma.session.update({
+      where: { id: resolvedSession.session.id },
+      data: {
+        revokedAt: new Date(),
+      },
+    });
+  }
+
+  clearAuthCookies(response);
+  return response.status(204).send();
 });
 
 module.exports = { authRouter };
