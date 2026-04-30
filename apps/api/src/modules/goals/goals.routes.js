@@ -4,6 +4,7 @@ const { prisma } = require("../../lib/prisma");
 const { requireAuth } = require("../../middleware/require-auth");
 
 const goalsRouter = Router({ mergeParams: true });
+const goalDetailRouter = Router();
 
 function serializeGoal(goal) {
   return {
@@ -15,6 +16,14 @@ function serializeGoal(goal) {
     createdAt: goal.createdAt,
     updatedAt: goal.updatedAt,
     ownerMembershipId: goal.ownerMembershipId,
+  };
+}
+
+function serializeGoalDetail(goal) {
+  return {
+    ...serializeGoal(goal),
+    milestones: goal.milestones,
+    updates: goal.updates,
   };
 }
 
@@ -77,4 +86,97 @@ goalsRouter.post("/", requireAuth, async (request, response) => {
   return response.status(201).json({ goal: serializeGoal(goal) });
 });
 
-module.exports = { goalsRouter };
+async function getGoalContext(goalId) {
+  return prisma.goal.findUnique({
+    where: { id: goalId },
+    include: {
+      milestones: {
+        orderBy: { createdAt: "asc" },
+      },
+      updates: {
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+}
+
+goalDetailRouter.get("/:goalId", requireAuth, async (request, response) => {
+  const goal = await getGoalContext(request.params.goalId);
+
+  if (!goal) {
+    return response.status(404).json({ error: "Goal not found." });
+  }
+
+  const membership = await getMembershipContext(request.auth.userId, goal.workspaceId);
+
+  if (!membership) {
+    return response.status(403).json({ error: "Workspace membership is required." });
+  }
+
+  return response.status(200).json({ goal: serializeGoalDetail(goal) });
+});
+
+goalDetailRouter.post("/:goalId/milestones", requireAuth, async (request, response) => {
+  const goal = await getGoalContext(request.params.goalId);
+
+  if (!goal) {
+    return response.status(404).json({ error: "Goal not found." });
+  }
+
+  const membership = await getMembershipContext(request.auth.userId, goal.workspaceId);
+
+  if (!membership) {
+    return response.status(403).json({ error: "Workspace membership is required." });
+  }
+
+  const title = typeof request.body.title === "string" ? request.body.title.trim() : "";
+  const progressPercentage = Number(request.body.progressPercentage || 0);
+  const dueDate = request.body.dueDate ? new Date(request.body.dueDate) : null;
+
+  if (!title) {
+    return response.status(400).json({ error: "Milestone title is required." });
+  }
+
+  const milestone = await prisma.milestone.create({
+    data: {
+      goalId: goal.id,
+      title,
+      progressPercentage,
+      dueDate,
+    },
+  });
+
+  return response.status(201).json({ milestone });
+});
+
+goalDetailRouter.post("/:goalId/updates", requireAuth, async (request, response) => {
+  const goal = await getGoalContext(request.params.goalId);
+
+  if (!goal) {
+    return response.status(404).json({ error: "Goal not found." });
+  }
+
+  const membership = await getMembershipContext(request.auth.userId, goal.workspaceId);
+
+  if (!membership) {
+    return response.status(403).json({ error: "Workspace membership is required." });
+  }
+
+  const content = typeof request.body.content === "string" ? request.body.content.trim() : "";
+
+  if (!content) {
+    return response.status(400).json({ error: "Progress update content is required." });
+  }
+
+  const update = await prisma.goalUpdate.create({
+    data: {
+      goalId: goal.id,
+      authorMembershipId: membership.id,
+      content,
+    },
+  });
+
+  return response.status(201).json({ update });
+});
+
+module.exports = { goalsRouter, goalDetailRouter };

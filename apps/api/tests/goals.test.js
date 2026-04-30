@@ -55,4 +55,52 @@ describe("goal routes", () => {
     expect(listResponse.body.goals).toHaveLength(1);
     expect(listResponse.body.goals[0].title).toBe("Launch the team hub");
   });
+
+  it("adds milestones and progress updates to a goal detail view", async () => {
+    const agent = request.agent(app);
+
+    await agent.post("/api/auth/register").send({
+      email: "detail-goals@fredohub.test",
+      password: "password123",
+      displayName: "Goal Detail Owner",
+    });
+
+    const workspaceResponse = await agent.post("/api/workspaces").send({
+      name: "Studio Detail",
+      description: "Goal detail workspace.",
+      accentColor: "#003b8e",
+    });
+
+    const goalResponse = await agent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/goals`)
+      .send({
+        title: "Ship the detail view",
+        status: "NOT_STARTED",
+      });
+
+    const milestoneResponse = await agent
+      .post(`/api/goals/${goalResponse.body.goal.id}/milestones`)
+      .send({
+        title: "Draft milestone",
+        progressPercentage: 25,
+      });
+
+    expect(milestoneResponse.statusCode).toBe(201);
+    expect(milestoneResponse.body.milestone.progressPercentage).toBe(25);
+
+    const updateResponse = await agent
+      .post(`/api/goals/${goalResponse.body.goal.id}/updates`)
+      .send({
+        content: "The first progress note is in the feed.",
+      });
+
+    expect(updateResponse.statusCode).toBe(201);
+    expect(updateResponse.body.update.content).toBe("The first progress note is in the feed.");
+
+    const detailResponse = await agent.get(`/api/goals/${goalResponse.body.goal.id}`);
+
+    expect(detailResponse.statusCode).toBe(200);
+    expect(detailResponse.body.goal.milestones).toHaveLength(1);
+    expect(detailResponse.body.goal.updates).toHaveLength(1);
+  });
 });
