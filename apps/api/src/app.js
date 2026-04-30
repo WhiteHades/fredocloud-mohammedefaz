@@ -3,6 +3,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
 const { authRouter } = require("./modules/auth/auth.routes");
+const { workspacesRouter } = require("./modules/workspaces/workspaces.routes");
 const { config } = require("./lib/env");
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use("/api/auth", authRouter);
+app.use("/api/workspaces", workspacesRouter);
 
 app.get("/api/health", (_request, response) => {
   response.json({
