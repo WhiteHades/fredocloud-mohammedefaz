@@ -60,6 +60,7 @@ model Workspace {
   memberships Membership[]
   invitations Invitation[]
   goals       Goal[]
+  announcements Announcement[]
 }
 
 model Membership {
@@ -75,6 +76,9 @@ model Membership {
   invitations Invitation[]  @relation("InvitationSender")
   ownedGoals  Goal[]        @relation("GoalOwner")
   goalUpdates GoalUpdate[]
+  announcements Announcement[] @relation("AnnouncementAuthor")
+  announcementComments AnnouncementComment[]
+  announcementReactions AnnouncementReaction[]
 
   @@unique([userId, workspaceId])
 }
@@ -150,4 +154,42 @@ model GoalUpdate {
   updatedAt          DateTime    @updatedAt
   goal               Goal        @relation(fields: [goalId], references: [id], onDelete: Cascade)
   authorMembership   Membership  @relation(fields: [authorMembershipId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
+  id                String                 @id @default(cuid())
+  workspaceId       String
+  authorMembershipId String
+  title             String
+  content           String
+  pinned            Boolean                @default(false)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  workspace         Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  authorMembership  Membership             @relation("AnnouncementAuthor", fields: [authorMembershipId], references: [id], onDelete: Cascade)
+  comments          AnnouncementComment[]
+  reactions         AnnouncementReaction[]
+}
+
+model AnnouncementComment {
+  id                String       @id @default(cuid())
+  announcementId    String
+  authorMembershipId String
+  content           String
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  announcement      Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  authorMembership  Membership   @relation(fields: [authorMembershipId], references: [id], onDelete: Cascade)
+}
+
+model AnnouncementReaction {
+  id                String       @id @default(cuid())
+  announcementId    String
+  membershipId      String
+  emoji             String
+  createdAt         DateTime     @default(now())
+  announcement      Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  membership        Membership   @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, membershipId, emoji])
 }
