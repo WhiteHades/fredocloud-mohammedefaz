@@ -115,6 +115,27 @@ workspacesRouter.post("/:workspaceId/invitations", requireAuth, async (request, 
   return response.status(201).json({ invitation });
 });
 
+workspacesRouter.get("/invitations", requireAuth, async (request, response) => {
+  const user = await prisma.user.findUnique({ where: { id: request.auth.userId } });
+
+  if (!user) {
+    return response.status(404).json({ error: "User not found." });
+  }
+
+  const invitations = await prisma.invitation.findMany({
+    where: {
+      email: user.email,
+      status: "PENDING",
+    },
+    include: {
+      workspace: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return response.status(200).json({ invitations });
+});
+
 workspacesRouter.post("/invitations/:invitationId/accept", requireAuth, async (request, response) => {
   const invitation = await prisma.invitation.findUnique({
     where: { id: request.params.invitationId },

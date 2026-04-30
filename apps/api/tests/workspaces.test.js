@@ -90,4 +90,86 @@ describe("workspace routes", () => {
     expect(membershipListResponse.body.memberships).toHaveLength(1);
     expect(membershipListResponse.body.memberships[0].workspace.name).toBe("Studio Beta");
   });
+
+  it("lists pending invitations for the signed-in user", async () => {
+    const adminAgent = request.agent(app);
+
+    await adminAgent.post("/api/auth/register").send({
+      email: "listing-admin@fredohub.test",
+      password: "password123",
+      displayName: "Listing Admin",
+    });
+
+    const workspaceResponse = await adminAgent.post("/api/workspaces").send({
+      name: "Studio Gamma",
+      description: "Pending invitation workspace.",
+      accentColor: "#2d6a4f",
+    });
+
+    await adminAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
+      .send({
+        email: "pending@fredohub.test",
+        role: "MEMBER",
+      });
+
+    const memberAgent = request.agent(app);
+
+    await memberAgent.post("/api/auth/register").send({
+      email: "pending@fredohub.test",
+      password: "password123",
+      displayName: "Pending Member",
+    });
+
+    const pendingResponse = await memberAgent.get("/api/workspaces/invitations");
+
+    expect(pendingResponse.statusCode).toBe(200);
+    expect(pendingResponse.body.invitations).toHaveLength(1);
+    expect(pendingResponse.body.invitations[0].workspace.name).toBe("Studio Gamma");
+  });
+
+  it("rejects invitation creation from a non-admin member", async () => {
+    const adminAgent = request.agent(app);
+
+    await adminAgent.post("/api/auth/register").send({
+      email: "guard-admin@fredohub.test",
+      password: "password123",
+      displayName: "Guard Admin",
+    });
+
+    const workspaceResponse = await adminAgent.post("/api/workspaces").send({
+      name: "Studio Delta",
+      description: "Guard workspace.",
+      accentColor: "#f0b429",
+    });
+
+    await adminAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
+      .send({
+        email: "guard-member@fredohub.test",
+        role: "MEMBER",
+      });
+
+    const memberAgent = request.agent(app);
+
+    await memberAgent.post("/api/auth/register").send({
+      email: "guard-member@fredohub.test",
+      password: "password123",
+      displayName: "Guard Member",
+    });
+
+    const pendingResponse = await memberAgent.get("/api/workspaces/invitations");
+    const invitationId = pendingResponse.body.invitations[0].id;
+
+    await memberAgent.post(`/api/workspaces/invitations/${invitationId}/accept`);
+
+    const forbiddenResponse = await memberAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
+      .send({
+        email: "blocked@fredohub.test",
+        role: "MEMBER",
+      });
+
+    expect(forbiddenResponse.statusCode).toBe(403);
+  });
 });
