@@ -88,7 +88,6 @@ export function LandingPage() {
           <div className="relative z-10 flex min-h-[92svh] flex-col">
             <header className="px-4 pt-4 md:px-6 md:pt-6">
               <div className="mx-auto flex w-fit items-center gap-2 rounded-full border border-white/10 bg-black/75 px-4 py-2 text-sm shadow-lg backdrop-blur-xl md:gap-6 md:px-8">
-                <span className="font-heading font-semibold tracking-[0.24em] text-white/80">notFredoHub</span>
                 <a href="#features" className="hidden text-white/70 transition hover:text-white md:block">Features</a>
                 <a href="#stack" className="hidden text-white/70 transition hover:text-white md:block">Stack</a>
                 <a href={API_DOCS_URL} target="_blank" rel="noreferrer" className="hidden text-white/70 transition hover:text-white md:block">API Docs</a>
