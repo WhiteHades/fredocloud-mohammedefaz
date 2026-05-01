@@ -1,6 +1,7 @@
 const { Router } = require("express");
 
 const { recordAuditEvent } = require("../../lib/audit");
+const { sendInvitationEmail } = require("../../lib/email");
 const { prisma } = require("../../lib/prisma");
 const {
   getWorkspaceAccess,
@@ -131,6 +132,12 @@ workspacesRouter.post("/:workspaceId/invitations", requireAuth, async (request, 
     targetType: "invitation",
     targetId: invitation.id,
     summary: `Invited ${invitation.email} as ${invitation.role}`,
+  });
+
+  await sendInvitationEmail({
+    to: invitation.email,
+    workspaceName: membership.workspace.name,
+    inviterName: membership.user.displayName || membership.user.email,
   });
 
   return response.status(201).json({ invitation });

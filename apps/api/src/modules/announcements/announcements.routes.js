@@ -1,6 +1,7 @@
 const { Router } = require("express");
 
 const { recordAuditEvent } = require("../../lib/audit");
+const { sendMentionEmail } = require("../../lib/email");
 const { prisma } = require("../../lib/prisma");
 const { emitNotificationEvent, emitWorkspaceEvent } = require("../../lib/realtime");
 const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
@@ -298,6 +299,17 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
           link: `/dashboard?announcement=${announcement.id}`,
         });
       });
+
+      await Promise.all(
+        mentionedMemberships.map((mentionedMembership) =>
+          sendMentionEmail({
+            to: mentionedMembership.user.email,
+            workspaceName: membership.workspace.name,
+            announcementTitle: announcement.title,
+            commentBody: content,
+          }),
+        ),
+      );
     }
   }
 

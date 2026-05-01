@@ -1,6 +1,7 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const swaggerUi = require("swagger-ui-express");
 
 const {
   actionItemActionsRouter,
@@ -17,6 +18,7 @@ const {
 const { goalDetailRouter, goalsRouter } = require("./modules/goals/goals.routes");
 const { workspacesRouter } = require("./modules/workspaces/workspaces.routes");
 const { config } = require("./lib/env");
+const { specification } = require("./lib/openapi");
 
 const app = express();
 
@@ -28,6 +30,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(specification));
 
 app.use("/api/action-items", actionItemActionsRouter);
 app.use("/api/auth", authRouter);

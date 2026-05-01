@@ -30,6 +30,7 @@ async function getWorkspaceAccess(userId, workspaceId) {
     include: {
       permissions: true,
       user: true,
+      workspace: true,
     },
   });
 }
