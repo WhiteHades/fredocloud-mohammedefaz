@@ -7,7 +7,7 @@
 
 <h1 align="center">notFredoHub</h1>
 
-<p align="center">Collaborative team hub — workspaces, goals, announcements, and action items in real time.</p>
+<p align="center">Collaborative team hub. Workspaces, goals, announcements, and action items in real time.</p>
 
 <br>
 
