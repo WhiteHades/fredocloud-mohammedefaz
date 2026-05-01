@@ -1,10 +1,5 @@
-"use client";
-
-import { PermissionsPanel } from "@/components/dashboard/permissions-panel";
-import { useDashboardContext } from "@/components/dashboard/dashboard-context";
+import { DashboardSettingsRoutePanel } from "@/components/dashboard/dashboard-route-panels";
 
 export default function DashboardSettingsPage() {
-  const { activeMembership } = useDashboardContext();
-
-  return <PermissionsPanel activeMembership={activeMembership || null} />;
+  return <DashboardSettingsRoutePanel />;
 }

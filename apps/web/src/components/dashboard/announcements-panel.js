@@ -20,34 +20,83 @@ const EMOJI_REACTIONS = ["🔥", "👏", "✅", "📌"];
 export function AnnouncementsPanel({ activeMembership, refreshKey }) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!activeMembership) return;
-    setLoading(true);
-    fetch(`${apiUrl}/api/workspaces/${activeMembership.workspace.id}/announcements`, { credentials: "include" })
-      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
-      .then(({ ok, data }) => { if (ok) setAnnouncements(data.announcements || []); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function loadAnnouncements() {
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${apiUrl}/api/workspaces/${activeMembership.workspace.id}/announcements`, { credentials: "include" });
+        const data = await response.json().catch(() => ({}));
+
+        if (!cancelled && response.ok) {
+          setAnnouncements(data.announcements || []);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadAnnouncements();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeMembership, refreshKey]);
 
   function handlePublish(e) {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
+    const attachment = fd.get("attachment");
+
+    setError("");
+    setIsPublishing(true);
+
     fetch(`${apiUrl}/api/workspaces/${activeMembership.workspace.id}/announcements`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({ title: fd.get("title"), content: fd.get("content"), pinned: fd.get("pinned") === "on" }),
     })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) { setError(data.error); return; }
-        setAnnouncements((prev) => [data.announcement, ...prev]);
+      .then((r) => r.json().then((data) => ({ ok: r.ok, data })))
+      .then(async ({ ok, data }) => {
+        if (!ok) {
+          setError(data.error || "Failed to publish.");
+          return;
+        }
+
+        let nextAnnouncement = data.announcement;
+
+        if (attachment instanceof File && attachment.size > 0) {
+          const attachmentFormData = new FormData();
+          attachmentFormData.append("file", attachment);
+
+          const attachmentResponse = await fetch(`${apiUrl}/api/announcements/${data.announcement.id}/attachments`, {
+            method: "POST",
+            body: attachmentFormData,
+            credentials: "include",
+          });
+          const attachmentData = await attachmentResponse.json().catch(() => ({}));
+
+          if (!attachmentResponse.ok) {
+            setError(attachmentData.error || "Announcement published, but the attachment upload failed.");
+          } else {
+            nextAnnouncement = attachmentData.announcement || nextAnnouncement;
+          }
+        }
+
+        setAnnouncements((prev) => [nextAnnouncement, ...prev]);
         e.currentTarget.reset();
       })
-      .catch(() => setError("Failed to publish."));
+      .catch(() => setError("Failed to publish."))
+      .finally(() => setIsPublishing(false));
   }
 
   function handleTogglePin(id) {
@@ -132,6 +181,21 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
               </CardHeader>
               <CardContent>
                 <div className="text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: ann.content }} />
+                {ann.attachments?.length ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {ann.attachments.map((attachment) => (
+                      <a
+                        key={attachment.id}
+                        href={attachment.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-full border px-3 py-1 text-xs text-muted-foreground transition hover:border-primary/40 hover:text-foreground"
+                      >
+                        {attachment.filename}
+                      </a>
+                    ))}
+                  </div>
+                ) : null}
                 <Separator className="my-3" />
                 <div className="flex items-center gap-2 flex-wrap">
                   {EMOJI_REACTIONS.map((emoji) => {
@@ -181,8 +245,14 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
                   <Switch id="a-pinned" name="pinned" />
                   <Label htmlFor="a-pinned">Pin immediately</Label>
                 </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="a-attachment">Attachment</Label>
+                  <Input id="a-attachment" name="attachment" type="file" />
+                </div>
                 {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button type="submit"><Megaphone /> Publish</Button>
+                <Button type="submit" disabled={isPublishing}>
+                  <Megaphone /> {isPublishing ? "Publishing..." : "Publish"}
+                </Button>
               </form>
             </CardContent>
           </Card>

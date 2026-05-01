@@ -1,10 +1,5 @@
-"use client";
-
-import { ActionItemsPanel } from "@/components/dashboard/action-items-panel";
-import { useDashboardContext } from "@/components/dashboard/dashboard-context";
+import { DashboardActionItemsRoutePanel } from "@/components/dashboard/dashboard-route-panels";
 
 export default function DashboardActionItemsPage() {
-  const { activeMembership, realtimeVersion } = useDashboardContext();
-
-  return <ActionItemsPanel activeWorkspace={activeMembership?.workspace || null} refreshKey={realtimeVersion} />;
+  return <DashboardActionItemsRoutePanel />;
 }

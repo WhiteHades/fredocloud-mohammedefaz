@@ -17,12 +17,30 @@ export function PermissionsPanel({ activeMembership }) {
 
   useEffect(() => {
     if (!activeMembership || activeMembership.role !== "ADMIN") return;
-    setLoading(true);
-    fetch(`${apiUrl}/api/workspaces/${activeMembership.workspace.id}/members`, { credentials: "include" })
-      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
-      .then(({ ok, data }) => { if (ok) setMemberships(data.memberships || []); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function loadMembers() {
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${apiUrl}/api/workspaces/${activeMembership.workspace.id}/members`, { credentials: "include" });
+        const data = await response.json().catch(() => ({}));
+
+        if (!cancelled && response.ok) {
+          setMemberships(data.memberships || []);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadMembers();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeMembership]);
 
   function togglePermission(membershipId, permission) {

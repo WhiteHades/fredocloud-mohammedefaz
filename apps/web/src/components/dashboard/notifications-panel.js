@@ -14,12 +14,30 @@ export function NotificationsPanel({ activeWorkspace, refreshKey }) {
 
   useEffect(() => {
     if (!activeWorkspace) return;
-    setLoading(true);
-    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/notifications`, { credentials: "include" })
-      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
-      .then(({ ok, data }) => { if (ok) setNotifications(data.notifications || []); })
-      .catch(() => setNotifications([]))
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function loadNotifications() {
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/notifications`, { credentials: "include" });
+        const data = await response.json().catch(() => ({}));
+
+        if (!cancelled) {
+          setNotifications(response.ok ? data.notifications || [] : []);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadNotifications();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeWorkspace, refreshKey]);
 
   if (!activeWorkspace) return null;

@@ -15,12 +15,30 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
 
   useEffect(() => {
     if (!activeWorkspace) return;
-    setLoading(true);
-    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/analytics`, { credentials: "include" })
-      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
-      .then(({ ok, data }) => { if (ok) setAnalytics(data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function loadAnalytics() {
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/analytics`, { credentials: "include" });
+        const data = await response.json().catch(() => ({}));
+
+        if (!cancelled && response.ok) {
+          setAnalytics(data);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadAnalytics();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeWorkspace, refreshKey]);
 
   useEffect(() => {
@@ -35,6 +53,9 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
   }, []);
 
   if (!activeWorkspace) return null;
+
+  const stats = analytics?.stats || analytics || {};
+  const goalCompletion = analytics?.goalCompletion || [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,7 +74,7 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
                 <Target className="size-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold font-heading">{analytics.totalGoals ?? 0}</p>
+                <p className="text-3xl font-bold font-heading">{stats.totalGoals ?? 0}</p>
               </CardContent>
             </Card>
             <Card>
@@ -62,7 +83,7 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
                 <CheckCircle className="size-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold font-heading">{analytics.completedThisWeek ?? 0}</p>
+                <p className="text-3xl font-bold font-heading">{stats.itemsCompletedThisWeek ?? stats.completedThisWeek ?? 0}</p>
               </CardContent>
             </Card>
             <Card>
@@ -71,7 +92,7 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
                 <WarningCircle className="size-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <p className="text-3xl font-bold font-heading">{analytics.overdueCount ?? 0}</p>
+                <p className="text-3xl font-bold font-heading">{stats.overdueCount ?? 0}</p>
               </CardContent>
             </Card>
           </div>
@@ -82,8 +103,8 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
               <CardDescription>Progress across goals</CardDescription>
             </CardHeader>
             <CardContent ref={chartHostRef}>
-              {analytics.goalCompletion?.length > 0 ? (
-                <BarChart width={chartWidth} height={300} data={analytics.goalCompletion} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+              {goalCompletion.length > 0 ? (
+                <BarChart width={chartWidth} height={300} data={goalCompletion} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />

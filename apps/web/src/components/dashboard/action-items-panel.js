@@ -15,12 +15,27 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Plus, ListBullets, Kanban } from "@phosphor-icons/react";
 
 const STATUSES = ["TODO", "IN_PROGRESS", "BLOCKED", "DONE"];
-const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"];
+const PRIORITIES = [
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Medium" },
+  { value: "HIGH", label: "High" },
+  { value: "CRITICAL", label: "Urgent" },
+];
 const STATUS_COLUMNS = ["TODO", "IN_PROGRESS", "BLOCKED", "DONE"];
 
-export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
+function formatPriority(priority) {
+  return PRIORITIES.find((option) => option.value === priority)?.label || priority;
+}
+
+function formatStatus(status) {
+  return String(status || "").replaceAll("_", " ");
+}
+
+export function ActionItemsPanel({ activeMembership, refreshKey }) {
+  const activeWorkspace = activeMembership?.workspace || null;
   const [items, setItems] = useState([]);
   const [goals, setGoals] = useState([]);
+  const [memberships, setMemberships] = useState([]);
   const [loading, setLoading] = useState(false);
   const [view, setView] = useState("board");
   const [showCreate, setShowCreate] = useState(false);
@@ -28,17 +43,50 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
 
   useEffect(() => {
     if (!activeWorkspace) return;
-    setLoading(true);
-    Promise.all([
-      fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/action-items`, { credentials: "include" }).then((r) => r.json()),
-      fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/goals`, { credentials: "include" }).then((r) => r.json()),
-    ])
-      .then(([aiData, goalData]) => {
-        setItems(aiData.actionItems || []);
-        setGoals(goalData.goals || []);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function loadActionItems() {
+      setLoading(true);
+
+      try {
+        const [itemsResponse, goalsResponse, membersResponse] = await Promise.all([
+          fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/action-items`, { credentials: "include" }),
+          fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/goals`, { credentials: "include" }),
+          fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/members`, { credentials: "include" }),
+        ]);
+        const [itemsData, goalsData, membersData] = await Promise.all([
+          itemsResponse.json().catch(() => ({})),
+          goalsResponse.json().catch(() => ({})),
+          membersResponse.json().catch(() => ({})),
+        ]);
+
+        if (cancelled) {
+          return;
+        }
+
+        if (itemsResponse.ok) {
+          setItems(itemsData.actionItems || []);
+        }
+
+        if (goalsResponse.ok) {
+          setGoals(goalsData.goals || []);
+        }
+
+        if (membersResponse.ok) {
+          setMemberships(membersData.memberships || []);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadActionItems();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeWorkspace, refreshKey]);
 
   function handleStatusChange(itemId, newStatus) {
@@ -62,15 +110,16 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        title: fd.get("title"),
-        description: fd.get("description"),
-        status: fd.get("status"),
-        priority: fd.get("priority"),
-        dueDate: fd.get("dueDate") || undefined,
-        goalId: fd.get("goalId") || undefined,
-      }),
-    })
+        body: JSON.stringify({
+          title: fd.get("title"),
+          description: fd.get("description"),
+          status: fd.get("status"),
+          priority: fd.get("priority"),
+          dueDate: fd.get("dueDate") || undefined,
+          goalId: fd.get("goalId") === "none" ? undefined : fd.get("goalId") || undefined,
+          assigneeMembershipId: fd.get("assigneeMembershipId") || activeMembership?.id,
+        }),
+      })
       .then((r) => r.json())
       .then((data) => {
         if (data.error) { setError(data.error); return; }
@@ -82,6 +131,7 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
   }
 
   const getGoalTitle = (goalId) => goals.find((g) => g.id === goalId)?.title || "";
+  const getAssigneeLabel = (membershipId) => memberships.find((membership) => membership.id === membershipId)?.user?.displayName || memberships.find((membership) => membership.id === membershipId)?.user?.email || "Unassigned";
 
   if (!activeWorkspace) return null;
 
@@ -115,29 +165,46 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
                   <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="ai-priority">Priority</Label>
-                <Select name="priority" defaultValue="MEDIUM">
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{PRIORITIES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="ai-priority">Priority</Label>
+                  <Select name="priority" defaultValue="MEDIUM">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {PRIORITIES.map((priority) => (
+                        <SelectItem key={priority.value} value={priority.value}>{priority.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="ai-date">Due Date</Label>
                 <Input id="ai-date" name="dueDate" type="date" />
               </div>
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="ai-goal">Parent Goal</Label>
-                <Select name="goalId">
-                  <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">None</SelectItem>
-                    {goals.map((g) => <SelectItem key={g.id} value={g.id}>{g.title}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-1.5 md:col-span-2">
-                <Label htmlFor="ai-desc">Description</Label>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="ai-goal">Parent Goal</Label>
+                  <Select name="goalId" defaultValue="none">
+                    <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">None</SelectItem>
+                      {goals.map((g) => <SelectItem key={g.id} value={g.id}>{g.title}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="ai-assignee">Assignee</Label>
+                  <Select name="assigneeMembershipId" defaultValue={activeMembership?.id || memberships[0]?.id || undefined}>
+                    <SelectTrigger id="ai-assignee"><SelectValue placeholder="Select assignee" /></SelectTrigger>
+                    <SelectContent>
+                      {memberships.map((membership) => (
+                        <SelectItem key={membership.id} value={membership.id}>
+                          {membership.user.displayName || membership.user.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex flex-col gap-1.5 md:col-span-2">
+                  <Label htmlFor="ai-desc">Description</Label>
                 <Textarea id="ai-desc" name="description" rows={2} />
               </div>
               <div className="md:col-span-2 lg:col-span-3 flex justify-end">
@@ -168,8 +235,9 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
                         <div className="min-w-0">
                           <p className="text-sm font-medium truncate">{item.title}</p>
                           {item.goalId && <p className="text-xs text-muted-foreground">{getGoalTitle(item.goalId)}</p>}
+                          <p className="text-xs text-muted-foreground">Assignee: {getAssigneeLabel(item.assigneeMembershipId)}</p>
                         </div>
-                        <Badge variant={item.priority === "URGENT" ? "destructive" : "secondary"}>{item.priority}</Badge>
+                        <Badge variant={item.priority === "CRITICAL" ? "destructive" : "secondary"}>{formatPriority(item.priority)}</Badge>
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1">
                         {STATUSES.filter((s) => s !== status).map((s) => (
@@ -195,10 +263,11 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
                 <CardContent className="p-4 flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <Badge variant={item.status === "DONE" ? "default" : "secondary"}>{item.status.replace("_", " ")}</Badge>
-                      <Badge variant={item.priority === "URGENT" ? "destructive" : "outline"}>{item.priority}</Badge>
+                      <Badge variant={item.status === "DONE" ? "default" : "secondary"}>{formatStatus(item.status)}</Badge>
+                      <Badge variant={item.priority === "CRITICAL" ? "destructive" : "outline"}>{formatPriority(item.priority)}</Badge>
                       <span className="font-medium truncate">{item.title}</span>
                     </div>
+                    <p className="text-xs text-muted-foreground mt-1">Assignee: {getAssigneeLabel(item.assigneeMembershipId)}</p>
                     {item.dueDate && <p className="text-xs text-muted-foreground mt-1">Due: {new Date(item.dueDate).toLocaleDateString()}</p>}
                   </div>
                   <div className="flex gap-1 shrink-0">

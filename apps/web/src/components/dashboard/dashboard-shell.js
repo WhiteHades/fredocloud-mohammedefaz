@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import {
   House,
@@ -61,7 +61,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { AnimeIntro } from "@/components/app-shell/anime-intro";
+import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: House },
@@ -83,6 +83,9 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
   const setActiveWorkspaceId = useWorkspaceStore((state) => state.setActiveWorkspaceId);
   const syncMemberships = useWorkspaceStore((state) => state.syncMemberships);
 
+  const [currentUser, setCurrentUser] = useState(user);
+  const [workspaceMemberships, setWorkspaceMemberships] = useState(memberships);
+  const [workspaceInvitations, setWorkspaceInvitations] = useState(pendingInvitations);
   const [avatarError, setAvatarError] = useState("");
   const [invitationError, setInvitationError] = useState("");
   const [workspaceError, setWorkspaceError] = useState("");
@@ -96,14 +99,84 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
   const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
 
-  useEffect(() => { setUser(user); }, [setUser, user]);
-  useEffect(() => { syncMemberships(memberships); }, [memberships, syncMemberships]);
+  function setDashboardUser(nextUser) {
+    setCurrentUser(nextUser);
+    setUser(nextUser);
+  }
+
+  function mergeWorkspaceUpdate(nextWorkspace) {
+    setWorkspaceMemberships((prev) => {
+      const nextMemberships = prev.map((membership) =>
+        membership.workspace.id === nextWorkspace.id
+          ? { ...membership, workspace: { ...membership.workspace, ...nextWorkspace } }
+          : membership,
+      );
+
+      syncMemberships(nextMemberships);
+      return nextMemberships;
+    });
+  }
+
+  useEffect(() => {
+    async function syncUserFromProps() {
+      setCurrentUser(user);
+    }
+
+    void syncUserFromProps();
+    setUser(user);
+  }, [setUser, user]);
+
+  useEffect(() => {
+    async function syncMembershipsFromProps() {
+      setWorkspaceMemberships(memberships);
+    }
+
+    void syncMembershipsFromProps();
+    syncMemberships(memberships);
+  }, [memberships, syncMemberships]);
+
+  useEffect(() => {
+    async function syncInvitationsFromProps() {
+      setWorkspaceInvitations(pendingInvitations);
+    }
+
+    void syncInvitationsFromProps();
+  }, [pendingInvitations]);
 
   const activeMembership =
-    memberships.find(({ workspace }) => workspace.id === activeWorkspaceId) || memberships[0] || null;
+    workspaceMemberships.find(({ workspace }) => workspace.id === activeWorkspaceId) || workspaceMemberships[0] || null;
+
+  async function refreshWorkspaceShell(nextActiveWorkspaceId) {
+    const [membershipsResponse, invitationsResponse] = await Promise.all([
+      fetch(`${apiUrl}/api/workspaces`, { credentials: "include" }),
+      fetch(`${apiUrl}/api/workspaces/invitations`, { credentials: "include" }),
+    ]);
+
+    const membershipsData = await membershipsResponse.json().catch(() => ({}));
+    const invitationsData = await invitationsResponse.json().catch(() => ({}));
+
+    if (membershipsResponse.ok) {
+      const nextMemberships = membershipsData.memberships || [];
+      setWorkspaceMemberships(nextMemberships);
+      syncMemberships(nextMemberships);
+
+      if (nextActiveWorkspaceId) {
+        setActiveWorkspaceId(nextActiveWorkspaceId);
+      }
+    }
+
+    if (invitationsResponse.ok) {
+      setWorkspaceInvitations(invitationsData.invitations || []);
+    }
+  }
 
   useEffect(() => {
     async function loadSocketToken() {
+      if (!currentUser?.id) {
+        setSocketToken(null);
+        return;
+      }
+
       try {
         const response = await fetch(`${apiUrl}/api/auth/socket-token`, { credentials: "include" });
         const data = await response.json().catch(() => ({}));
@@ -112,7 +185,7 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
       } catch { setSocketToken(null); }
     }
     loadSocketToken();
-  }, [user.id]);
+  }, [currentUser?.id]);
 
   useEffect(() => {
     if (!socketToken) return;
@@ -141,17 +214,17 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
       });
     });
     socket.on("notification:created", ({ userId, workspaceId }) => {
-      if (userId === user.id && workspaceId === activeMembership?.workspace.id) bumpRealtime();
+      if (userId === currentUser.id && workspaceId === activeMembership?.workspace.id) bumpRealtime();
     });
     return () => { socket.disconnect(); };
-  }, [activeMembership?.workspace.id, socketToken, user.id]);
+  }, [activeMembership?.workspace.id, currentUser?.id, socketToken]);
 
   async function handleLogout() {
     setIsLoggingOut(true);
     await fetch(`${apiUrl}/api/auth/logout`, { method: "POST", credentials: "include" });
     clearUser();
+    setCurrentUser(null);
     router.push("/login");
-    router.refresh();
     setIsLoggingOut(false);
   }
 
@@ -168,10 +241,12 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) { setAvatarError(data.error || "Avatar upload failed."); return; }
-      setUser(data.user);
-      router.refresh();
+      setDashboardUser(data.user);
     } catch { setAvatarError("Upload failed. Check your connection."); }
-    finally { setIsUploadingAvatar(false); }
+    finally {
+      event.target.value = "";
+      setIsUploadingAvatar(false);
+    }
   }
 
   async function handleCreateWorkspace(event) {
@@ -193,7 +268,9 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
       const data = await response.json().catch(() => ({}));
       if (!response.ok) { setWorkspaceError(data.error || "Workspace creation failed."); return; }
       setActiveWorkspaceId(data.workspace.id);
-      router.refresh();
+      startTransition(() => {
+        void refreshWorkspaceShell(data.workspace.id);
+      });
       setShowCreateWorkspace(false);
       event.currentTarget.reset();
     } catch { setWorkspaceError("Could not reach the server."); }
@@ -219,7 +296,6 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
       setShowInviteDialog(false);
     } catch { setInvitationError("Could not reach the server."); }
     finally { setIsSendingInvitation(false); }
-    router.refresh();
   }
 
   async function handleAcceptInvitation(invitationId) {
@@ -231,28 +307,44 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
       setInvitationError(data.error || "Invitation could not be accepted.");
       return;
     }
-    router.refresh();
+    const data = await response.json().catch(() => ({}));
+    startTransition(() => {
+      void refreshWorkspaceShell(data.membership?.workspace?.id);
+    });
   }
 
-  const contextValue = useMemo(
-    () => ({
-      activeMembership, avatarError, handleAcceptInvitation, handleAvatarUpload,
-      handleCreateWorkspace, handleLogout, handleSendInvitation, invitationError,
-      isCreatingWorkspace, isLoggingOut, isSendingInvitation, isUploadingAvatar,
-      memberships, onlineUserIds, pendingInvitations, realtimeVersion,
-      setActiveWorkspaceId, user, workspaceError,
-    }),
-    [
-      activeMembership, avatarError, invitationError, isCreatingWorkspace,
-      isLoggingOut, isSendingInvitation, isUploadingAvatar, memberships,
-      onlineUserIds, pendingInvitations, realtimeVersion, setActiveWorkspaceId,
-      user, workspaceError,
-    ],
-  );
+  const contextValue = {
+    activeMembership,
+    avatarError,
+    handleAcceptInvitation,
+    handleAvatarUpload,
+    handleCreateWorkspace,
+    handleLogout,
+    handleSendInvitation,
+    invitationError,
+    isCreatingWorkspace,
+    isLoggingOut,
+    isSendingInvitation,
+    isUploadingAvatar,
+    memberships: workspaceMemberships,
+    onlineUserIds,
+    pendingInvitations: workspaceInvitations,
+    realtimeVersion,
+    refreshWorkspaceShell,
+    mergeWorkspaceUpdate,
+    setDashboardUser,
+    setActiveWorkspaceId,
+    user: currentUser,
+    workspaceError,
+  };
 
-  const initials = user.displayName
-    ? user.displayName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-    : user.email?.slice(0, 2).toUpperCase() || "U";
+  if (!currentUser) {
+    return null;
+  }
+
+  const initials = currentUser.displayName
+    ? currentUser.displayName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : currentUser.email?.slice(0, 2).toUpperCase() || "U";
 
   return (
     <DashboardProvider value={contextValue}>
@@ -281,16 +373,16 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
                     <DropdownMenuTrigger asChild>
                       <SidebarMenuButton className="w-full justify-start">
                         <Buildings />
-                        <span className="truncate">{activeMembership?.workspace.name || "Select Workspace"}</span>
-                        {memberships.length > 1 && (
-                          <Badge variant="secondary" className="ml-auto">{memberships.length}</Badge>
-                        )}
+                         <span className="truncate">{activeMembership?.workspace.name || "Select Workspace"}</span>
+                         {workspaceMemberships.length > 1 && (
+                           <Badge variant="secondary" className="ml-auto">{workspaceMemberships.length}</Badge>
+                         )}
                       </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-56">
                       <DropdownMenuLabel>Switch Workspace</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      {memberships.map(({ workspace, role }) => (
+                      {workspaceMemberships.map(({ workspace, role }) => (
                         <DropdownMenuItem
                           key={workspace.id}
                           onClick={() => setActiveWorkspaceId(workspace.id)}
@@ -348,13 +440,13 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     )}
-                    {pendingInvitations.length > 0 && (
+                    {workspaceInvitations.length > 0 && (
                       <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                           <Link href="/dashboard/workspaces">
                             <User />
                             <span>Invitations</span>
-                            <Badge variant="secondary" className="ml-auto">{pendingInvitations.length}</Badge>
+                            <Badge variant="secondary" className="ml-auto">{workspaceInvitations.length}</Badge>
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -373,19 +465,19 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
                     <DropdownMenuTrigger asChild>
                       <SidebarMenuButton className="w-full">
                         <Avatar className="size-6 rounded-md">
-                          <AvatarImage src={user.avatarUrl || undefined} alt={user.displayName || user.email} />
+                          <AvatarImage src={currentUser.avatarUrl || undefined} alt={currentUser.displayName || currentUser.email} />
                           <AvatarFallback className="rounded-md text-xs">{initials}</AvatarFallback>
                         </Avatar>
-                        <span className="truncate">{user.displayName || user.email}</span>
+                        <span className="truncate">{currentUser.displayName || currentUser.email}</span>
                         <SignOut className="ml-auto" />
                       </SidebarMenuButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start" className="w-56">
                       <DropdownMenuLabel>
                         <div className="flex flex-col">
-                          <span>{user.displayName}</span>
-                          <span className="text-xs text-muted-foreground">{user.email}</span>
-                        </div>
+                           <span>{currentUser.displayName}</span>
+                           <span className="text-xs text-muted-foreground">{currentUser.email}</span>
+                         </div>
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
@@ -418,18 +510,21 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
           </Sidebar>
 
           <main className="flex-1 flex flex-col min-w-0">
-            <div className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
+            <div className="sticky top-0 z-10 flex h-14 shrink-0 items-center gap-2 border-b bg-background/90 px-4 backdrop-blur-sm">
               <SidebarTrigger />
-              <Separator orientation="vertical" className="h-6" />
+              <Separator orientation="vertical" className="mx-1 h-full py-2" />
+              <span
+                className="size-2.5 rounded-full border border-white/30 shadow-sm"
+                style={{ backgroundColor: activeMembership?.workspace.accentColor || "var(--primary)" }}
+              />
               <span className="text-sm font-medium text-muted-foreground">
                 {activeMembership?.workspace.name || "notFredoHub"}
               </span>
-            </div>
-            <AnimeIntro>
-              <div className="p-4 md:p-6 lg:p-8" data-anime-item>
-                {children}
+              <div className="ml-auto">
+                <ThemeToggle />
               </div>
-            </AnimeIntro>
+            </div>
+            <div className="p-4 md:p-6 lg:p-8">{children}</div>
           </main>
         </div>
 

@@ -14,12 +14,30 @@ export function AuditPanel({ activeMembership, refreshKey }) {
 
   useEffect(() => {
     if (!activeMembership || !activeMembership.permissions?.AUDIT_VIEW) return;
-    setLoading(true);
-    fetch(`${apiUrl}/api/workspaces/${activeMembership.workspace.id}/audit-events`, { credentials: "include" })
-      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
-      .then(({ ok, data }) => { if (ok) setEvents(data.events || []); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function loadAuditEvents() {
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${apiUrl}/api/workspaces/${activeMembership.workspace.id}/audit-events`, { credentials: "include" });
+        const data = await response.json().catch(() => ({}));
+
+        if (!cancelled && response.ok) {
+          setEvents(data.auditEvents || data.events || []);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadAuditEvents();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeMembership, refreshKey]);
 
   if (!activeMembership || !activeMembership.permissions?.AUDIT_VIEW) return null;

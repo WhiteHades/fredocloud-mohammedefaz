@@ -14,12 +14,30 @@ export function PresencePanel({ activeWorkspace, onlineUserIds }) {
 
   useEffect(() => {
     if (!activeWorkspace) return;
-    setLoading(true);
-    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/members`, { credentials: "include" })
-      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
-      .then(({ ok, data }) => { if (ok) setMemberships(data.memberships || []); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    let cancelled = false;
+
+    async function loadPresenceMembers() {
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/members`, { credentials: "include" });
+        const data = await response.json().catch(() => ({}));
+
+        if (!cancelled && response.ok) {
+          setMemberships(data.memberships || []);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void loadPresenceMembers();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeWorkspace]);
 
   const onlineMembers = memberships.filter((m) => onlineUserIds.includes(m.user.id));
