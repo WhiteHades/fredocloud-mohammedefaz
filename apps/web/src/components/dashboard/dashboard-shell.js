@@ -46,7 +46,9 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
     memberships.find(({ workspace }) => workspace.id === activeWorkspaceId) || memberships[0] || null;
 
   useEffect(() => {
-    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || apiUrl, {
+    const socketBaseUrl = process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
+    const socket = io(socketBaseUrl, {
+      path: socketBaseUrl ? "/socket.io" : "/realtime/socket.io",
       withCredentials: true,
     });
 
