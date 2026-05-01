@@ -10,22 +10,22 @@
     "test": "jest --runInBand"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4",
     "next": "16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-is": "^16.13.1",
     "recharts": "^3.8.1",
     "socket.io-client": "^4.8.3",
+    "tailwindcss": "^4",
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "jest": "^30.3.0",
-    "jest-environment-jsdom": "^30.3.0",
-    "tailwindcss": "^4"
+    "jest-environment-jsdom": "^30.3.0"
   }
 }
