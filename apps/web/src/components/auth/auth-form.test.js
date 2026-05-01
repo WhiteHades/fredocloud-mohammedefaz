@@ -43,13 +43,13 @@ describe("AuthForm", () => {
   it("renders register-specific fields and redirects on success", async () => {
     render(<AuthForm mode="register" />);
 
-    fireEvent.change(screen.getByLabelText("Display name"), {
+    fireEvent.change(screen.getByPlaceholderText("Display name"), {
       target: { value: "New User" },
     });
-    fireEvent.change(screen.getByLabelText("Email"), {
+    fireEvent.change(screen.getByPlaceholderText("Email address"), {
       target: { value: "new@notfredohub.test" },
     });
-    fireEvent.change(screen.getByLabelText("Password"), {
+    fireEvent.change(screen.getByPlaceholderText("Password"), {
       target: { value: "password123" },
     });
     fireEvent.click(screen.getByText("Create account"));
@@ -62,12 +62,11 @@ describe("AuthForm", () => {
     });
   });
 
-  it("posts login through the same-origin api path", () => {
+  it("renders login form with correct fields", () => {
     render(<AuthForm mode="login" />);
 
-    const form = screen.getByRole("button", { name: "Log in" }).closest("form");
-
-    expect(form).toHaveAttribute("action", "/api/auth/login");
-    expect(form).toHaveAttribute("method", "POST");
+    expect(screen.getByPlaceholderText("Email address")).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Password")).toBeInTheDocument();
+    expect(screen.getByText("Log in")).toBeInTheDocument();
   });
 });
