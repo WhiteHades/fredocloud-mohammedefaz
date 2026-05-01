@@ -1,0 +1,10 @@
+[build]
+builder = "RAILPACK"
+buildCommand = "npm install && npx prisma generate --config prisma.config.js"
+watchPatterns = []
+
+[deploy]
+startCommand = "npx prisma migrate deploy --config prisma.config.js && node prisma/seed.js && node src/server.js"
+healthcheckPath = "/api/health"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

@@ -18,8 +18,17 @@ const plexMono = IBM_Plex_Mono({
 
 export const metadata = {
   title: "notFredoHub",
-  description: "A Swiss-styled collaborative team hub for goals, announcements, and action items.",
+  description: "Complete team management system for FredoCloud.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+  openGraph: {
+    title: "notFredoHub",
+    description: "Complete team management system for FredoCloud.",
+    images: "/icon.svg",
+  },
 };
 
 export default function RootLayout({ children }) {
