@@ -13,6 +13,7 @@ enum WorkspaceRole {
 
 enum WorkspacePermission {
   GOAL_CREATE
+  ACTION_ITEM_CREATE
   ANNOUNCEMENT_PUBLISH
   MEMBER_INVITE
   WORKSPACE_UPDATE

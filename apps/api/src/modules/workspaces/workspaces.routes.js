@@ -1,6 +1,11 @@
 const { Router } = require("express");
 
 const { prisma } = require("../../lib/prisma");
+const {
+  getWorkspaceAccess,
+  hasPermission,
+  serializePermissions,
+} = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
 
 const workspacesRouter = Router();
@@ -9,6 +14,14 @@ function serializeMembership(membership) {
   return {
     id: membership.id,
     role: membership.role,
+    permissions: membership.permissions ? serializePermissions(membership) : undefined,
+    user: membership.user
+      ? {
+          id: membership.user.id,
+          email: membership.user.email,
+          displayName: membership.user.displayName,
+        }
+      : undefined,
     workspace: {
       id: membership.workspace.id,
       name: membership.workspace.name,
@@ -20,21 +33,10 @@ function serializeMembership(membership) {
   };
 }
 
-async function getMembershipContext(userId, workspaceId) {
-  return prisma.membership.findUnique({
-    where: {
-      userId_workspaceId: {
-        userId,
-        workspaceId,
-      },
-    },
-  });
-}
-
 workspacesRouter.get("/", requireAuth, async (request, response) => {
   const memberships = await prisma.membership.findMany({
     where: { userId: request.auth.userId },
-    include: { workspace: true },
+    include: { permissions: true, workspace: true },
     orderBy: { createdAt: "asc" },
   });
 
@@ -90,9 +92,9 @@ workspacesRouter.post("/", requireAuth, async (request, response) => {
 });
 
 workspacesRouter.post("/:workspaceId/invitations", requireAuth, async (request, response) => {
-  const membership = await getMembershipContext(request.auth.userId, request.params.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
 
-  if (!membership || membership.role !== "ADMIN") {
+  if (!membership || !hasPermission(membership, "MEMBER_INVITE")) {
     return response.status(403).json({ error: "Only workspace admins can send invitations." });
   }
 
@@ -113,6 +115,28 @@ workspacesRouter.post("/:workspaceId/invitations", requireAuth, async (request, 
   });
 
   return response.status(201).json({ invitation });
+});
+
+workspacesRouter.get("/:workspaceId/members", requireAuth, async (request, response) => {
+  const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
+
+  if (!membership) {
+    return response.status(403).json({ error: "Workspace membership is required." });
+  }
+
+  const memberships = await prisma.membership.findMany({
+    where: { workspaceId: request.params.workspaceId },
+    include: {
+      permissions: true,
+      user: true,
+      workspace: true,
+    },
+    orderBy: { createdAt: "asc" },
+  });
+
+  return response.status(200).json({
+    memberships: memberships.map(serializeMembership),
+  });
 });
 
 workspacesRouter.get("/invitations", requireAuth, async (request, response) => {
@@ -151,7 +175,7 @@ workspacesRouter.post("/invitations/:invitationId/accept", requireAuth, async (r
     return response.status(403).json({ error: "This invitation does not belong to the current user." });
   }
 
-  const existingMembership = await getMembershipContext(user.id, invitation.workspaceId);
+  const existingMembership = await getWorkspaceAccess(user.id, invitation.workspaceId);
 
   if (existingMembership) {
     return response.status(409).json({ error: "This user already belongs to the workspace." });
@@ -183,5 +207,50 @@ workspacesRouter.post("/invitations/:invitationId/accept", requireAuth, async (r
     },
   });
 });
+
+workspacesRouter.patch(
+  "/:workspaceId/members/:membershipId/permissions",
+  requireAuth,
+  async (request, response) => {
+    const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
+
+    if (!membership || !hasPermission(membership, "WORKSPACE_UPDATE")) {
+      return response.status(403).json({ error: "Only workspace admins can update permissions." });
+    }
+
+    const permission = typeof request.body.permission === "string" ? request.body.permission.trim() : "";
+    const allowed = Boolean(request.body.allowed);
+
+    if (!permission) {
+      return response.status(400).json({ error: "Permission name is required." });
+    }
+
+    await prisma.membershipPermission.upsert({
+      where: {
+        membershipId_permission: {
+          membershipId: request.params.membershipId,
+          permission,
+        },
+      },
+      update: { allowed },
+      create: {
+        membershipId: request.params.membershipId,
+        permission,
+        allowed,
+      },
+    });
+
+    const updatedMembership = await prisma.membership.findUnique({
+      where: { id: request.params.membershipId },
+      include: {
+        permissions: true,
+        user: true,
+        workspace: true,
+      },
+    });
+
+    return response.status(200).json({ membership: serializeMembership(updatedMembership) });
+  },
+);
 
 module.exports = { workspacesRouter };

@@ -1,6 +1,7 @@
 const { Router } = require("express");
 
 const { prisma } = require("../../lib/prisma");
+const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
 
 const workspaceAnnouncementsRouter = Router({ mergeParams: true });
@@ -19,17 +20,6 @@ function serializeAnnouncement(announcement) {
   };
 }
 
-async function getMembershipContext(userId, workspaceId) {
-  return prisma.membership.findUnique({
-    where: {
-      userId_workspaceId: {
-        userId,
-        workspaceId,
-      },
-    },
-  });
-}
-
 async function getAnnouncementContext(announcementId) {
   return prisma.announcement.findUnique({
     where: { id: announcementId },
@@ -45,7 +35,7 @@ async function getAnnouncementContext(announcementId) {
 }
 
 workspaceAnnouncementsRouter.get("/", requireAuth, async (request, response) => {
-  const membership = await getMembershipContext(request.auth.userId, request.params.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
 
   if (!membership) {
     return response.status(403).json({ error: "Workspace membership is required." });
@@ -70,9 +60,9 @@ workspaceAnnouncementsRouter.get("/", requireAuth, async (request, response) => 
 });
 
 workspaceAnnouncementsRouter.post("/", requireAuth, async (request, response) => {
-  const membership = await getMembershipContext(request.auth.userId, request.params.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
 
-  if (!membership || membership.role !== "ADMIN") {
+  if (!membership || !hasPermission(membership, "ANNOUNCEMENT_PUBLISH")) {
     return response.status(403).json({ error: "Only workspace admins can publish announcements." });
   }
 
@@ -108,7 +98,7 @@ announcementActionsRouter.post("/:announcementId/reactions", requireAuth, async 
     return response.status(404).json({ error: "Announcement not found." });
   }
 
-  const membership = await getMembershipContext(request.auth.userId, announcement.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, announcement.workspaceId);
 
   if (!membership) {
     return response.status(403).json({ error: "Workspace membership is required." });
@@ -153,9 +143,9 @@ announcementActionsRouter.patch("/:announcementId", requireAuth, async (request,
     return response.status(404).json({ error: "Announcement not found." });
   }
 
-  const membership = await getMembershipContext(request.auth.userId, announcement.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, announcement.workspaceId);
 
-  if (!membership || membership.role !== "ADMIN") {
+  if (!membership || !hasPermission(membership, "ANNOUNCEMENT_PUBLISH")) {
     return response.status(403).json({ error: "Only workspace admins can update announcements." });
   }
 
@@ -190,7 +180,7 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
     return response.status(404).json({ error: "Announcement not found." });
   }
 
-  const membership = await getMembershipContext(request.auth.userId, announcement.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, announcement.workspaceId);
 
   if (!membership) {
     return response.status(403).json({ error: "Workspace membership is required." });

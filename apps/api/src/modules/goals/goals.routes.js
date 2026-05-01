@@ -1,6 +1,7 @@
 const { Router } = require("express");
 
 const { prisma } = require("../../lib/prisma");
+const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
 
 const goalsRouter = Router({ mergeParams: true });
@@ -27,19 +28,8 @@ function serializeGoalDetail(goal) {
   };
 }
 
-async function getMembershipContext(userId, workspaceId) {
-  return prisma.membership.findUnique({
-    where: {
-      userId_workspaceId: {
-        userId,
-        workspaceId,
-      },
-    },
-  });
-}
-
 goalsRouter.get("/", requireAuth, async (request, response) => {
-  const membership = await getMembershipContext(request.auth.userId, request.params.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
 
   if (!membership) {
     return response.status(403).json({ error: "Workspace membership is required." });
@@ -54,10 +44,14 @@ goalsRouter.get("/", requireAuth, async (request, response) => {
 });
 
 goalsRouter.post("/", requireAuth, async (request, response) => {
-  const membership = await getMembershipContext(request.auth.userId, request.params.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
 
   if (!membership) {
     return response.status(403).json({ error: "Workspace membership is required." });
+  }
+
+  if (!hasPermission(membership, "GOAL_CREATE")) {
+    return response.status(403).json({ error: "This member cannot create goals." });
   }
 
   const title = typeof request.body.title === "string" ? request.body.title.trim() : "";
@@ -107,7 +101,7 @@ goalDetailRouter.get("/:goalId", requireAuth, async (request, response) => {
     return response.status(404).json({ error: "Goal not found." });
   }
 
-  const membership = await getMembershipContext(request.auth.userId, goal.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, goal.workspaceId);
 
   if (!membership) {
     return response.status(403).json({ error: "Workspace membership is required." });
@@ -123,7 +117,7 @@ goalDetailRouter.post("/:goalId/milestones", requireAuth, async (request, respon
     return response.status(404).json({ error: "Goal not found." });
   }
 
-  const membership = await getMembershipContext(request.auth.userId, goal.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, goal.workspaceId);
 
   if (!membership) {
     return response.status(403).json({ error: "Workspace membership is required." });
@@ -156,7 +150,7 @@ goalDetailRouter.post("/:goalId/updates", requireAuth, async (request, response)
     return response.status(404).json({ error: "Goal not found." });
   }
 
-  const membership = await getMembershipContext(request.auth.userId, goal.workspaceId);
+  const membership = await getWorkspaceAccess(request.auth.userId, goal.workspaceId);
 
   if (!membership) {
     return response.status(403).json({ error: "Workspace membership is required." });
