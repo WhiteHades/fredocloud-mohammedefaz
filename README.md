@@ -55,7 +55,7 @@
 |---|---|
 | Monorepo | Turborepo |
 | Frontend | Next.js App Router (JavaScript) |
-| Styling | Tailwind CSS |
+| Styling | Tailwind CSS + shadcn/ui (Luma) |
 | State | Zustand |
 | Backend | Node.js + Express |
 | Database | PostgreSQL + Prisma |
@@ -145,10 +145,18 @@ Full list in `apps/api/.env.example`.
 
 <br>
 
+## UI Design
+
+- **Design system:** shadcn/ui Luma (Radix primitives)
+- **Layout:** Collapsible sidebar with workspace switcher, card-based dashboard grid
+- **Theme:** System-aware dark/light mode via next-themes, OKLCH color system
+- **Animations:** Staggered entrance via anime.js, transitions-dev CSS
+- **Icons:** Phosphor Icons (consistent stroke style)
+
 ## Known limitations
 
 - Nodemailer needs valid SMTP credentials for actual delivery
 - One custom domain (Railway free tier) — the web gets it, API uses Railway's URL
-- Command palette is navigation-focused
+- Command palette is navigation-focused via shadcn CommandDialog
 
 <br>
