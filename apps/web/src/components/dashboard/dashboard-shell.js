@@ -12,6 +12,7 @@ import { ActionItemsPanel } from "./action-items-panel";
 import { GoalsPanel } from "./goals-panel";
 import { PermissionsPanel } from "./permissions-panel";
 import { AuditPanel } from "./audit-panel";
+import { AnalyticsPanel } from "./analytics-panel";
 
 export function DashboardShell({ user, memberships, pendingInvitations }) {
   const router = useRouter();
@@ -397,6 +398,7 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
           <ActionItemsPanel activeWorkspace={activeMembership?.workspace || null} />
           <PermissionsPanel activeMembership={activeMembership || null} />
           <AuditPanel activeMembership={activeMembership || null} />
+          <AnalyticsPanel activeWorkspace={activeMembership?.workspace || null} />
         </div>
 
         <div className="col-span-12 flex flex-col justify-between border border-stone-200 bg-[#c8102e] p-6 text-stone-50 dark:border-stone-800 md:col-span-4 md:p-8 lg:p-10">
