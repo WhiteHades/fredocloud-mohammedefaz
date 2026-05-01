@@ -13,12 +13,12 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: "/api/:path*",
-        destination: `${apiUrl}/api/:path*`,
+        source: "/api/socket.io/:path*",
+        destination: `${apiUrl}/socket.io/:path*`,
       },
       {
-        source: "/realtime/socket.io/:path*",
-        destination: `${apiUrl}/socket.io/:path*`,
+        source: "/api/:path*",
+        destination: `${apiUrl}/api/:path*`,
       },
     ];
   },

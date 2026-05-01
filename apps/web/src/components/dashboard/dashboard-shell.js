@@ -48,7 +48,7 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
   useEffect(() => {
     const socketBaseUrl = process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
     const socket = io(socketBaseUrl, {
-      path: socketBaseUrl ? "/socket.io" : "/realtime/socket.io",
+      path: socketBaseUrl ? "/socket.io" : "/api/socket.io",
       withCredentials: true,
     });
 

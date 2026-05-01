@@ -1,0 +1,7 @@
+[    7496ms] [WARNING] The width(-1) and height(-1) of chart should be greater than 0,
+       please check the style of container, or the props width(100%) and height(100%),
+       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the
+       height and width. @ https://notfredohub.mohammedefaz.com/_next/static/chunks/0trhdup-7mssh.js:2
+[    7901ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://notfredohub.mohammedefaz.com/realtime/socket.io/?EIO=4&transport=polling&t=lfiv1win:0
+[    9630ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://notfredohub.mohammedefaz.com/realtime/socket.io/?EIO=4&transport=polling&t=lfkgbgor:0
+[   12733ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://notfredohub.mohammedefaz.com/realtime/socket.io/?EIO=4&transport=polling&t=lfmp7fz6:0
