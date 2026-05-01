@@ -52,4 +52,8 @@ app.get("/api/health", (_request, response) => {
   });
 });
 
+app.get("/", (_request, response) => {
+  response.redirect(301, "https://web-production-7acc2.up.railway.app");
+});
+
 module.exports = { app };

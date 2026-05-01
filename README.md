@@ -7,15 +7,7 @@
 
 <h1 align="center">notFredoHub</h1>
 
-<p align="center">Complete team management system for FredoCloud.</p>
-
-<p align="center">
-  <a href="https://github.com/WhiteHades/notfredohub/actions"><img alt="build" src="https://img.shields.io/badge/build-passing-1c1917?style=flat-square"></a>
-  <a href="#"><img alt="license" src="https://img.shields.io/badge/license-MIT-1c1917?style=flat-square"></a>
-  <a href="https://notfredohub.mohammedefaz.com"><img alt="production" src="https://img.shields.io/badge/production-live-c8102e?style=flat-square"></a>
-  <a href="#stack"><img alt="stack" src="https://img.shields.io/badge/monorepo-turborepo-1c1917?style=flat-square"></a>
-  <a href="#tests"><img alt="tests" src="https://img.shields.io/badge/tests-21%20passing-1c1917?style=flat-square"></a>
-</p>
+<p align="center">A Swiss-styled collaborative team hub &mdash; not Fredo&rsquo;s, yours.</p>
 
 <br>
 
@@ -29,30 +21,37 @@ A full-stack workspace application where teams manage shared goals, post announc
 
 | Service | URL |
 |---|---|
-| Web | [`https://notfredohub.mohammedefaz.com`](https://notfredohub.mohammedefaz.com) |
-| API | [`https://api.notfredohub.mohammedefaz.com`](https://api.notfredohub.mohammedefaz.com) |
-| Swagger | [`/api/docs`](https://api.notfredohub.mohammedefaz.com/api/docs) |
+| Web | [`https://web-production-7acc2.up.railway.app`](https://web-production-7acc2.up.railway.app) |
+| API | [`https://fredocloud-mohammedefaz-production.up.railway.app`](https://fredocloud-mohammedefaz-production.up.railway.app) |
+| Custom domain | [`notfredohub.mohammedefaz.com`](https://notfredohub.mohammedefaz.com) (redirects to web) |
+| API Docs | [`/api/docs`](https://fredocloud-mohammedefaz-production.up.railway.app/api/docs) |
 
 **Demo login:** `demo@notfredohub.test` / `demo12345`
 
-<p align="center">
-  <br>
-  <img alt="features" src="https://img.shields.io/badge/auth-cookie_JWT-1c1917?style=flat-square">
-  <img alt="workspaces" src="https://img.shields.io/badge/workspaces-multi_tenant-1c1917?style=flat-square">
-  <img alt="goals" src="https://img.shields.io/badge/goals-milestones_%2B_feed-1c1917?style=flat-square">
-  <img alt="announcements" src="https://img.shields.io/badge/announcements-rich_text_%2B_reactions-1c1917?style=flat-square">
-  <img alt="action items" src="https://img.shields.io/badge/action_items-kanban_%2B_list-1c1917?style=flat-square">
-  <img alt="realtime" src="https://img.shields.io/badge/realtime-socket.io_presence-1c1917?style=flat-square">
-  <img alt="analytics" src="https://img.shields.io/badge/analytics-recharts_%2B_csv-1c1917?style=flat-square">
-  <img alt="rbac" src="https://img.shields.io/badge/advanced-rbac_permissions-c8102e?style=flat-square">
-  <img alt="audit" src="https://img.shields.io/badge/advanced-audit_log_%2B_csv-c8102e?style=flat-square">
-  <img alt="theme" src="https://img.shields.io/badge/bonus-dark_%2F_light-c8102e?style=flat-square">
-  <img alt="email" src="https://img.shields.io/badge/bonus-nodemailer-c8102e?style=flat-square">
-  <img alt="cmd" src="https://img.shields.io/badge/bonus-ctrl%2Bk_palette-c8102e?style=flat-square">
-  <img alt="swagger" src="https://img.shields.io/badge/bonus-openapi_docs-c8102e?style=flat-square">
-  <img alt="pwa" src="https://img.shields.io/badge/bonus-pwa_shell-c8102e?style=flat-square">
-  <img alt="tests" src="https://img.shields.io/badge/bonus-jest_%2B_rtl-c8102e?style=flat-square">
-</p>
+<br>
+
+## Features
+
+- Email/password authentication with cookie JWT sessions
+- Multi-workspace creation, switching, invitations, and role-based membership
+- Goals with nested milestones and progress updates
+- Announcements with rich text, pinning, reactions, and comments
+- Action items with list and kanban views
+- Live workspace presence, live panel refresh via Socket.io
+- Mention notifications with in-app delivery
+- Analytics dashboard with completion chart (Recharts) and CSV export
+
+**Advanced:**
+- RBAC permission matrix with per-member overrides
+- Immutable audit timeline with CSV export
+
+**Bonus:**
+- Dark/light theme via system preference
+- Email notifications (Nodemailer hooks)
+- Command palette (`Ctrl+K`)
+- Unit & integration tests (Jest + Supertest + RTL)
+- API documentation at `/api/docs`
+- Installable PWA shell
 
 <br>
 
@@ -73,13 +72,6 @@ A full-stack workspace application where teams manage shared goals, post announc
 
 <br>
 
-## Advanced features
-
-1. **RBAC** — Permission matrix controlling goal creation, announcement publishing, invitations, and more. Defaults per role with per-member overrides.
-2. **Audit log** — Immutable event trail for workspace mutations. Filterable timeline UI with CSV export.
-
-<br>
-
 ## Layout
 
 ```text
@@ -97,29 +89,23 @@ packages/
 You need Node.js, npm, and a running PostgreSQL instance.
 
 ```bash
-# clone
 git clone git@github.com:WhiteHades/notfredohub.git
 cd notfredohub
 
-# install
 npm install
 
-# start postgres (Docker one-liner)
+# postgres (Docker one-liner)
 docker run -d --name notfredohub-postgres \
   -e POSTGRES_DB=notfredohub \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -p 5432:5432 postgres:16
 
-# set up env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
 
-# migrate and seed
 npm run db:migrate --workspace=apps/api -- --name local_setup
 npm run db:seed --workspace=apps/api
-
-# start
 npm run dev
 ```
 
@@ -129,14 +115,14 @@ Open [`http://localhost:3000`](http://localhost:3000) and log in with `demo@notf
 
 ## Scripts
 
-| Command | What it does |
+| Command | Purpose |
 |---|---|
 | `npm run dev` | Start both apps |
 | `npm run build` | Production build |
-| `npm run test` | All tests (API + web) |
-| `npm run lint` | Lint everything |
-| `npm run db:migrate --workspace=apps/api` | Run Prisma migrations |
-| `npm run db:seed --workspace=apps/api` | Seed demo workspace |
+| `npm run test` | All tests |
+| `npm run lint` | Lint |
+| `npm run db:migrate --workspace=apps/api` | Prisma migrations |
+| `npm run db:seed --workspace=apps/api` | Seed demo |
 | `npm run db:generate --workspace=apps/api` | Regenerate Prisma client |
 
 <br>
@@ -148,18 +134,13 @@ Open [`http://localhost:3000`](http://localhost:3000) and log in with `demo@notf
 | Variable | Required | Purpose |
 |---|---|---|
 | `DATABASE_URL` | Yes | PostgreSQL connection |
-| `JWT_ACCESS_SECRET` | Yes | JWT access token signing |
-| `JWT_REFRESH_SECRET` | Yes | JWT refresh token signing |
+| `JWT_ACCESS_SECRET` | Yes | JWT signing |
+| `JWT_REFRESH_SECRET` | Yes | JWT signing |
 | `CLIENT_URL` | Yes | CORS origin |
 | `CLOUDINARY_CLOUD_NAME` | No | Avatar upload |
-| `CLOUDINARY_API_KEY` | No | Avatar upload |
-| `CLOUDINARY_API_SECRET` | No | Avatar upload |
 | `SMTP_HOST` | No | Email delivery |
-| `SMTP_USER` | No | Email delivery |
-| `SMTP_PASS` | No | Email delivery |
-| `SMTP_FROM` | No | Email delivery |
-| `DEMO_EMAIL` | No | Seed account email |
-| `DEMO_PASSWORD` | No | Seed account password |
+
+Full list in `apps/api/.env.example`.
 
 ### Web (`apps/web/.env.local`)
 
@@ -173,9 +154,9 @@ Open [`http://localhost:3000`](http://localhost:3000) and log in with `demo@notf
 ## Known limitations
 
 - Cloudinary avatar upload needs runtime credentials on the API service
-- Nodemailer hooks need valid SMTP credentials for actual email delivery
-- Custom domain setup pending Porkbun DNS API access enablement
-- The command palette is navigation-focused, not a full action runner
+- Nodemailer needs valid SMTP credentials for actual delivery
+- One custom domain (Railway free tier) &mdash; the web gets it, API uses Railway's URL
+- Command palette is navigation-focused
 
 <br>
 
