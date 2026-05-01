@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { requireSessionUser } from "@/lib/auth-server";
-import { getPendingInvitations, getWorkspaceMemberships } from "@/lib/workspace-server";
+import { getWorkspaceMemberships, getPendingInvitations } from "@/lib/workspace-server";
 
 export default async function DashboardLayout({ children }) {
   const user = await requireSessionUser();

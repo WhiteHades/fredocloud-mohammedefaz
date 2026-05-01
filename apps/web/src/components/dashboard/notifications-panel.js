@@ -1,59 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { apiUrl } from "@/lib/runtime";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Empty } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Bell } from "@phosphor-icons/react";
 
 export function NotificationsPanel({ activeWorkspace, refreshKey }) {
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function loadNotifications() {
-      if (!activeWorkspace) {
-        setNotifications([]);
-        return;
-      }
-
-      const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/notifications`, {
-        credentials: "include",
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        setNotifications([]);
-        return;
-      }
-
-      setNotifications(data.notifications);
-    }
-
-    loadNotifications();
+    if (!activeWorkspace) return;
+    setLoading(true);
+    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/notifications`, { credentials: "include" })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
+      .then(({ ok, data }) => { if (ok) setNotifications(data.notifications || []); })
+      .catch(() => setNotifications([]))
+      .finally(() => setLoading(false));
   }, [activeWorkspace, refreshKey]);
 
-  if (!activeWorkspace) {
-    return null;
-  }
+  if (!activeWorkspace) return null;
 
   return (
-    <div className="nfh-panel t-panel-slide" data-open="true">
-      <p className="nfh-eyebrow">Notifications</p>
-      <div className="mt-[10px] grid gap-[10px]">
-        {notifications.length ? (
-          notifications.map((notification) => (
-            <div key={notification.id} className="nfh-subpanel">
-              <p className="nfh-eyebrow">{notification.type}</p>
-              <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">
-                {notification.title}
-              </p>
-              <p className="mt-[10px] text-[11px] uppercase tracking-[-0.005em] opacity-70">
-                {notification.body}
-              </p>
-            </div>
-          ))
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Bell className="size-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold font-heading">Notifications</h3>
+          {notifications.length > 0 && <Badge variant="secondary" className="ml-auto">{notifications.length}</Badge>}
+        </div>
+        {loading ? (
+          <div className="flex flex-col gap-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+        ) : notifications.length === 0 ? (
+          <Empty title="No notifications" description="You're all caught up." />
         ) : (
-          <p className="nfh-muted">No notifications yet.</p>
+          <div className="flex flex-col gap-2">
+            {notifications.map((n) => (
+              <div key={n.id} className="rounded-lg border p-3">
+                <p className="text-xs font-medium text-muted-foreground uppercase">{n.type}</p>
+                <p className="text-sm font-medium">{n.title}</p>
+                {n.body && <p className="text-xs text-muted-foreground mt-0.5">{n.body}</p>}
+              </div>
+            ))}
+          </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

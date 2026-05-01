@@ -1,58 +1,49 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { TextB, TextItalic, ListBullets } from "@phosphor-icons/react";
 
-export function RichTextField({ defaultValue = "", name, label, minHeight = "160px" }) {
+export function RichTextField({ defaultValue, name, label, minHeight = "160px" }) {
   const editorRef = useRef(null);
   const inputRef = useRef(null);
 
   function syncValue() {
-    if (!editorRef.current || !inputRef.current) {
-      return;
+    if (inputRef.current && editorRef.current) {
+      inputRef.current.value = editorRef.current.innerHTML;
     }
-
-    inputRef.current.value = editorRef.current.innerHTML;
   }
 
-  function applyCommand(command) {
-    document.execCommand(command);
-    syncValue();
+  function execCommand(command, value) {
+    document.execCommand(command, false, value);
     editorRef.current?.focus();
+    syncValue();
   }
 
   return (
-    <div className="nfh-stack">
-      <span className="nfh-eyebrow">{label}</span>
-      <div className="flex flex-wrap gap-[10px]">
-        {[
-          ["bold", "Bold"],
-          ["italic", "Italic"],
-          ["insertUnorderedList", "List"],
-        ].map(([command, buttonLabel]) => (
-          <button
-            key={command}
-            className="nfh-chip"
-            onClick={(event) => {
-              event.preventDefault();
-              applyCommand(command);
-            }}
-            type="button"
-          >
-            {buttonLabel}
-          </button>
-        ))}
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-1 rounded-t-lg border border-b-0 bg-muted/50 p-1">
+        <Button variant="ghost" size="icon-sm" onClick={() => execCommand("bold")} title="Bold">
+          <TextB />
+        </Button>
+        <Button variant="ghost" size="icon-sm" onClick={() => execCommand("italic")} title="Italic">
+          <TextItalic />
+        </Button>
+        <Button variant="ghost" size="icon-sm" onClick={() => execCommand("insertUnorderedList")} title="List">
+          <ListBullets />
+        </Button>
       </div>
       <div
         ref={editorRef}
-        className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
         contentEditable
-        dangerouslySetInnerHTML={{ __html: defaultValue }}
-        onBlur={syncValue}
-        onInput={syncValue}
-        style={{ minHeight }}
         suppressContentEditableWarning
+        className="min-h-[160px] rounded-b-lg border border-t-0 bg-background p-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        style={{ minHeight }}
+        onInput={syncValue}
+        onBlur={syncValue}
+        dangerouslySetInnerHTML={{ __html: defaultValue || "" }}
       />
-      <input ref={inputRef} defaultValue={defaultValue} name={name} type="hidden" />
+      <input ref={inputRef} type="hidden" name={name} defaultValue={defaultValue || ""} />
     </div>
   );
 }

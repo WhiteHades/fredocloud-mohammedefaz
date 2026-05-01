@@ -1,407 +1,239 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { apiUrl } from "@/lib/runtime";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Empty } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, CheckCircle, Clock, XCircle } from "@phosphor-icons/react";
+
+const STATUS_OPTIONS = ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "BLOCKED"];
 
 export function GoalsPanel({ activeWorkspace, refreshKey }) {
-  const [detailError, setDetailError] = useState("");
-  const [detailGoal, setDetailGoal] = useState(null);
   const [goals, setGoals] = useState([]);
-  const [goalError, setGoalError] = useState("");
-  const [isAddingMilestone, setIsAddingMilestone] = useState(false);
-  const [isAddingUpdate, setIsAddingUpdate] = useState(false);
-  const [isCreatingGoal, setIsCreatingGoal] = useState(false);
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
-  const [isLoadingGoals, setIsLoadingGoals] = useState(false);
-  const [selectedGoalId, setSelectedGoalId] = useState(null);
+  const [selectedGoal, setSelectedGoal] = useState(null);
+  const [goalDetail, setGoalDetail] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadGoals() {
-      if (!activeWorkspace) {
-        setGoals([]);
-        setSelectedGoalId(null);
-        return;
-      }
-
-      setGoalError("");
-      setIsLoadingGoals(true);
-
-      const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/goals`, {
-        credentials: "include",
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        setGoalError(data.error || "Goals could not be loaded.");
-        setGoals([]);
-        setSelectedGoalId(null);
-        setIsLoadingGoals(false);
-        return;
-      }
-
-      setGoals(data.goals);
-      setSelectedGoalId((currentGoalId) =>
-        currentGoalId && data.goals.some((goal) => goal.id === currentGoalId)
-          ? currentGoalId
-          : data.goals[0]?.id || null,
-      );
-      setIsLoadingGoals(false);
-    }
-
-    loadGoals();
+    if (!activeWorkspace) return;
+    setLoading(true);
+    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/goals`, { credentials: "include" })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
+      .then(({ ok, data }) => { if (ok) setGoals(data.goals || []); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [activeWorkspace, refreshKey]);
 
   useEffect(() => {
-    async function loadGoalDetail() {
-      if (!selectedGoalId) {
-        setDetailGoal(null);
-        return;
-      }
+    if (!selectedGoal || !activeWorkspace) return;
+    fetch(`${apiUrl}/api/goals/${selectedGoal}`, { credentials: "include" })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
+      .then(({ ok, data }) => { if (ok) setGoalDetail(data); })
+      .catch(() => {});
+  }, [selectedGoal, activeWorkspace, refreshKey]);
 
-      setDetailError("");
-      setIsLoadingDetail(true);
-
-      const response = await fetch(`${apiUrl}/api/goals/${selectedGoalId}`, {
-        credentials: "include",
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        setDetailError(data.error || "Goal detail could not be loaded.");
-        setDetailGoal(null);
-        setIsLoadingDetail(false);
-        return;
-      }
-
-      setDetailGoal(data.goal);
-      setIsLoadingDetail(false);
-    }
-
-    loadGoalDetail();
-  }, [selectedGoalId, refreshKey]);
-
-  async function handleCreateGoal(event) {
-    event.preventDefault();
-
-    if (!activeWorkspace) {
-      return;
-    }
-
-    setGoalError("");
-    setIsCreatingGoal(true);
-
-    const formData = new FormData(event.currentTarget);
-    const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/goals`, {
+  function handleCreateGoal(e) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/goals`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        title: formData.get("title"),
-        description: formData.get("description"),
-        dueDate: formData.get("dueDate") || null,
-        status: formData.get("status"),
-      }),
-    });
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      setGoalError(data.error || "Goal creation failed.");
-      setIsCreatingGoal(false);
-      return;
-    }
-
-    const nextGoals = [...goals, data.goal];
-    setGoals(nextGoals);
-    setSelectedGoalId(data.goal.id);
-    event.currentTarget.reset();
-    setIsCreatingGoal(false);
+      body: JSON.stringify({ title: fd.get("title"), description: fd.get("description"), dueDate: fd.get("dueDate"), status: fd.get("status") }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) { setError(data.error); return; }
+        setGoals((prev) => [data.goal, ...prev]);
+        setShowCreate(false);
+        e.currentTarget.reset();
+      })
+      .catch(() => setError("Failed to create goal."));
   }
 
-  async function handleAddMilestone(event) {
-    event.preventDefault();
-
-    if (!selectedGoalId) {
-      return;
-    }
-
-    setDetailError("");
-    setIsAddingMilestone(true);
-
-    const formData = new FormData(event.currentTarget);
-    const response = await fetch(`${apiUrl}/api/goals/${selectedGoalId}/milestones`, {
+  function handleAddMilestone(e) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    fetch(`${apiUrl}/api/goals/${selectedGoal}/milestones`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        title: formData.get("title"),
-        progressPercentage: Number(formData.get("progressPercentage") || 0),
-        dueDate: formData.get("dueDate") || null,
-      }),
-    });
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      setDetailError(data.error || "Milestone creation failed.");
-      setIsAddingMilestone(false);
-      return;
-    }
-
-    setDetailGoal((currentGoal) =>
-      currentGoal
-        ? { ...currentGoal, milestones: [...currentGoal.milestones, data.milestone] }
-        : currentGoal,
-    );
-    event.currentTarget.reset();
-    setIsAddingMilestone(false);
+      body: JSON.stringify({ title: fd.get("title"), progressPercentage: Number(fd.get("progress")), dueDate: fd.get("dueDate") }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) { setError(data.error); return; }
+        setGoalDetail((prev) => ({ ...prev, milestones: [...(prev?.milestones || []), data.milestone] }));
+        e.currentTarget.reset();
+      })
+      .catch(() => setError("Failed to add milestone."));
   }
 
-  async function handleAddUpdate(event) {
-    event.preventDefault();
-
-    if (!selectedGoalId) {
-      return;
-    }
-
-    setDetailError("");
-    setIsAddingUpdate(true);
-
-    const formData = new FormData(event.currentTarget);
-    const response = await fetch(`${apiUrl}/api/goals/${selectedGoalId}/updates`, {
+  function handlePostUpdate(e) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    fetch(`${apiUrl}/api/goals/${selectedGoal}/updates`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        content: formData.get("content"),
-      }),
-    });
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      setDetailError(data.error || "Progress update failed.");
-      setIsAddingUpdate(false);
-      return;
-    }
-
-    setDetailGoal((currentGoal) =>
-      currentGoal
-        ? { ...currentGoal, updates: [...currentGoal.updates, data.update] }
-        : currentGoal,
-    );
-    event.currentTarget.reset();
-    setIsAddingUpdate(false);
+      body: JSON.stringify({ content: fd.get("content") }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) { setError(data.error); return; }
+        setGoalDetail((prev) => ({ ...prev, updates: [data.update, ...(prev?.updates || [])] }));
+        e.currentTarget.reset();
+      })
+      .catch(() => setError("Failed to post update."));
   }
 
-  const selectedGoal = detailGoal || goals.find((goal) => goal.id === selectedGoalId) || null;
+  if (!activeWorkspace) return null;
 
   return (
-    <div className="nfh-panel t-panel-slide" data-open="true">
-      <p className="nfh-eyebrow">Goals</p>
-      {activeWorkspace ? (
-        <div className="mt-[10px] grid gap-[10px] lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
-          <div className="grid gap-[10px]">
-            {goals.map((goal) => {
-              const isSelected = goal.id === selectedGoalId;
-
-              return (
-                <button
-                  key={goal.id}
-                  className={`border p-[20px] text-left transition-transform hover:scale-[1.01] active:scale-[0.99] ${
-                    isSelected
-                      ? "border-current bg-black text-[#e6e6dd]"
-                      : "border-current bg-transparent"
-                  }`}
-                  onClick={() => setSelectedGoalId(goal.id)}
-                  type="button"
-                >
-                  <p className="nfh-eyebrow">{goal.status.replaceAll("_", " ")}</p>
-                  <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">{goal.title}</p>
-                  <p className="mt-[10px] nfh-muted">
-                    {goal.dueDate ? new Date(goal.dueDate).toLocaleDateString() : "No due date set."}
-                  </p>
-                </button>
-              );
-            })}
-            {isLoadingGoals ? (
-              <p className="nfh-muted">Loading goals…</p>
-            ) : null}
-            {!isLoadingGoals && goals.length === 0 ? (
-              <p className="nfh-muted">No goals yet. Create the first one below.</p>
-            ) : null}
-          </div>
-          <div className="grid gap-[10px]">
-            <div className="nfh-subpanel">
-              <p className="nfh-eyebrow">Goal Detail</p>
-              {selectedGoal ? (
-                <div className="mt-[10px] grid gap-[10px]">
-                  <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] leading-[0.95] tracking-[-0.02em]">{selectedGoal.title}</h2>
-                  <p className="nfh-eyebrow">{selectedGoal.status.replaceAll("_", " ")}</p>
-                  <p className="text-[20px] leading-[1.1] tracking-[-0.009em] opacity-75">
-                    {selectedGoal.description || "No goal description yet."}
-                  </p>
-                  <div className="grid gap-[10px] md:grid-cols-2">
-                    <div className="nfh-subpanel">
-                      <p className="nfh-eyebrow">Milestones</p>
-                      <div className="mt-[10px] grid gap-[10px]">
-                        {selectedGoal.milestones?.length ? (
-                          selectedGoal.milestones.map((milestone) => (
-                            <div key={milestone.id} className="border border-current px-[16px] py-[14px]">
-                              <p className="text-[20px] leading-[1] tracking-[-0.009em]">{milestone.title}</p>
-                              <p className="mt-[5px] nfh-eyebrow">
-                                {milestone.progressPercentage}% complete
-                              </p>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="nfh-muted">No milestones yet.</p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="nfh-subpanel">
-                      <p className="nfh-eyebrow">Progress Feed</p>
-                      <div className="mt-[10px] grid gap-[10px]">
-                        {selectedGoal.updates?.length ? (
-                          selectedGoal.updates.map((update) => (
-                            <div key={update.id} className="border border-current px-[16px] py-[14px]">
-                              <p className="text-[20px] leading-[1.1] tracking-[-0.009em]">
-                                {update.content}
-                              </p>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="nfh-muted">No progress updates yet.</p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  {detailError ? <p className="nfh-error">{detailError}</p> : null}
-                  {isLoadingDetail ? (
-                    <p className="nfh-muted">Loading detail…</p>
-                  ) : null}
-                </div>
-              ) : (
-                <p className="mt-[10px] nfh-muted">Select a goal to inspect it.</p>
-              )}
-            </div>
-            <form className="nfh-subpanel nfh-stack" onSubmit={handleAddMilestone}>
-              <p className="nfh-eyebrow">Add Milestone</p>
-              <label className="nfh-label">
-                <span className="nfh-eyebrow">Title</span>
-                <input
-                  className="nfh-input outline-none focus:ring-2 focus:ring-accent"
-                  name="title"
-                  required
-                  type="text"
-                />
-              </label>
-              <div className="nfh-divider-grid nfh-divider-grid-2">
-                <label className="nfh-label">
-                  <span className="nfh-eyebrow">Progress percentage</span>
-                  <input
-                    className="nfh-input outline-none focus:ring-2 focus:ring-accent"
-                    defaultValue="0"
-                    name="progressPercentage"
-                    max="100"
-                    min="0"
-                    type="number"
-                  />
-                </label>
-                <label className="nfh-label">
-                  <span className="nfh-eyebrow">Due date</span>
-                  <input
-                    className="nfh-input outline-none focus:ring-2 focus:ring-accent"
-                    name="dueDate"
-                    type="date"
-                  />
-                </label>
-              </div>
-              <button
-                className="nfh-pill"
-                disabled={!selectedGoalId || isAddingMilestone}
-                type="submit"
-              >
-                {isAddingMilestone ? "Adding…" : "Add milestone"}
-              </button>
-            </form>
-            <form className="nfh-subpanel nfh-stack" onSubmit={handleAddUpdate}>
-              <p className="nfh-eyebrow">Post Progress Update</p>
-              <label className="nfh-label">
-                <span className="nfh-eyebrow">Update</span>
-                <textarea
-                  className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
-                  name="content"
-                  required
-                />
-              </label>
-              <button
-                className="nfh-pill"
-                disabled={!selectedGoalId || isAddingUpdate}
-                type="submit"
-              >
-                {isAddingUpdate ? "Posting…" : "Post update"}
-              </button>
-            </form>
-            <form className="nfh-subpanel nfh-stack" onSubmit={handleCreateGoal}>
-              <p className="nfh-eyebrow">Create Goal</p>
-              <label className="nfh-label">
-                <span className="nfh-eyebrow">Title</span>
-                <input
-                  className="nfh-input outline-none focus:ring-2 focus:ring-accent"
-                  name="title"
-                  required
-                  type="text"
-                />
-              </label>
-              <label className="nfh-label">
-                <span className="nfh-eyebrow">Description</span>
-                <textarea
-                  className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
-                  name="description"
-                />
-              </label>
-              <div className="nfh-divider-grid nfh-divider-grid-2">
-                <label className="nfh-label">
-                  <span className="nfh-eyebrow">Due date</span>
-                  <input
-                    className="nfh-input outline-none focus:ring-2 focus:ring-accent"
-                    name="dueDate"
-                    type="date"
-                  />
-                </label>
-                <label className="nfh-label">
-                  <span className="nfh-eyebrow">Status</span>
-                  <select
-                    className="nfh-select outline-none focus:ring-2 focus:ring-accent"
-                    defaultValue="NOT_STARTED"
-                    name="status"
-                  >
-                    <option value="NOT_STARTED">Not started</option>
-                    <option value="IN_PROGRESS">In progress</option>
-                    <option value="AT_RISK">At risk</option>
-                    <option value="COMPLETED">Completed</option>
-                  </select>
-                </label>
-              </div>
-              {goalError ? <p className="nfh-error">{goalError}</p> : null}
-              <button
-                className="nfh-pill"
-                disabled={isCreatingGoal}
-                type="submit"
-              >
-                {isCreatingGoal ? "Creating…" : "Create goal"}
-              </button>
-            </form>
-          </div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-1 flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold font-heading">Goals</h2>
+          <Button size="sm" onClick={() => setShowCreate(!showCreate)}>
+            <Plus /> New Goal
+          </Button>
         </div>
-      ) : (
-        <p className="mt-[10px] nfh-muted">Select or create a workspace before planning goals.</p>
-      )}
+
+        {showCreate && (
+          <Card>
+            <CardContent className="pt-4">
+              <form onSubmit={handleCreateGoal} className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="g-title">Title</Label>
+                  <Input id="g-title" name="title" required />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="g-desc">Description</Label>
+                  <Textarea id="g-desc" name="description" rows={2} />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="g-date">Due Date</Label>
+                  <Input id="g-date" name="dueDate" type="date" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="g-status">Status</Label>
+                  <Select name="status" defaultValue="NOT_STARTED">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {STATUS_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {error && <p className="text-sm text-destructive">{error}</p>}
+                <Button type="submit">Create Goal</Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {loading ? (
+          <div className="flex flex-col gap-2">
+            {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+          </div>
+        ) : goals.length === 0 ? (
+          <Empty title="No goals yet" description="Create your first goal to get started." />
+        ) : (
+          goals.map((goal) => (
+            <Card
+              key={goal.id}
+              className={`cursor-pointer transition-colors hover:bg-muted/50 ${selectedGoal === goal.id ? "border-primary ring-1 ring-primary/20" : ""}`}
+              onClick={() => setSelectedGoal(goal.id)}
+            >
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{goal.title}</p>
+                    {goal.dueDate && <p className="text-xs text-muted-foreground">Due: {new Date(goal.dueDate).toLocaleDateString()}</p>}
+                  </div>
+                  <Badge variant="secondary" className="shrink-0">{goal.status}</Badge>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
+
+      <div className="lg:col-span-2">
+        {!selectedGoal ? (
+          <div className="flex h-64 items-center justify-center rounded-xl border border-dashed">
+            <p className="text-muted-foreground">Select a goal to view details</p>
+          </div>
+        ) : goalDetail ? (
+          <div className="flex flex-col gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>{goalDetail.goal?.title || goalDetail.title}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Badge>{goalDetail.goal?.status || goalDetail.status}</Badge>
+                  {(goalDetail.goal?.dueDate || goalDetail.dueDate) && (
+                    <Badge variant="secondary">Due: {new Date(goalDetail.goal?.dueDate || goalDetail.dueDate).toLocaleDateString()}</Badge>
+                  )}
+                </div>
+              </CardHeader>
+              {(goalDetail.goal?.description || goalDetail.description) && (
+                <CardContent><p className="text-sm text-muted-foreground">{goalDetail.goal?.description || goalDetail.description}</p></CardContent>
+              )}
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Milestones</CardTitle></CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                {(goalDetail.milestones || []).map((m) => (
+                  <div key={m.id} className="flex items-center justify-between rounded-lg border p-3">
+                    <div>
+                      <p className="text-sm font-medium">{m.title}</p>
+                      {m.dueDate && <p className="text-xs text-muted-foreground">{new Date(m.dueDate).toLocaleDateString()}</p>}
+                    </div>
+                    <Badge variant="secondary">{m.progressPercentage}%</Badge>
+                  </div>
+                ))}
+                <Separator />
+                <form onSubmit={handleAddMilestone} className="flex flex-col gap-2">
+                  <Input name="title" placeholder="Milestone title" required />
+                  <div className="flex gap-2">
+                    <Input name="progress" type="number" min="0" max="100" defaultValue="0" className="w-24" />
+                    <Input name="dueDate" type="date" />
+                    <Button type="submit" size="sm"><Plus /></Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-base">Progress Updates</CardTitle></CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <form onSubmit={handlePostUpdate} className="flex flex-col gap-2">
+                  <Textarea name="content" placeholder="Post a progress update..." rows={2} required />
+                  <Button type="submit" size="sm" className="self-end">Post Update</Button>
+                </form>
+                {(goalDetail.updates || []).map((u) => (
+                  <div key={u.id} className="rounded-lg border p-3">
+                    <p className="text-sm">{u.content}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{new Date(u.createdAt).toLocaleString()}</p>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        ) : (
+          <div className="flex h-64 items-center justify-center"><Skeleton className="h-8 w-8" /></div>
+        )}
+      </div>
     </div>
   );
 }

@@ -1,60 +1,57 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { apiUrl } from "@/lib/runtime";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Empty } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Circle, Users } from "@phosphor-icons/react";
 
 export function PresencePanel({ activeWorkspace, onlineUserIds }) {
   const [memberships, setMemberships] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function loadMembers() {
-      if (!activeWorkspace) {
-        setMemberships([]);
-        return;
-      }
-
-      const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/members`, {
-        credentials: "include",
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        setMemberships([]);
-        return;
-      }
-
-      setMemberships(data.memberships);
-    }
-
-    loadMembers();
+    if (!activeWorkspace) return;
+    setLoading(true);
+    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/members`, { credentials: "include" })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
+      .then(({ ok, data }) => { if (ok) setMemberships(data.memberships || []); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [activeWorkspace]);
 
-  if (!activeWorkspace) {
-    return null;
-  }
+  const onlineMembers = memberships.filter((m) => onlineUserIds.includes(m.user.id));
 
-  const onlineMembers = memberships.filter((membership) => onlineUserIds.includes(membership.user?.id));
+  if (!activeWorkspace) return null;
 
   return (
-    <div className="nfh-panel t-panel-slide" data-open="true">
-      <p className="nfh-eyebrow">Online Members</p>
-      <div className="mt-[10px] grid gap-[10px]">
-        {onlineMembers.length ? (
-          onlineMembers.map((membership) => (
-            <div key={membership.id} className="nfh-subpanel">
-              <p className="text-[20px] leading-[1] tracking-[-0.009em]">
-                {membership.user?.displayName || membership.user?.email}
-              </p>
-              <p className="mt-[5px] nfh-eyebrow">
-                {membership.role}
-              </p>
-            </div>
-          ))
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Users className="size-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold font-heading">Online Members</h3>
+          {onlineMembers.length > 0 && (
+            <Badge variant="secondary" className="ml-auto">{onlineMembers.length}</Badge>
+          )}
+        </div>
+        {loading ? (
+          <div className="flex flex-col gap-2">{[...Array(2)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
+        ) : onlineMembers.length === 0 ? (
+          <Empty title="No one else is online" description="Online members will appear here." />
         ) : (
-          <p className="nfh-muted">No one else is online.</p>
+          <div className="flex flex-col gap-2">
+            {onlineMembers.map((m) => (
+              <div key={m.id} className="flex items-center gap-2 rounded-lg border p-2">
+                <Circle className="size-2 fill-green-500 text-green-500" weight="fill" />
+                <span className="text-sm font-medium">{m.user.displayName || m.user.email}</span>
+                <Badge variant="secondary" className="ml-auto">{m.role}</Badge>
+              </div>
+            ))}
+          </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

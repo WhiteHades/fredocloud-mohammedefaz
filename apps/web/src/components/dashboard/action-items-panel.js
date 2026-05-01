@@ -1,306 +1,221 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { apiUrl } from "@/lib/runtime";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Empty } from "@/components/ui/empty";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, ListBullets, Kanban } from "@phosphor-icons/react";
+
+const STATUSES = ["TODO", "IN_PROGRESS", "BLOCKED", "DONE"];
+const PRIORITIES = ["LOW", "MEDIUM", "HIGH", "URGENT"];
+const STATUS_COLUMNS = ["TODO", "IN_PROGRESS", "BLOCKED", "DONE"];
 
 export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
-  const [actionItemError, setActionItemError] = useState("");
-  const [actionItems, setActionItems] = useState([]);
+  const [items, setItems] = useState([]);
   const [goals, setGoals] = useState([]);
-  const [isCreatingActionItem, setIsCreatingActionItem] = useState(false);
-  const [isLoadingActionItems, setIsLoadingActionItems] = useState(false);
-  const [viewMode, setViewMode] = useState("list");
-
-  async function handleStatusChange(actionItemId, status) {
-    const response = await fetch(`${apiUrl}/api/action-items/${actionItemId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ status }),
-    });
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      setActionItemError(data.error || "Action item update failed.");
-      return;
-    }
-
-    setActionItems((currentActionItems) =>
-      currentActionItems.map((actionItem) =>
-        actionItem.id === actionItemId ? data.actionItem : actionItem,
-      ),
-    );
-  }
-
-  const boardColumns = {
-    TODO: actionItems.filter((actionItem) => actionItem.status === "TODO"),
-    IN_PROGRESS: actionItems.filter((actionItem) => actionItem.status === "IN_PROGRESS"),
-    BLOCKED: actionItems.filter((actionItem) => actionItem.status === "BLOCKED"),
-    DONE: actionItems.filter((actionItem) => actionItem.status === "DONE"),
-  };
+  const [loading, setLoading] = useState(false);
+  const [view, setView] = useState("board");
+  const [showCreate, setShowCreate] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    async function loadPanelData() {
-      if (!activeWorkspace) {
-        setActionItems([]);
-        setGoals([]);
-        return;
-      }
-
-      setActionItemError("");
-      setIsLoadingActionItems(true);
-
-      const [actionItemsResponse, goalsResponse] = await Promise.all([
-        fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/action-items`, {
-          credentials: "include",
-        }),
-        fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/goals`, {
-          credentials: "include",
-        }),
-      ]);
-      const actionItemsData = await actionItemsResponse.json().catch(() => ({}));
-      const goalsData = await goalsResponse.json().catch(() => ({}));
-
-      if (!actionItemsResponse.ok) {
-        setActionItemError(actionItemsData.error || "Action items could not be loaded.");
-        setActionItems([]);
-        setIsLoadingActionItems(false);
-        return;
-      }
-
-      setActionItems(actionItemsData.actionItems || []);
-      setGoals(goalsData.goals || []);
-      setIsLoadingActionItems(false);
-    }
-
-    loadPanelData();
+    if (!activeWorkspace) return;
+    setLoading(true);
+    Promise.all([
+      fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/action-items`, { credentials: "include" }).then((r) => r.json()),
+      fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/goals`, { credentials: "include" }).then((r) => r.json()),
+    ])
+      .then(([aiData, goalData]) => {
+        setItems(aiData.actionItems || []);
+        setGoals(goalData.goals || []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [activeWorkspace, refreshKey]);
 
-  async function handleCreateActionItem(event) {
-    event.preventDefault();
-
-    if (!activeWorkspace) {
-      return;
-    }
-
-    setActionItemError("");
-    setIsCreatingActionItem(true);
-
-    const formData = new FormData(event.currentTarget);
-    const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/action-items`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  function handleStatusChange(itemId, newStatus) {
+    fetch(`${apiUrl}/api/action-items/${itemId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        title: formData.get("title"),
-        description: formData.get("description"),
-        status: formData.get("status"),
-        priority: formData.get("priority"),
-        dueDate: formData.get("dueDate") || null,
-        goalId: formData.get("goalId") || null,
-      }),
-    });
-    const data = await response.json().catch(() => ({}));
-
-    if (!response.ok) {
-      setActionItemError(data.error || "Action item creation failed.");
-      setIsCreatingActionItem(false);
-      return;
-    }
-
-    setActionItems((currentActionItems) => [...currentActionItems, data.actionItem]);
-    event.currentTarget.reset();
-    setIsCreatingActionItem(false);
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) return;
+        setItems((prev) => prev.map((i) => (i.id === itemId ? { ...i, status: newStatus } : i)));
+      });
   }
 
+  function handleCreate(e) {
+    e.preventDefault();
+    const fd = new FormData(e.currentTarget);
+    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/action-items`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        title: fd.get("title"),
+        description: fd.get("description"),
+        status: fd.get("status"),
+        priority: fd.get("priority"),
+        dueDate: fd.get("dueDate") || undefined,
+        goalId: fd.get("goalId") || undefined,
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) { setError(data.error); return; }
+        setItems((prev) => [data.actionItem, ...prev]);
+        setShowCreate(false);
+        e.currentTarget.reset();
+      })
+      .catch(() => setError("Failed to create."));
+  }
+
+  const getGoalTitle = (goalId) => goals.find((g) => g.id === goalId)?.title || "";
+
+  if (!activeWorkspace) return null;
+
   return (
-    <div className="nfh-panel t-panel-slide" data-open="true">
-      <div className="flex items-center justify-between gap-[10px]">
-        <p className="nfh-eyebrow">Action Items</p>
-        <div className="flex gap-[10px]">
-          <button
-            className={`nfh-chip ${
-              viewMode === "list"
-                ? "nfh-chip-active"
-                : ""
-            }`}
-            onClick={() => setViewMode("list")}
-            type="button"
-          >
-            List
-          </button>
-          <button
-            className={`nfh-chip ${
-              viewMode === "board"
-                ? "nfh-chip-active"
-                : ""
-            }`}
-            onClick={() => setViewMode("board")}
-            type="button"
-          >
-            Board
-          </button>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold font-heading">Action Items</h2>
+        <div className="flex items-center gap-2">
+          <Tabs value={view} onValueChange={setView}>
+            <TabsList>
+              <TabsTrigger value="board"><Kanban /> Board</TabsTrigger>
+              <TabsTrigger value="list"><ListBullets /> List</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Button size="sm" onClick={() => setShowCreate(!showCreate)}><Plus /> New</Button>
         </div>
       </div>
-      <div className="mt-[10px] grid gap-[10px] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <div className="grid gap-[10px]">
-          {viewMode === "list" ? (
-            actionItems.length ? (
-              actionItems.map((actionItem) => (
-                <div key={actionItem.id} className="nfh-subpanel">
-                  <p className="nfh-eyebrow">
-                    {actionItem.status.replaceAll("_", " ")} · {actionItem.priority}
-                  </p>
-                  <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">{actionItem.title}</p>
-                  <p className="mt-[10px] nfh-muted">
-                    {actionItem.goalId ? "Linked to a goal." : "No goal linked yet."}
-                  </p>
-                  <div className="mt-[10px] flex flex-wrap gap-[10px]">
-                    {["TODO", "IN_PROGRESS", "BLOCKED", "DONE"].map((status) => (
-                      <button
-                        key={status}
-                        className={`nfh-chip ${actionItem.status === status ? "nfh-chip-active" : ""}`}
-                        onClick={() => handleStatusChange(actionItem.id, status)}
-                        type="button"
-                      >
-                        {status.replace("_", " ")}
-                      </button>
+
+      {showCreate && (
+        <Card>
+          <CardContent className="pt-4">
+            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="ai-title">Title</Label>
+                <Input id="ai-title" name="title" required />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="ai-status">Status</Label>
+                <Select name="status" defaultValue="TODO">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="ai-priority">Priority</Label>
+                <Select name="priority" defaultValue="MEDIUM">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{PRIORITIES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="ai-date">Due Date</Label>
+                <Input id="ai-date" name="dueDate" type="date" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="ai-goal">Parent Goal</Label>
+                <Select name="goalId">
+                  <SelectTrigger><SelectValue placeholder="None" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {goals.map((g) => <SelectItem key={g.id} value={g.id}>{g.title}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5 md:col-span-2">
+                <Label htmlFor="ai-desc">Description</Label>
+                <Textarea id="ai-desc" name="description" rows={2} />
+              </div>
+              <div className="md:col-span-2 lg:col-span-3 flex justify-end">
+                {error && <p className="text-sm text-destructive mr-auto">{error}</p>}
+                <Button type="submit">Create</Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {loading ? (
+        <div className="flex flex-col gap-3">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}</div>
+      ) : view === "board" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {STATUS_COLUMNS.map((status) => {
+            const columnItems = items.filter((i) => i.status === status);
+            return (
+              <div key={status} className="rounded-xl border bg-muted/30 p-3 flex flex-col gap-2 min-h-[200px]">
+                <div className="flex items-center justify-between">
+                  <Badge variant="secondary">{status.replace("_", " ")}</Badge>
+                  <span className="text-xs text-muted-foreground">{columnItems.length}</span>
+                </div>
+                {columnItems.map((item) => (
+                  <Card key={item.id} className="cursor-pointer hover:shadow-sm">
+                    <CardContent className="p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{item.title}</p>
+                          {item.goalId && <p className="text-xs text-muted-foreground">{getGoalTitle(item.goalId)}</p>}
+                        </div>
+                        <Badge variant={item.priority === "URGENT" ? "destructive" : "secondary"}>{item.priority}</Badge>
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {STATUSES.filter((s) => s !== status).map((s) => (
+                          <Button key={s} variant="ghost" size="xs" className="h-6 text-xs" onClick={() => handleStatusChange(item.id, s)}>
+                            → {s.replace("_", " ")}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {items.length === 0 ? (
+            <Empty title="No action items" description="Create your first action item." />
+          ) : (
+            items.map((item) => (
+              <Card key={item.id}>
+                <CardContent className="p-4 flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Badge variant={item.status === "DONE" ? "default" : "secondary"}>{item.status.replace("_", " ")}</Badge>
+                      <Badge variant={item.priority === "URGENT" ? "destructive" : "outline"}>{item.priority}</Badge>
+                      <span className="font-medium truncate">{item.title}</span>
+                    </div>
+                    {item.dueDate && <p className="text-xs text-muted-foreground mt-1">Due: {new Date(item.dueDate).toLocaleDateString()}</p>}
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    {STATUSES.map((s) => (
+                      item.status !== s && (
+                        <Button key={s} variant="ghost" size="xs" className="h-7 text-xs" onClick={() => handleStatusChange(item.id, s)}>
+                          {s.replace("_", " ")}
+                        </Button>
+                      )
                     ))}
                   </div>
-                </div>
-              ))
-            ) : (
-              <p className="nfh-muted">No action items yet.</p>
-            )
-          ) : (
-            <div className="grid gap-[10px] xl:grid-cols-4">
-              {Object.entries(boardColumns).map(([status, items]) => (
-                <div key={status} className="nfh-subpanel">
-                  <p className="nfh-eyebrow">
-                    {status.replace("_", " ")}
-                  </p>
-                  <div className="mt-[10px] grid gap-[10px]">
-                    {items.length ? (
-                      items.map((actionItem) => (
-                        <div key={actionItem.id} className="border border-current px-[16px] py-[14px]">
-                          <p className="nfh-eyebrow">
-                            {actionItem.priority}
-                          </p>
-                          <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">
-                            {actionItem.title}
-                          </p>
-                          <div className="mt-[10px] flex flex-wrap gap-[10px]">
-                            {["TODO", "IN_PROGRESS", "BLOCKED", "DONE"].map((nextStatus) => (
-                              <button
-                                key={nextStatus}
-                                className={`nfh-chip ${actionItem.status === nextStatus ? "nfh-chip-active" : ""}`}
-                                onClick={() => handleStatusChange(actionItem.id, nextStatus)}
-                                type="button"
-                              >
-                                {nextStatus.replace("_", " ")}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="nfh-muted">No items.</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                </CardContent>
+              </Card>
+            ))
           )}
-          {isLoadingActionItems ? (
-            <p className="nfh-muted">Loading action items…</p>
-          ) : null}
         </div>
-        <form className="nfh-subpanel nfh-stack" onSubmit={handleCreateActionItem}>
-          <p className="nfh-eyebrow">Create Action Item</p>
-          <label className="nfh-label">
-            <span className="nfh-eyebrow">Title</span>
-            <input
-              className="nfh-input outline-none focus:ring-2 focus:ring-accent"
-              name="title"
-              required
-              type="text"
-            />
-          </label>
-          <label className="nfh-label">
-            <span className="nfh-eyebrow">Description</span>
-            <textarea
-              className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
-              name="description"
-            />
-          </label>
-          <div className="nfh-divider-grid nfh-divider-grid-2">
-            <label className="nfh-label">
-              <span className="nfh-eyebrow">Status</span>
-              <select
-                className="nfh-select outline-none focus:ring-2 focus:ring-accent"
-                defaultValue="TODO"
-                name="status"
-              >
-                <option value="TODO">Todo</option>
-                <option value="IN_PROGRESS">In progress</option>
-                <option value="BLOCKED">Blocked</option>
-                <option value="DONE">Done</option>
-              </select>
-            </label>
-            <label className="nfh-label">
-              <span className="nfh-eyebrow">Priority</span>
-              <select
-                className="nfh-select outline-none focus:ring-2 focus:ring-accent"
-                defaultValue="MEDIUM"
-                name="priority"
-              >
-                <option value="LOW">Low</option>
-                <option value="MEDIUM">Medium</option>
-                <option value="HIGH">High</option>
-                <option value="CRITICAL">Critical</option>
-              </select>
-            </label>
-          </div>
-          <div className="nfh-divider-grid nfh-divider-grid-2">
-            <label className="nfh-label">
-              <span className="nfh-eyebrow">Due date</span>
-              <input
-                className="nfh-input outline-none focus:ring-2 focus:ring-accent"
-                name="dueDate"
-                type="date"
-              />
-            </label>
-            <label className="nfh-label">
-              <span className="nfh-eyebrow">Parent goal</span>
-              <select
-                className="nfh-select outline-none focus:ring-2 focus:ring-accent"
-                defaultValue=""
-                name="goalId"
-              >
-                <option value="">None</option>
-                {goals.map((goal) => (
-                  <option key={goal.id} value={goal.id}>
-                    {goal.title}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-          {actionItemError ? <p className="nfh-error">{actionItemError}</p> : null}
-          <button
-            className="nfh-pill"
-            disabled={isCreatingActionItem}
-            type="submit"
-          >
-            {isCreatingActionItem ? "Creating…" : "Create action item"}
-          </button>
-        </form>
-      </div>
+      )}
     </div>
   );
 }

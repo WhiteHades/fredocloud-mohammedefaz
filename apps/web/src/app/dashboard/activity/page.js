@@ -9,7 +9,7 @@ export default function DashboardActivityPage() {
   const { activeMembership, onlineUserIds, realtimeVersion } = useDashboardContext();
 
   return (
-    <div className="grid gap-[10px]">
+    <div className="flex flex-col gap-4">
       <PresencePanel activeWorkspace={activeMembership?.workspace || null} onlineUserIds={onlineUserIds} />
       <NotificationsPanel activeWorkspace={activeMembership?.workspace || null} refreshKey={realtimeVersion} />
       <AuditPanel activeMembership={activeMembership || null} refreshKey={realtimeVersion} />

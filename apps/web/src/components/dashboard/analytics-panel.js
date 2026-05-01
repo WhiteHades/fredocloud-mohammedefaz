@@ -1,117 +1,102 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-
+import { useEffect, useState, useRef } from "react";
+import { BarChart, Bar, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { apiUrl } from "@/lib/runtime";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChartBar, CheckCircle, WarningCircle, Target } from "@phosphor-icons/react";
 
 export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
   const [analytics, setAnalytics] = useState(null);
-  const [analyticsError, setAnalyticsError] = useState("");
-  const [chartWidth, setChartWidth] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [chartWidth, setChartWidth] = useState(400);
   const chartHostRef = useRef(null);
 
   useEffect(() => {
-    async function loadAnalytics() {
-      if (!activeWorkspace) {
-        setAnalytics(null);
-        return;
-      }
-
-      setAnalyticsError("");
-
-      const response = await fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/analytics`, {
-        credentials: "include",
-      });
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        setAnalyticsError(data.error || "Analytics could not be loaded.");
-        setAnalytics(null);
-        return;
-      }
-
-      setAnalytics(data);
-    }
-
-    loadAnalytics();
+    if (!activeWorkspace) return;
+    setLoading(true);
+    fetch(`${apiUrl}/api/workspaces/${activeWorkspace.id}/analytics`, { credentials: "include" })
+      .then((r) => r.json().then((d) => ({ ok: r.ok, data: d })))
+      .then(({ ok, data }) => { if (ok) setAnalytics(data); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [activeWorkspace, refreshKey]);
 
   useEffect(() => {
-    if (!chartHostRef.current) {
-      return undefined;
-    }
-
-    const updateWidth = () => {
-      const nextWidth = Math.floor(chartHostRef.current?.getBoundingClientRect().width || 0);
-      setChartWidth(nextWidth);
-    };
-
-    updateWidth();
-
-    const observer = new ResizeObserver(() => {
-      updateWidth();
+    if (!chartHostRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setChartWidth(entry.contentRect.width);
+      }
     });
-
     observer.observe(chartHostRef.current);
+    return () => observer.disconnect();
+  }, []);
 
-    return () => {
-      observer.disconnect();
-    };
-  }, [analytics]);
-
-  if (!activeWorkspace) {
-    return null;
-  }
+  if (!activeWorkspace) return null;
 
   return (
-    <div className="nfh-panel t-panel-slide" data-open="true">
-      <p className="nfh-eyebrow">Analytics</p>
-      {analytics ? (
-        <div className="mt-[10px] grid gap-[10px]">
-          <div className="nfh-divider-grid nfh-divider-grid-3">
-            <div className="nfh-subpanel">
-              <p className="nfh-eyebrow">Total Goals</p>
-              <p className="mt-[5px] text-[clamp(2rem,5vw,4rem)] leading-[0.9] tracking-[-0.03em]">{analytics.stats.totalGoals}</p>
-            </div>
-            <div className="nfh-subpanel">
-              <p className="nfh-eyebrow">Completed This Week</p>
-              <p className="mt-[5px] text-[clamp(2rem,5vw,4rem)] leading-[0.9] tracking-[-0.03em]">
-                {analytics.stats.itemsCompletedThisWeek}
-              </p>
-            </div>
-            <div className="nfh-subpanel">
-              <p className="nfh-eyebrow">Overdue Count</p>
-              <p className="mt-[5px] text-[clamp(2rem,5vw,4rem)] leading-[0.9] tracking-[-0.03em]">{analytics.stats.overdueCount}</p>
-            </div>
-          </div>
-          <div className="nfh-subpanel">
-            <p className="nfh-eyebrow">Goal Completion</p>
-            <div ref={chartHostRef} className="mt-[10px] min-h-80 min-w-0">
-              {chartWidth > 0 ? (
-                <BarChart width={chartWidth} height={320} data={analytics.goalCompletion} margin={{ top: 8, right: 16, left: -8, bottom: 8 }}>
-                  <CartesianGrid strokeDasharray="2 6" stroke="currentColor" opacity={0.2} />
-                  <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                  <YAxis tickLine={false} axisLine={false} domain={[0, 100]} />
-                  <Tooltip />
-                  <Bar dataKey="progress" fill="#ff0000" radius={0} />
-                </BarChart>
-              ) : null}
-            </div>
-          </div>
+    <div className="flex flex-col gap-6">
+      <h2 className="text-lg font-semibold font-heading">Analytics</h2>
+
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-28 w-full" />)}
         </div>
-      ) : (
-        <p className="mt-[10px] nfh-muted">
-          {analyticsError || "Analytics will appear once a workspace is active."}
-        </p>
-      )}
+      ) : analytics ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Total Goals</CardTitle>
+                <Target className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold font-heading">{analytics.totalGoals ?? 0}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Completed This Week</CardTitle>
+                <CheckCircle className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold font-heading">{analytics.completedThisWeek ?? 0}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Overdue</CardTitle>
+                <WarningCircle className="size-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <p className="text-3xl font-bold font-heading">{analytics.overdueCount ?? 0}</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Goal Completion</CardTitle>
+              <CardDescription>Progress across goals</CardDescription>
+            </CardHeader>
+            <CardContent ref={chartHostRef}>
+              {analytics.goalCompletion?.length > 0 ? (
+                <BarChart width={chartWidth} height={300} data={analytics.goalCompletion} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="progress" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              ) : (
+                <p className="text-sm text-muted-foreground">No goal data yet.</p>
+              )}
+            </CardContent>
+          </Card>
+        </>
+      ) : null}
     </div>
   );
 }

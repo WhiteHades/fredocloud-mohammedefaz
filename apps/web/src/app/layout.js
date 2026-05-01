@@ -1,13 +1,35 @@
+import { Geist, Geist_Mono, IBM_Plex_Sans } from "next/font/google";
+
+import { Providers } from "@/components/app-shell/providers";
 import { CommandPalette } from "@/components/app-shell/command-palette";
 import { ServiceWorkerRegister } from "@/components/app-shell/service-worker-register";
 import "./globals.css";
 
+const ibmPlexSans = IBM_Plex_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
+});
+
+const geistMonoHeading = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-heading",
+});
+
+const fontMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+});
+
 export const metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_URL || "https://notfredohub.mohammedefaz.com",
+    process.env.NEXT_PUBLIC_URL || "https://notfredohub.mohammedefaz.com"
   ),
-  title: "notFredoHub",
-  description: "Complete team management system for FredoCloud.",
+  title: {
+    default: "notFredoHub",
+    template: "%s | notFredoHub",
+  },
+  description: "Collaborative team hub for FredoCloud — goals, announcements, and action items in real time.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -18,24 +40,24 @@ export const metadata = {
   },
   openGraph: {
     title: "notFredoHub",
-    description: "Complete team management system for FredoCloud.",
-    images: [
-      {
-        url: "/brand-banner.png",
-        width: 1600,
-        height: 900,
-      },
-    ],
+    description: "Collaborative team hub for FredoCloud.",
+    images: [{ url: "/brand-banner.png", width: 1600, height: 900 }],
   },
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
-        <ServiceWorkerRegister />
-        <CommandPalette />
-        {children}
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${ibmPlexSans.variable} ${geistMonoHeading.variable} ${fontMono.variable} antialiased`}
+    >
+      <body>
+        <Providers>
+          <ServiceWorkerRegister />
+          <CommandPalette />
+          {children}
+        </Providers>
       </body>
     </html>
   );

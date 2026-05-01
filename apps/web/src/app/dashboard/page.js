@@ -1,7 +1,7 @@
 import { WorkspaceHome } from "@/components/dashboard/workspace-home";
 
 export const metadata = {
-  title: "Overview | notFredoHub",
+  title: "Overview",
 };
 
 export default function DashboardOverviewPage() {

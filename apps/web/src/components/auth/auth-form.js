@@ -3,26 +3,45 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { startTransition, useState } from "react";
+import {
+  User,
+  EnvelopeSimple,
+  LockSimple,
+  SignIn,
+  UserPlus,
+  Spinner,
+} from "@phosphor-icons/react";
 
 import { apiUrl } from "@/lib/runtime";
 import { useAuthStore } from "@/stores/auth-store";
+import { FieldGroup } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
+import { AnimeIntro } from "@/components/app-shell/anime-intro";
 
 const FORM_COPY = {
   login: {
     action: `${apiUrl}/api/auth/login`,
     cta: "Log in",
-    heading: "Enter the workspace.",
+    heading: "Welcome back",
+    description: "Enter your credentials to access your workspaces.",
     prompt: "Need an account?",
     promptHref: "/register",
     promptLabel: "Create one",
+    icon: SignIn,
   },
   register: {
     action: `${apiUrl}/api/auth/register`,
     cta: "Create account",
-    heading: "Open a new workspace identity.",
+    heading: "Get started",
+    description: "Create your account and join your team workspaces.",
     prompt: "Already registered?",
     promptHref: "/login",
     promptLabel: "Log in",
+    icon: UserPlus,
   },
 };
 
@@ -33,6 +52,7 @@ export function AuthForm({ mode }) {
   const [isPending, setIsPending] = useState(false);
 
   const copy = FORM_COPY[mode];
+  const Icon = copy.icon;
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -53,9 +73,7 @@ export function AuthForm({ mode }) {
     try {
       const response = await fetch(copy.action, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payload),
       });
@@ -82,70 +100,98 @@ export function AuthForm({ mode }) {
   }
 
   return (
-    <div className="border border-current p-[24px]">
-      <p className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
-        notFredoHub Authentication
-      </p>
-      <h1 className="mt-[10px] text-[clamp(2rem,5vw,3rem)] font-medium leading-[0.95] tracking-[-0.02em]">
-        {copy.heading}
-      </h1>
-      <form className="mt-[10px] flex flex-col gap-[10px]" action={copy.action} method="POST" onSubmit={handleSubmit}>
-        {mode === "register" ? (
-          <label className="flex flex-col gap-[5px]">
-            <span className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
-              Display name
-            </span>
-            <input
-              className="h-[48px] border border-current bg-transparent px-[16px] text-[20px] tracking-[-0.009em] outline-none focus:ring-2 focus:ring-accent"
-              name="displayName"
-              type="text"
-              required
-            />
-          </label>
-        ) : null}
-        <label className="flex flex-col gap-[5px]">
-          <span className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
-            Email
-          </span>
-          <input
-            className="h-[48px] border border-current bg-transparent px-[16px] text-[20px] tracking-[-0.009em] outline-none focus:ring-2 focus:ring-accent"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-          />
-        </label>
-        <label className="flex flex-col gap-[5px]">
-          <span className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
-            Password
-          </span>
-          <input
-            className="h-[48px] border border-current bg-transparent px-[16px] text-[20px] tracking-[-0.009em] outline-none focus:ring-2 focus:ring-accent"
-            name="password"
-            type="password"
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            required
-          />
-        </label>
-        {error ? (
-          <p className="border border-accent bg-accent/10 px-[16px] py-[12px] text-[11px] uppercase tracking-[-0.005em] text-accent">
-            {error}
-          </p>
-        ) : null}
-        <button
-          className="h-[56px] rounded-[300px] bg-white px-[24px] text-[20px] tracking-[-0.009em] text-black transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
-          disabled={isPending}
-          type="submit"
-        >
-          {isPending ? "Submitting…" : copy.cta}
-        </button>
-      </form>
-      <p className="mt-[10px] text-[11px] uppercase tracking-[-0.005em] opacity-60">
-        {copy.prompt}{" "}
-        <Link className="text-foreground underline" href={copy.promptHref}>
-          {copy.promptLabel}
-        </Link>
-      </p>
-    </div>
+    <AnimeIntro>
+      <div className="w-full max-w-md" data-anime-item>
+        <div className="mb-6 flex justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary">
+            <span className="text-lg font-bold text-primary-foreground font-heading">nF</span>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-heading">{copy.heading}</CardTitle>
+            <CardDescription>{copy.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {mode === "register" ? (
+                <FieldGroup>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                    <Input
+                      name="displayName"
+                      type="text"
+                      placeholder="Display name"
+                      className="pl-10 h-10"
+                      required
+                    />
+                  </div>
+                </FieldGroup>
+              ) : null}
+              <FieldGroup>
+                <div className="relative">
+                  <EnvelopeSimple className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    name="email"
+                    type="email"
+                    placeholder="Email address"
+                    autoComplete="email"
+                    className="pl-10 h-10"
+                    required
+                  />
+                </div>
+              </FieldGroup>
+              <FieldGroup>
+                <div className="relative">
+                  <LockSimple className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+                  <Input
+                    name="password"
+                    type="password"
+                    placeholder="Password"
+                    autoComplete={mode === "login" ? "current-password" : "new-password"}
+                    className="pl-10 h-10"
+                    required
+                  />
+                </div>
+              </FieldGroup>
+
+              {error ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              ) : null}
+
+              <Button type="submit" disabled={isPending} className="w-full h-10">
+                {isPending ? (
+                  <>
+                    <Spinner className="animate-spin" data-icon="inline-start" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Icon data-icon="inline-start" />
+                    {copy.cta}
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="justify-center">
+            <p className="text-sm text-muted-foreground">
+              {copy.prompt}{" "}
+              <Link href={copy.promptHref} className="text-primary hover:underline font-medium">
+                {copy.promptLabel}
+              </Link>
+            </p>
+          </CardFooter>
+        </Card>
+
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">Demo: </span>
+          demo@notfredohub.test / demo12345
+        </p>
+      </div>
+    </AnimeIntro>
   );
 }
