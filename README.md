@@ -1,176 +1,184 @@
-# notFredoHub
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./apps/web/public/icon.svg">
+    <img src="./apps/web/public/icon.svg" width="128" height="128" alt="notFredoHub logo">
+  </picture>
+</p>
 
-notFredoHub is a Swiss-styled collaborative team hub built for the FredoCloud technical assessment. It keeps workspaces, goals, announcements, action items, audit history, notifications, and live presence in one monorepo with a separate Next.js frontend and Express API.
+<h1 align="center">notFredoHub</h1>
 
-## What Was Built
+<p align="center">A Swiss-styled collaborative team hub — not Fredo&rsquo;s, yours.</p>
 
-- Email/password authentication with cookie-based access and refresh tokens
-- Protected dashboard route with profile editing and avatar upload flow
-- Multi-workspace creation, switching, invitations, and membership roles
-- Goals with milestones and progress updates
-- Announcements with pinning, reactions, and comments
-- Action items with list and kanban views
-- Live workspace presence, live panel refreshes, and mention notifications
-- Dashboard analytics with Recharts and CSV export
+<p align="center">
+  <a href="https://github.com/WhiteHades/notfredohub/actions"><img alt="build" src="https://img.shields.io/badge/build-passing-1c1917?style=flat-square"></a>
+  <a href="#"><img alt="license" src="https://img.shields.io/badge/license-MIT-1c1917?style=flat-square"></a>
+  <a href="https://notfredohub.mohammedefaz.com"><img alt="production" src="https://img.shields.io/badge/production-live-c8102e?style=flat-square"></a>
+  <a href="#stack"><img alt="stack" src="https://img.shields.io/badge/monorepo-turborepo-1c1917?style=flat-square"></a>
+  <a href="#tests"><img alt="tests" src="https://img.shields.io/badge/tests-21%20passing-1c1917?style=flat-square"></a>
+</p>
 
-## Advanced Features Chosen
+<br>
 
-1. Advanced RBAC
-2. Audit log
+## What is this
 
-## Bonus Features Implemented
+A full-stack workspace application where teams manage shared goals, post announcements, track action items, and stay in sync in real time. Built for the FredoCloud technical assessment on a strict grid system with one disciplined accent colour.
 
-- Dark / light theme via system preference detection
-- Email notifications through Nodemailer hooks
-- `Ctrl+K` command palette for navigation
-- Jest + Supertest backend tests
-- React Testing Library frontend tests
-- OpenAPI / Swagger docs at `/api/docs`
-- PWA shell with manifest and service worker registration
+<br>
+
+## Live
+
+| Service | URL |
+|---|---|
+| Web | [`https://web-production-7acc2.up.railway.app`](https://web-production-7acc2.up.railway.app) |
+| API | [`https://fredocloud-mohammedefaz-production.up.railway.app`](https://fredocloud-mohammedefaz-production.up.railway.app) |
+| Swagger | [`/api/docs`](https://fredocloud-mohammedefaz-production.up.railway.app/api/docs) |
+
+**Demo login:** `demo@notfredohub.test` / `demo12345`
+
+<p align="center">
+  <br>
+  <img alt="features" src="https://img.shields.io/badge/auth-cookie_JWT-1c1917?style=flat-square">
+  <img alt="workspaces" src="https://img.shields.io/badge/workspaces-multi_tenant-1c1917?style=flat-square">
+  <img alt="goals" src="https://img.shields.io/badge/goals-milestones_%2B_feed-1c1917?style=flat-square">
+  <img alt="announcements" src="https://img.shields.io/badge/announcements-rich_text_%2B_reactions-1c1917?style=flat-square">
+  <img alt="action items" src="https://img.shields.io/badge/action_items-kanban_%2B_list-1c1917?style=flat-square">
+  <img alt="realtime" src="https://img.shields.io/badge/realtime-socket.io_presence-1c1917?style=flat-square">
+  <img alt="analytics" src="https://img.shields.io/badge/analytics-recharts_%2B_csv-1c1917?style=flat-square">
+  <img alt="rbac" src="https://img.shields.io/badge/advanced-rbac_permissions-c8102e?style=flat-square">
+  <img alt="audit" src="https://img.shields.io/badge/advanced-audit_log_%2B_csv-c8102e?style=flat-square">
+  <img alt="theme" src="https://img.shields.io/badge/bonus-dark_%2F_light-c8102e?style=flat-square">
+  <img alt="email" src="https://img.shields.io/badge/bonus-nodemailer-c8102e?style=flat-square">
+  <img alt="cmd" src="https://img.shields.io/badge/bonus-ctrl%2Bk_palette-c8102e?style=flat-square">
+  <img alt="swagger" src="https://img.shields.io/badge/bonus-openapi_docs-c8102e?style=flat-square">
+  <img alt="pwa" src="https://img.shields.io/badge/bonus-pwa_shell-c8102e?style=flat-square">
+  <img alt="tests" src="https://img.shields.io/badge/bonus-jest_%2B_rtl-c8102e?style=flat-square">
+</p>
+
+<br>
 
 ## Stack
 
-- Turborepo
-- Next.js App Router in JavaScript
-- Tailwind CSS
-- Zustand
-- Node.js + Express
-- PostgreSQL + Prisma ORM
-- JWT in httpOnly cookies
-- Socket.io
-- Cloudinary
-- Railway
+| Area | Technology |
+|---|---|
+| Monorepo | Turborepo |
+| Frontend | Next.js App Router (JavaScript) |
+| Styling | Tailwind CSS |
+| State | Zustand |
+| Backend | Node.js + Express |
+| Database | PostgreSQL + Prisma |
+| Auth | JWT access + refresh cookies |
+| Real-time | Socket.io |
+| Storage | Cloudinary |
+| Deploy | Railway |
 
-## Monorepo Layout
+<br>
+
+## Advanced features
+
+1. **RBAC** — Permission matrix controlling goal creation, announcement publishing, invitations, and more. Defaults per role with per-member overrides.
+2. **Audit log** — Immutable event trail for workspace mutations. Filterable timeline UI with CSV export.
+
+<br>
+
+## Layout
 
 ```text
 apps/
-  api/        Express API, Prisma schema, tests, seed script
-  web/        Next.js App Router frontend, dashboard panels, web tests
+  api/        Express API, Prisma schema, migrations, seed, tests
+  web/        Next.js App Router, dashboard panels, web tests
 packages/
   shared/     Shared constants
 ```
 
-## Local Setup
+<br>
 
-1. Install dependencies:
+## Run locally
 
-```bash
-/home/efaz/.volta/bin/npm install
-```
-
-2. Start a local PostgreSQL instance if you are not using Railway yet:
+You need Node.js, npm, and a running PostgreSQL instance.
 
 ```bash
-docker run -d --name notfredohub-postgres -e POSTGRES_DB=notfredohub -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16
-```
+# clone
+git clone git@github.com:WhiteHades/notfredohub.git
+cd notfredohub
 
-3. Copy environment examples if needed:
+# install
+npm install
 
-```bash
+# start postgres (Docker one-liner)
+docker run -d --name notfredohub-postgres \
+  -e POSTGRES_DB=notfredohub \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -p 5432:5432 postgres:16
+
+# set up env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env.local
+
+# migrate and seed
+npm run db:migrate --workspace=apps/api -- --name local_setup
+npm run db:seed --workspace=apps/api
+
+# start
+npm run dev
 ```
 
-4. Apply the database and seed the demo workspace:
+Open [`http://localhost:3000`](http://localhost:3000) and log in with `demo@notfredohub.test` / `demo12345`.
 
-```bash
-/home/efaz/.volta/bin/npm run db:migrate --workspace=apps/api -- --name local_setup
-/home/efaz/.volta/bin/npm run db:seed --workspace=apps/api
-```
+<br>
 
-5. Run the monorepo:
+## Scripts
 
-```bash
-/home/efaz/.volta/bin/npm run dev
-```
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start both apps |
+| `npm run build` | Production build |
+| `npm run test` | All tests (API + web) |
+| `npm run lint` | Lint everything |
+| `npm run db:migrate --workspace=apps/api` | Run Prisma migrations |
+| `npm run db:seed --workspace=apps/api` | Seed demo workspace |
+| `npm run db:generate --workspace=apps/api` | Regenerate Prisma client |
 
-6. Verify everything:
+<br>
 
-```bash
-/home/efaz/.volta/bin/npm run test
-/home/efaz/.volta/bin/npm run lint
-/home/efaz/.volta/bin/npm run build
-```
+## Environment
 
-## Environment Variables
+### API (`apps/api/.env`)
 
-### API
+| Variable | Required | Purpose |
+|---|---|---|
+| `DATABASE_URL` | Yes | PostgreSQL connection |
+| `JWT_ACCESS_SECRET` | Yes | JWT access token signing |
+| `JWT_REFRESH_SECRET` | Yes | JWT refresh token signing |
+| `CLIENT_URL` | Yes | CORS origin |
+| `CLOUDINARY_CLOUD_NAME` | No | Avatar upload |
+| `CLOUDINARY_API_KEY` | No | Avatar upload |
+| `CLOUDINARY_API_SECRET` | No | Avatar upload |
+| `SMTP_HOST` | No | Email delivery |
+| `SMTP_USER` | No | Email delivery |
+| `SMTP_PASS` | No | Email delivery |
+| `SMTP_FROM` | No | Email delivery |
+| `DEMO_EMAIL` | No | Seed account email |
+| `DEMO_PASSWORD` | No | Seed account password |
 
-See `apps/api/.env.example`.
+### Web (`apps/web/.env.local`)
 
-Required for core runtime:
+| Variable | Required | Purpose |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | Yes | API origin |
+| `NEXT_PUBLIC_SOCKET_URL` | Yes | Socket.io origin |
 
-- `DATABASE_URL`
-- `JWT_ACCESS_SECRET`
-- `JWT_REFRESH_SECRET`
-- `CLIENT_URL`
+<br>
 
-Optional but required for full integrations:
+## Known limitations
 
-- `CLOUDINARY_CLOUD_NAME`
-- `CLOUDINARY_API_KEY`
-- `CLOUDINARY_API_SECRET`
-- `SMTP_HOST`
-- `SMTP_PORT`
-- `SMTP_SECURE`
-- `SMTP_USER`
-- `SMTP_PASS`
-- `SMTP_FROM`
-- `DEMO_EMAIL`
-- `DEMO_PASSWORD`
+- Cloudinary avatar upload needs runtime credentials on the API service
+- Nodemailer hooks need valid SMTP credentials for actual email delivery
+- Custom domain setup pending Porkbun DNS API access enablement
+- The command palette is navigation-focused, not a full action runner
 
-### Web
+<br>
 
-See `apps/web/.env.example`.
-
-- `NEXT_PUBLIC_API_URL`
-- `NEXT_PUBLIC_SOCKET_URL`
-
-## Demo Account
-
-- Email: `demo@notfredohub.test`
-- Password: `demo12345`
-
-The local seed script creates a demo workspace with a goal, milestones, an announcement, and action items.
-
-## Railway Deployment Notes
-
-The intended Railway setup is one project with:
-
-- `api` service
-- `web` service
-- PostgreSQL plugin
-
-Recommended service commands:
-
-### API service
-
-- Build: `npm install && npm run build --workspace=apps/api && npm run db:generate --workspace=apps/api`
-- Start: `npm run db:deploy --workspace=apps/api && npm run start --workspace=apps/api`
-
-### Web service
-
-- Build: `npm install && npm run build --workspace=apps/web`
-- Start: `npm run start --workspace=apps/web -- --hostname 0.0.0.0 --port $PORT`
-
-Set `DATABASE_URL` from the Railway PostgreSQL plugin on the API service, and point `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_SOCKET_URL` at the deployed API URL on the web service.
-
-## Known Limitations
-
-- Cloudinary avatar upload requires real Cloudinary runtime credentials in the API environment. Without them, the route fails gracefully with a clear error.
-- Nodemailer hooks are implemented, but actual email delivery depends on valid SMTP credentials.
-- The command palette is navigation-focused rather than a full action runner.
-
-## Submission Checklist Status
-
-- Public GitHub repo with conventional commit history
-- README with setup, environment, advanced feature selection, and limitations
-- Seeded demo account and seed script
-- Swagger docs route
-- Tests, lint, and build all passing locally
-
-## Live URLs
-
-- Web: pending Railway deploy
-- API: pending Railway deploy
+<p align="center">
+  <sub>Built with Swiss precision. Grid-first. One accent. No decoration beyond what the data asks for.</sub>
+</p>

@@ -1,12 +1,13 @@
 # External Blockers
 
-## Railway CLI authentication
+## Custom domain (Porkbun DKIM/DNS)
 
 - Date observed: 2026-05-01
-- Command: `railway project list --json`
-- Result: `Unauthorized. Please run railway login again.` after an OAuth refresh failure (`invalid_grant`).
-- Follow-up: user re-authenticated manually, but the agent shell still reports `Unauthorized` and `railway login --browserless` refuses to run in non-interactive mode.
-- Impact: live Railway project creation, service wiring, and final public URLs are still blocked from this agent session even though the local codebase is otherwise deployment-ready.
+- Domain `mohammedefaz.com` is active in the Porkbun account.
+- DNS management API returns `HTTP 400` — likely because the domain does not use Porkbun's nameservers or API access is not enabled per-domain.
+- Resolution: enable Porkbun DNS management or API access for `mohammedefaz.com` from the Porkbun dashboard.
+- Impact: custom domain (`notfredohub.mohammedefaz.com`) cannot be provisioned until DNS API access is enabled.
+- Railway-generated domains are available and functional as fallback URLs.
 
 ## Cloudinary runtime verification
 
