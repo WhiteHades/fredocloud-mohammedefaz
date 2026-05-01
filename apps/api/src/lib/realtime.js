@@ -84,7 +84,7 @@ function attachRealtime(server, clientUrl) {
     try {
       const cookieHeader = socket.handshake.headers.cookie;
       const cookies = parseCookieHeader(cookieHeader);
-      const token = cookies[ACCESS_COOKIE_NAME];
+      const token = socket.handshake.auth?.token || cookies[ACCESS_COOKIE_NAME];
 
       if (!token) {
         next(new Error("Authentication required."));

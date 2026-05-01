@@ -154,6 +154,15 @@ authRouter.get("/me", requireAuth, async (request, response) => {
   return response.status(200).json({ user: serializeUser(user) });
 });
 
+authRouter.get("/socket-token", requireAuth, async (request, response) => {
+  const socketToken = createAccessToken({
+    id: request.auth.userId,
+    email: request.auth.email,
+  });
+
+  return response.status(200).json({ socketToken });
+});
+
 authRouter.patch("/me", requireAuth, async (request, response) => {
   const displayName =
     typeof request.body.displayName === "string" && request.body.displayName.trim()

@@ -33,6 +33,7 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
   const [isSendingInvitation, setIsSendingInvitation] = useState(false);
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [socketToken, setSocketToken] = useState(null);
 
   useEffect(() => {
     setUser(user);
@@ -46,9 +47,38 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
     memberships.find(({ workspace }) => workspace.id === activeWorkspaceId) || memberships[0] || null;
 
   useEffect(() => {
-    const socketBaseUrl = process.env.NEXT_PUBLIC_SOCKET_URL || undefined;
+    async function loadSocketToken() {
+      try {
+        const response = await fetch(`${apiUrl}/api/auth/socket-token`, {
+          credentials: "include",
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          setSocketToken(null);
+          return;
+        }
+
+        setSocketToken(data.socketToken || null);
+      } catch {
+        setSocketToken(null);
+      }
+    }
+
+    loadSocketToken();
+  }, [user.id]);
+
+  useEffect(() => {
+    if (!socketToken) {
+      return undefined;
+    }
+
+    const socketBaseUrl = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL || undefined;
     const socket = io(socketBaseUrl, {
-      path: socketBaseUrl ? "/socket.io" : "/api/socket.io",
+      path: "/socket.io",
+      auth: {
+        token: socketToken,
+      },
       withCredentials: true,
     });
 
@@ -93,7 +123,7 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
     return () => {
       socket.disconnect();
     };
-  }, [activeMembership?.workspace.id, user.id]);
+  }, [activeMembership?.workspace.id, socketToken, user.id]);
 
   async function handleLogout() {
     setIsLoggingOut(true);
