@@ -3,11 +3,7 @@
 ## Custom domain (Porkbun DKIM/DNS)
 
 - Date observed: 2026-05-01
-- Domain `mohammedefaz.com` is active in the Porkbun account.
-- DNS management API returns `HTTP 400` — likely because the domain does not use Porkbun's nameservers or API access is not enabled per-domain.
-- Resolution: enable Porkbun DNS management or API access for `mohammedefaz.com` from the Porkbun dashboard.
-- Impact: custom domain (`notfredohub.mohammedefaz.com`) cannot be provisioned until DNS API access is enabled.
-- Railway-generated domains are available and functional as fallback URLs.
+- Resolution: API access for `mohammedefaz.com` was enabled via Porkbun dashboard. DNS CNAME records for `notfredohub` and `api.notfredohub` created successfully. Both records point to their respective Railway services.
 
 ## Cloudinary runtime verification
 
