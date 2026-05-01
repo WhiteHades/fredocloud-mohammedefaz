@@ -10,32 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  House,
-  Buildings,
-  Target,
-  Megaphone,
-  Checks,
-  ChartBar,
-  ActivityIcon,
-  Gear,
-  SignIn,
-  UserPlus,
-} from "@phosphor-icons/react";
-
-const COMMANDS = [
-  { href: "/", label: "Home", icon: House },
-  { href: "/dashboard", label: "Overview", icon: House },
-  { href: "/dashboard/workspaces", label: "Workspaces", icon: Buildings },
-  { href: "/dashboard/goals", label: "Goals", icon: Target },
-  { href: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
-  { href: "/dashboard/action-items", label: "Action Items", icon: Checks },
-  { href: "/dashboard/analytics", label: "Analytics", icon: ChartBar },
-  { href: "/dashboard/activity", label: "Activity", icon: ActivityIcon },
-  { href: "/dashboard/settings", label: "Settings", icon: Gear },
-  { href: "/login", label: "Log in", icon: SignIn },
-  { href: "/register", label: "Register", icon: UserPlus },
-];
+import { PALETTE_COMMANDS } from "@/lib/navigation";
 
 export function CommandPalette() {
   const router = useRouter();
@@ -58,7 +33,7 @@ export function CommandPalette() {
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Navigation">
-          {COMMANDS.map((cmd) => {
+          {PALETTE_COMMANDS.map((cmd) => {
             const Icon = cmd.icon;
             return (
               <CommandItem

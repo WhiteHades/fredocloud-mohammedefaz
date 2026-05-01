@@ -5,24 +5,22 @@ import { usePathname, useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import {
-  House,
   Buildings,
-  Target,
-  Megaphone,
-  Checks,
-  ChartBar,
-  ActivityIcon,
-  Gear,
   SignOut,
   Plus,
   User,
   UploadSimple,
 } from "@phosphor-icons/react";
 
+import { APP_NAME } from "@notfredohub/shared";
 import { apiUrl } from "@/lib/runtime";
+import { apiFetch } from "@/lib/api";
+import { NAV_ITEMS } from "@/lib/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
 import { DashboardProvider } from "./dashboard-context";
+import { CreateWorkspaceDialog } from "./create-workspace-dialog";
+import { InviteMemberDialog } from "./invite-member-dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -50,30 +48,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
-
-const NAV_ITEMS = [
-  { href: "/", label: "Home", icon: House },
-  { href: "/dashboard", label: "Overview", icon: ChartBar },
-  { href: "/dashboard/workspaces", label: "Workspaces", icon: Buildings },
-  { href: "/dashboard/goals", label: "Goals", icon: Target },
-  { href: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
-  { href: "/dashboard/action-items", label: "Action Items", icon: Checks },
-  { href: "/dashboard/analytics", label: "Analytics", icon: ChartBar },
-  { href: "/dashboard/activity", label: "Activity", icon: ActivityIcon },
-  { href: "/dashboard/settings", label: "Settings", icon: Gear },
-];
 
 export function DashboardShell({ children, user, memberships, pendingInvitations }) {
   const pathname = usePathname();
@@ -519,7 +495,7 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
                 style={{ backgroundColor: activeMembership?.workspace.accentColor || "var(--primary)" }}
               />
               <span className="text-sm font-medium text-muted-foreground">
-                {activeMembership?.workspace.name || "notFredoHub"}
+                {activeMembership?.workspace.name || APP_NAME}
               </span>
               <div className="ml-auto">
                 <ThemeToggle />
@@ -529,63 +505,21 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
           </main>
         </div>
 
-        <Dialog open={showCreateWorkspace} onOpenChange={setShowCreateWorkspace}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create Workspace</DialogTitle>
-              <DialogDescription>Create a new workspace for your team.</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleCreateWorkspace} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" required placeholder="Workspace name" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="description">Description</Label>
-                <Input id="description" name="description" placeholder="Brief description" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="accentColor">Accent Color</Label>
-                <Input id="accentColor" name="accentColor" defaultValue="#d4510a" type="color" className="h-10 w-full p-1" />
-              </div>
-              {workspaceError && <p className="text-sm text-destructive">{workspaceError}</p>}
-              <Button type="submit" disabled={isCreatingWorkspace}>
-                {isCreatingWorkspace ? "Creating..." : "Create Workspace"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <CreateWorkspaceDialog
+          open={showCreateWorkspace}
+          onOpenChange={setShowCreateWorkspace}
+          onSubmit={handleCreateWorkspace}
+          error={workspaceError}
+          isPending={isCreatingWorkspace}
+        />
 
-        <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invite Member</DialogTitle>
-              <DialogDescription>Send an invitation to join this workspace.</DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSendInvitation} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" name="email" type="email" required placeholder="colleague@example.com" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="role">Role</Label>
-                <Select name="role" defaultValue="MEMBER">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ADMIN">Admin</SelectItem>
-                    <SelectItem value="MEMBER">Member</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              {invitationError && <p className="text-sm text-destructive">{invitationError}</p>}
-              <Button type="submit" disabled={isSendingInvitation}>
-                {isSendingInvitation ? "Sending..." : "Send Invitation"}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <InviteMemberDialog
+          open={showInviteDialog}
+          onOpenChange={setShowInviteDialog}
+          onSubmit={handleSendInvitation}
+          error={invitationError}
+          isPending={isSendingInvitation}
+        />
       </SidebarProvider>
     </DashboardProvider>
   );

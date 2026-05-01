@@ -1,28 +1,22 @@
 "use client";
 
 import { useDashboardContext } from "./dashboard-context";
+import { CreateWorkspaceDialog } from "./create-workspace-dialog";
+import { InviteMemberDialog } from "./invite-member-dialog";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Empty } from "@/components/ui/empty";
-import { Check, Buildings, EnvelopeSimple, UserPlus, UploadSimple, X } from "@phosphor-icons/react";
+import { Check, Buildings, EnvelopeSimple, UploadSimple } from "@phosphor-icons/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export function WorkspaceHome() {
   const ctx = useDashboardContext();
-  const router = useRouter();
   const [createWorkspaceOpen, setCreateWorkspaceOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState("MEMBER");
 
-  const fileNameFromUrl = ctx.user.avatarUrl ? ctx.user.avatarUrl.split("/").pop()?.split("?")[0] : null;
   const initials = ctx.user.displayName
     ? ctx.user.displayName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : ctx.user.email?.slice(0, 2).toUpperCase() || "U";
@@ -65,7 +59,6 @@ export function WorkspaceHome() {
               </Button>
               <input type="file" accept="image/*" className="sr-only" onChange={ctx.handleAvatarUpload} disabled={ctx.isUploadingAvatar} />
             </label>
-            {ctx.avatarError && <p className="text-xs text-destructive mt-1">{ctx.avatarError}</p>}
           </CardContent>
         </Card>
 
@@ -121,91 +114,44 @@ export function WorkspaceHome() {
                 </Badge>
               </div>
             ))}
-            <Button variant="outline" className="mt-2" onClick={() => { setCreateWorkspaceOpen(true); setInviteOpen(false); }}>
-              <Buildings /> Create Workspace
-            </Button>
+            <div className="flex gap-2 mt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setCreateWorkspaceOpen(true)}>
+                <Buildings /> Create Workspace
+              </Button>
+              {ctx.activeMembership?.role === "ADMIN" && (
+                <Button variant="outline" className="flex-1" onClick={() => setInviteOpen(true)}>
+                  <EnvelopeSimple /> Invite Members
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        {ctx.activeMembership?.role === "ADMIN" && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Invite Team Members</CardTitle>
-              <CardDescription>Invite colleagues to this workspace.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  ctx.handleSendInvitation(e);
-                }}
-                className="flex flex-col gap-3"
-              >
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="invite-email">Email</Label>
-                  <Input
-                    id="invite-email"
-                    name="email"
-                    type="email"
-                    placeholder="colleague@example.com"
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="invite-role-select">Role</Label>
-                  <Select name="role" defaultValue="MEMBER">
-                    <SelectTrigger id="invite-role-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ADMIN">Admin</SelectItem>
-                      <SelectItem value="MEMBER">Member</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                {ctx.invitationError && <p className="text-sm text-destructive">{ctx.invitationError}</p>}
-                <Button type="submit" disabled={ctx.isSendingInvitation}>
-                  <EnvelopeSimple /> {ctx.isSendingInvitation ? "Sending..." : "Send Invitation"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <p className="text-sm text-muted-foreground">Keep your workspace organised.</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {createWorkspaceOpen && (
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base">Create Workspace</CardTitle>
-              <CardDescription>Set up a new workspace for your team.</CardDescription>
-            </div>
-            <Button variant="ghost" size="icon" onClick={() => setCreateWorkspaceOpen(false)}>
-              <X />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={(e) => { ctx.handleCreateWorkspace(e); setCreateWorkspaceOpen(false); }} className="flex flex-col gap-3">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="ws-name">Name</Label>
-                <Input id="ws-name" name="name" required placeholder="Workspace name" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="ws-desc">Description</Label>
-                <Input id="ws-desc" name="description" placeholder="Brief description" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="ws-color">Accent Color</Label>
-                <Input id="ws-color" name="accentColor" defaultValue="#d4510a" type="color" className="h-10 w-full p-1" />
-              </div>
-              {ctx.workspaceError && <p className="text-sm text-destructive">{ctx.workspaceError}</p>}
-              <Button type="submit" disabled={ctx.isCreatingWorkspace}>
-                {ctx.isCreatingWorkspace ? "Creating..." : "Create"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+      <CreateWorkspaceDialog
+        open={createWorkspaceOpen}
+        onOpenChange={setCreateWorkspaceOpen}
+        onSubmit={ctx.handleCreateWorkspace}
+        error={ctx.workspaceError}
+        isPending={ctx.isCreatingWorkspace}
+      />
+
+      <InviteMemberDialog
+        open={inviteOpen}
+        onOpenChange={setInviteOpen}
+        onSubmit={ctx.handleSendInvitation}
+        error={ctx.invitationError}
+        isPending={ctx.isSendingInvitation}
+      />
     </div>
   );
 }
