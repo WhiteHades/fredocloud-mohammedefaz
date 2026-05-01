@@ -10,7 +10,8 @@
     "test": "jest --runInBand",
     "db:generate": "prisma generate --config prisma.config.js",
     "db:migrate": "prisma migrate dev --config prisma.config.js",
-    "db:deploy": "prisma migrate deploy --config prisma.config.js"
+    "db:deploy": "prisma migrate deploy --config prisma.config.js",
+    "db:seed": "node prisma/seed.js"
   },
   "devDependencies": {
     "jest": "^30.3.0",
