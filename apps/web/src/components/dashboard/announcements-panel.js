@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { apiUrl } from "@/lib/runtime";
+import { RichTextField } from "./rich-text-field";
 
 export function AnnouncementsPanel({ activeMembership, refreshKey }) {
   const [announcements, setAnnouncements] = useState([]);
@@ -202,7 +203,7 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
                 ) : null}
               </div>
               <p className="mt-4 max-w-[60ch] text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70">
-                {announcement.content}
+                <span dangerouslySetInnerHTML={{ __html: announcement.content }} />
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {["🔥", "👏", "✅", "📌"].map((emoji) => (
@@ -271,14 +272,7 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
                 type="text"
               />
             </label>
-            <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-              Content
-              <textarea
-                className="min-h-[160px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
-                name="content"
-                required
-              />
-            </label>
+            <RichTextField label="Content" name="content" />
             <label className="flex items-center gap-3 text-sm text-stone-900/70 dark:text-stone-50/70">
               <input name="pinned" type="checkbox" />
               Pin immediately
