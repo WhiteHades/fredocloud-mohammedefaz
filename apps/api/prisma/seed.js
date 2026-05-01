@@ -37,6 +37,7 @@ async function main(){
     console.log("Force reseed: truncating all tables...");
     await prisma.$executeRawUnsafe('TRUNCATE TABLE "Notification","AuditEvent","AnnouncementAttachment","AnnouncementReaction","AnnouncementComment","Announcement","GoalUpdate","Milestone","Goal","ActionItem","Invitation","MembershipPermission","Membership","Workspace","Session","User" CASCADE');
     console.log("Truncated.\n");
+    delete process.env.RESEED;
   }
 
   console.log("Seeding massive notFredoHub demo data...\n");
@@ -72,18 +73,30 @@ async function main(){
     console.log(`  Workspace "${ws.name}" — ${mem.length} members`);
 
     const gc=r(50,80);
+    const createdGoals=[];
     for(let i=0;i<gc;i++){
       const g=await prisma.goal.create({data:{workspaceId:ws.id,ownerMembershipId:p(mem).id,title:`${p(GVERBS)} ${p(GNOUNS)}`,description:`${p(GVERBS)} ${p(GNOUNS)} across all ${p(DEPTS)} surfaces. Includes design review, implementation, testing, documentation, and stakeholder sign-off.`,status:p(GSTATUS),dueDate:Math.random()>0.3?dNow(r(5,90)):dAgo(r(5,60))}});
+      createdGoals.push(g);
+    }
+    for(const g of createdGoals){
       for(let j=0;j<r(2,6);j++)await prisma.milestone.create({data:{goalId:g.id,title:p(MILES),progressPercentage:r(0,100),sortOrder:j}});
       for(let j=0;j<r(0,5);j++)await prisma.goalUpdate.create({data:{goalId:g.id,authorMembershipId:p(mem).id,content:p(UPDATES),createdAt:dAgo(r(1,60))}});
     }
     console.log(`    ${gc} goals`);
 
     const ac=r(30,50);
+    const createdAnnouncements=[];
     for(let i=0;i<ac;i++){
       const an=await prisma.announcement.create({data:{workspaceId:ws.id,authorMembershipId:p(mem.filter(m=>m.role==="ADMIN")).id,title:`${p(ATITLES)} (#${r(1,999)})`,content:p(ABODIES),pinned:Math.random()<0.12,createdAt:dAgo(r(1,90))}});
-      for(const reactor of pN(mem,r(1,Math.min(mem.length,8))))await prisma.announcementReaction.create({data:{announcementId:an.id,membershipId:reactor.id,emoji:p(EMOJIS)}}).catch(()=>{});
-      for(let j=0;j<r(0,6);j++)await prisma.announcementComment.create({data:{announcementId:an.id,authorMembershipId:p(mem).id,content:p(COMMENTS),createdAt:dAgo(r(1,80))}});
+      createdAnnouncements.push(an);
+    }
+    for(const an of createdAnnouncements){
+      for(const reactor of pN(mem,r(1,Math.min(mem.length,8)))){
+        await prisma.announcementReaction.create({data:{announcementId:an.id,membershipId:reactor.id,emoji:p(EMOJIS)}}).catch(()=>{});
+      }
+      for(let j=0;j<r(0,6);j++){
+        await prisma.announcementComment.create({data:{announcementId:an.id,authorMembershipId:p(mem).id,content:p(COMMENTS),createdAt:dAgo(r(1,80))}}).catch(()=>{});
+      }
     }
     console.log(`    ${ac} announcements`);
 
