@@ -1,9 +1,9 @@
 import { WorkspaceHome } from "@/components/dashboard/workspace-home";
 
 export const metadata = {
-  title: "Overview | notFredoHub",
+  title: "Workspaces | notFredoHub",
 };
 
-export default function DashboardOverviewPage() {
+export default function DashboardWorkspacesPage() {
   return <WorkspaceHome />;
 }
