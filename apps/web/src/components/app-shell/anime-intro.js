@@ -10,37 +10,39 @@ export function AnimeIntro({ children, selector = "[data-anime-item]" }) {
 
     async function run() {
       const host = scopeRef.current;
-
-      if (!host) {
-        return;
-      }
+      if (!host) return;
 
       const items = host.querySelectorAll(selector);
-
-      if (!items.length) {
-        return;
-      }
+      if (!items.length) return;
 
       const existing = window.anime;
-
       if (!existing) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "/vendor/anime.umd.min.js";
-          script.async = true;
-          script.onload = resolve;
-          script.onerror = reject;
-          document.body.appendChild(script);
-        });
+        try {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = "/vendor/anime.umd.min.js";
+            script.async = true;
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
+          });
+        } catch {
+          items.forEach((item) => {
+            item.style.opacity = "1";
+            item.style.transform = "none";
+          });
+          return;
+        }
       }
+
+      if (cancelled) return;
 
       const anime = window.anime;
-
-      if (cancelled) {
-        return;
-      }
-
       if (!anime) {
+        items.forEach((item) => {
+          item.style.opacity = "1";
+          item.style.transform = "none";
+        });
         return;
       }
 

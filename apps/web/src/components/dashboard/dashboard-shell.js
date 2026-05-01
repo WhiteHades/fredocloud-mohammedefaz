@@ -9,9 +9,9 @@ import {
   Buildings,
   Target,
   Megaphone,
-  Checklist,
+  Checks,
   ChartBar,
-  Activity,
+  ActivityIcon,
   Gear,
   SignOut,
   Plus,
@@ -68,9 +68,9 @@ const NAV_ITEMS = [
   { href: "/dashboard/workspaces", label: "Workspaces", icon: Buildings },
   { href: "/dashboard/goals", label: "Goals", icon: Target },
   { href: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
-  { href: "/dashboard/action-items", label: "Action Items", icon: Checklist },
+  { href: "/dashboard/action-items", label: "Action Items", icon: Checks },
   { href: "/dashboard/analytics", label: "Analytics", icon: ChartBar },
-  { href: "/dashboard/activity", label: "Activity", icon: Activity },
+  { href: "/dashboard/activity", label: "Activity", icon: ActivityIcon },
   { href: "/dashboard/settings", label: "Settings", icon: Gear },
 ];
 
