@@ -1,4 +1,7 @@
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+
+import { CommandPalette } from "@/components/app-shell/command-palette";
+import { ServiceWorkerRegister } from "@/components/app-shell/service-worker-register";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -16,6 +19,7 @@ const plexMono = IBM_Plex_Mono({
 export const metadata = {
   title: "FredoHub",
   description: "A Swiss-styled collaborative team hub for goals, announcements, and action items.",
+  manifest: "/manifest.webmanifest",
 };
 
 export default function RootLayout({ children }) {
@@ -24,7 +28,11 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${plexSans.variable} ${plexMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <ServiceWorkerRegister />
+        <CommandPalette />
+        {children}
+      </body>
     </html>
   );
 }
