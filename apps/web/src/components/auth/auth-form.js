@@ -101,7 +101,7 @@ export function AuthForm({ mode }) {
 
   return (
     <AnimeIntro>
-      <div className="w-full max-w-md" data-anime-item>
+      <div className="w-full max-w-lg" data-anime-item>
         <div className="mb-6 flex justify-center">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary">
             <span className="text-lg font-bold text-primary-foreground font-heading">nF</span>

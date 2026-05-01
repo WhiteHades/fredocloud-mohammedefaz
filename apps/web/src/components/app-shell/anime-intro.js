@@ -1,9 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 export function AnimeIntro({ children, selector = "[data-anime-item]" }) {
   const scopeRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const host = scopeRef.current;
+    if (!host) return;
+    const items = host.querySelectorAll(selector);
+    items.forEach((item) => {
+      item.style.opacity = "0";
+      item.style.transform = "translateY(20px)";
+    });
+  }, [selector]);
 
   useEffect(() => {
     let cancelled = false;
@@ -45,11 +55,6 @@ export function AnimeIntro({ children, selector = "[data-anime-item]" }) {
         });
         return;
       }
-
-      items.forEach((item) => {
-        item.style.opacity = "0";
-        item.style.transform = "translateY(20px)";
-      });
 
       anime.animate(items, {
         opacity: [0, 1],
