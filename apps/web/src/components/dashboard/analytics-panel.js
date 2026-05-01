@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bar,
   BarChart,
   CartesianGrid,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -16,6 +15,8 @@ import { apiUrl } from "@/lib/runtime";
 export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
   const [analytics, setAnalytics] = useState(null);
   const [analyticsError, setAnalyticsError] = useState("");
+  const [chartWidth, setChartWidth] = useState(0);
+  const chartHostRef = useRef(null);
 
   useEffect(() => {
     async function loadAnalytics() {
@@ -42,6 +43,29 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
 
     loadAnalytics();
   }, [activeWorkspace, refreshKey]);
+
+  useEffect(() => {
+    if (!chartHostRef.current) {
+      return undefined;
+    }
+
+    const updateWidth = () => {
+      const nextWidth = Math.floor(chartHostRef.current?.getBoundingClientRect().width || 0);
+      setChartWidth(nextWidth);
+    };
+
+    updateWidth();
+
+    const observer = new ResizeObserver(() => {
+      updateWidth();
+    });
+
+    observer.observe(chartHostRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [analytics]);
 
   if (!activeWorkspace) {
     return null;
@@ -70,16 +94,16 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
           </div>
           <div className="nfh-subpanel">
             <p className="nfh-eyebrow">Goal Completion</p>
-            <div className="mt-[10px] h-80 min-w-0">
-              <ResponsiveContainer width="100%" height="100%" minWidth={240}>
-                <BarChart data={analytics.goalCompletion} margin={{ top: 8, right: 16, left: -8, bottom: 8 }}>
+            <div ref={chartHostRef} className="mt-[10px] min-h-80 min-w-0">
+              {chartWidth > 0 ? (
+                <BarChart width={chartWidth} height={320} data={analytics.goalCompletion} margin={{ top: 8, right: 16, left: -8, bottom: 8 }}>
                   <CartesianGrid strokeDasharray="2 6" stroke="currentColor" opacity={0.2} />
                   <XAxis dataKey="name" tickLine={false} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} domain={[0, 100]} />
                   <Tooltip />
                   <Bar dataKey="progress" fill="#ff0000" radius={0} />
                 </BarChart>
-              </ResponsiveContainer>
+              ) : null}
             </div>
           </div>
         </div>
