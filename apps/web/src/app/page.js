@@ -1,75 +1,87 @@
 export default function Home() {
   return (
-    <main className="flex-1 border-b border-stone-200 bg-stone-50 text-stone-900 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-50">
-      <section className="mx-auto grid min-h-screen max-w-6xl grid-cols-12 gap-4 px-4 py-16 md:gap-8 md:px-8 md:py-24 lg:py-32">
-        <div className="col-span-12 border border-stone-200 bg-stone-100 p-6 dark:border-stone-800 dark:bg-stone-900 md:col-span-7 md:p-8 lg:p-10">
-          <p className="text-xs uppercase tracking-[0.24em] text-stone-900/50 dark:text-stone-50/50">
-            Collaborative Team Hub
-          </p>
-          <h1 className="mt-6 max-w-[12ch] text-[clamp(2.5rem,8vw,5rem)] font-light leading-[0.95] tracking-tight break-words">
-            notFredoHub
-          </h1>
-          <p className="mt-6 max-w-[60ch] text-base leading-relaxed text-stone-900/70 dark:text-stone-50/70 md:text-lg">
-            A workspace for goals, announcements, and action items, built on a strict grid, a disciplined colour system, and a live collaboration core.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+    <main className="flex-1">
+      <section className="mx-auto grid min-h-screen max-w-7xl grid-cols-12 gap-[10px] px-4 py-16 md:px-8 md:py-24 lg:py-32">
+        <div className="col-span-12 flex flex-col justify-between md:col-span-7">
+          <div>
+            <p className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
+              Collaborative Team Hub
+            </p>
+            <h1 className="mt-[10px] text-[clamp(3rem,10vw,8rem)] font-medium leading-[0.9] tracking-[-0.03em]">
+              notFredoHub
+            </h1>
+            <p className="mt-[10px] max-w-[40ch] text-[20px] leading-[1] tracking-[-0.009em] opacity-70">
+              Complete team management system for FredoCloud. Goals, announcements, and action items in real time.
+            </p>
+          </div>
+          <div className="mt-[10px] flex flex-col gap-[10px] sm:flex-row">
             <a
-              className="min-h-[44px] border border-[#c8102e] bg-[#c8102e] px-4 py-3 text-sm uppercase tracking-[0.22em] text-stone-50 transition hover:bg-[#9d1028] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c8102e]"
+              className="inline-flex h-[56px] items-center justify-center rounded-[300px] bg-white px-[24px] text-[20px] tracking-[-0.009em] text-black transition-transform hover:scale-[1.02] active:scale-[0.97]"
               href="/register"
             >
               Create account
             </a>
             <a
-              className="min-h-[44px] border border-stone-300 px-4 py-3 text-sm uppercase tracking-[0.22em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-700 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+              className="inline-flex h-[56px] items-center justify-center rounded-[300px] border border-current px-[24px] text-[20px] tracking-[-0.009em] transition-transform hover:scale-[1.02] active:scale-[0.97]"
               href="/login"
             >
               Log in
             </a>
           </div>
-          <div className="mt-10 grid grid-cols-1 gap-4 text-sm text-stone-900/70 dark:text-stone-50/70 sm:grid-cols-2">
-            <div className="border border-stone-200 px-4 py-4 dark:border-stone-800">
-              <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-                Frontend
-              </p>
-              <p className="mt-3 text-base text-stone-900 dark:text-stone-50">
-                Next.js App Router, Tailwind, Zustand, Recharts.
-              </p>
-            </div>
-            <div className="border border-stone-200 px-4 py-4 dark:border-stone-800">
-              <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-                Backend
-              </p>
-              <p className="mt-3 text-base text-stone-900 dark:text-stone-50">
-                Express, Prisma, PostgreSQL, Socket.io, Cloudinary.
-              </p>
-            </div>
-          </div>
         </div>
 
-        <div className="col-span-12 flex flex-col justify-between border border-stone-200 bg-[#c8102e] p-6 text-stone-50 dark:border-stone-800 md:col-span-5 md:p-8 lg:p-10">
+        <div className="col-span-12 mt-[10px] flex flex-col justify-between border border-current p-[24px] md:col-span-5 md:mt-0">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-stone-50/70">
-              Foundation Slice
+            <p className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
+              Foundation
             </p>
-            <p className="mt-6 max-w-[16ch] text-3xl font-light leading-tight tracking-tight md:text-4xl">
-              Monorepo scaffold in place. API health next.
+            <p className="mt-[10px] text-[clamp(1.5rem,4vw,2.5rem)] font-medium leading-[0.95] tracking-[-0.02em]">
+              Monorepo scaffold. API health live.
             </p>
           </div>
-          <div className="mt-10 grid gap-4 text-sm leading-relaxed text-stone-50/80">
+          <div className="mt-[10px] flex flex-col gap-[10px]">
             <a
-              className="min-h-[44px] border border-stone-50/30 px-4 py-3 transition hover:bg-stone-50/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-50"
+              className="inline-flex h-[48px] items-center justify-center rounded-[300px] bg-white px-[20px] text-[11px] uppercase tracking-[-0.005em] text-black transition-transform hover:scale-[1.02] active:scale-[0.97]"
               href="https://fredocloud-mohammedefaz-production.up.railway.app/api/health"
               target="_blank"
               rel="noreferrer"
             >
-              Open API health endpoint
+              Open API health
             </a>
-            <div className="border border-stone-50/30 px-4 py-3">
-              JavaScript-only across the repo, as required by the assessment.
+            <div className="border border-current px-[20px] py-[16px] text-[11px] uppercase tracking-[-0.005em]">
+              JavaScript-only across the repo, as required.
             </div>
           </div>
         </div>
+
+        <div className="col-span-12 mt-[10px] grid grid-cols-2 gap-[10px] md:grid-cols-4">
+          {[
+            { label: "Frontend", value: "Next.js, Tailwind, Zustand, Recharts" },
+            { label: "Backend", value: "Express, Prisma, PostgreSQL, Socket.io" },
+            { label: "Auth", value: "JWT access + refresh cookies" },
+            { label: "Deploy", value: "Railway, Cloudinary, Turborepo" },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="border border-current p-[20px]"
+            >
+              <p className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
+                {item.label}
+              </p>
+              <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">
+                {item.value}
+              </p>
+            </div>
+          ))}
+        </div>
       </section>
+
+      <footer className="border-t border-current bg-black px-4 py-[20px] text-[11px] uppercase tracking-[-0.005em] text-[#e6e6dd] md:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-[10px] sm:flex-row">
+          <span>notFredoHub</span>
+          <span>Complete team management system for FredoCloud</span>
+        </div>
+      </footer>
     </main>
   );
 }

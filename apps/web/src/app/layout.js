@@ -1,20 +1,6 @@
-import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
-
 import { CommandPalette } from "@/components/app-shell/command-palette";
 import { ServiceWorkerRegister } from "@/components/app-shell/service-worker-register";
 import "./globals.css";
-
-const plexSans = IBM_Plex_Sans({
-  variable: "--font-plex-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-});
-
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
-});
 
 export const metadata = {
   metadataBase: new URL(
@@ -28,9 +14,7 @@ export const metadata = {
       { url: "/favicon.ico", sizes: "32x32" },
       { url: "/icon.svg", type: "image/svg+xml" },
     ],
-    apple: [
-      { url: "/apple-touch-icon.png", sizes: "180x180" },
-    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   openGraph: {
     title: "notFredoHub",
@@ -47,10 +31,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className={`${plexSans.variable} ${plexMono.variable} h-full antialiased`}
-    >
+    <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <ServiceWorkerRegister />
         <CommandPalette />

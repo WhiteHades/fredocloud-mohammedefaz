@@ -82,39 +82,45 @@ export function AuthForm({ mode }) {
   }
 
   return (
-    <div className="border border-stone-200 bg-stone-100 p-6 dark:border-stone-800 dark:bg-stone-900 md:p-8">
-      <p className="text-xs uppercase tracking-[0.24em] text-stone-900/45 dark:text-stone-50/45">
+    <div className="border border-current p-[24px]">
+      <p className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
         notFredoHub Authentication
       </p>
-      <h1 className="mt-6 max-w-[14ch] text-4xl font-light leading-tight tracking-tight text-balance md:text-5xl">
+      <h1 className="mt-[10px] text-[clamp(2rem,5vw,3rem)] font-medium leading-[0.95] tracking-[-0.02em]">
         {copy.heading}
       </h1>
-      <form className="mt-8 grid gap-4" action={copy.action} method="POST" onSubmit={handleSubmit}>
+      <form className="mt-[10px] flex flex-col gap-[10px]" action={copy.action} method="POST" onSubmit={handleSubmit}>
         {mode === "register" ? (
-          <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-            Display name
+          <label className="flex flex-col gap-[5px]">
+            <span className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
+              Display name
+            </span>
             <input
-              className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+              className="h-[48px] border border-current bg-transparent px-[16px] text-[20px] tracking-[-0.009em] outline-none focus:ring-2 focus:ring-accent"
               name="displayName"
               type="text"
               required
             />
           </label>
         ) : null}
-        <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-          Email
+        <label className="flex flex-col gap-[5px]">
+          <span className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
+            Email
+          </span>
           <input
-            className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+            className="h-[48px] border border-current bg-transparent px-[16px] text-[20px] tracking-[-0.009em] outline-none focus:ring-2 focus:ring-accent"
             name="email"
             type="email"
             autoComplete="email"
             required
           />
         </label>
-        <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-          Password
+        <label className="flex flex-col gap-[5px]">
+          <span className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
+            Password
+          </span>
           <input
-            className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+            className="h-[48px] border border-current bg-transparent px-[16px] text-[20px] tracking-[-0.009em] outline-none focus:ring-2 focus:ring-accent"
             name="password"
             type="password"
             autoComplete={mode === "login" ? "current-password" : "new-password"}
@@ -122,21 +128,21 @@ export function AuthForm({ mode }) {
           />
         </label>
         {error ? (
-          <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
+          <p className="border border-accent bg-accent/10 px-[16px] py-[12px] text-[11px] uppercase tracking-[-0.005em] text-accent">
             {error}
           </p>
         ) : null}
         <button
-          className="min-h-[44px] border border-[#c8102e] bg-[#c8102e] px-4 py-3 text-sm uppercase tracking-[0.22em] text-stone-50 transition hover:bg-[#9d1028] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c8102e] disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-[56px] rounded-[300px] bg-white px-[24px] text-[20px] tracking-[-0.009em] text-black transition-transform hover:scale-[1.02] active:scale-[0.97] disabled:opacity-60"
           disabled={isPending}
           type="submit"
         >
           {isPending ? "Submitting…" : copy.cta}
         </button>
       </form>
-      <p className="mt-6 text-sm text-stone-900/60 dark:text-stone-50/60">
+      <p className="mt-[10px] text-[11px] uppercase tracking-[-0.005em] opacity-60">
         {copy.prompt}{" "}
-        <Link className="text-stone-900 dark:text-stone-50" href={copy.promptHref}>
+        <Link className="text-foreground underline" href={copy.promptHref}>
           {copy.promptLabel}
         </Link>
       </p>
