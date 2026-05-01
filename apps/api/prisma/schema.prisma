@@ -49,6 +49,11 @@ enum ActionItemPriority {
   CRITICAL
 }
 
+enum NotificationType {
+  INVITATION
+  MENTION
+}
+
 model User {
   id             String       @id @default(cuid())
   email          String       @unique
@@ -61,6 +66,7 @@ model User {
   memberships    Membership[]
   sessions       Session[]
   workspaces     Workspace[]  @relation("WorkspaceCreator")
+  notifications  Notification[]
 }
 
 model Workspace {
@@ -78,6 +84,7 @@ model Workspace {
   announcements Announcement[]
   actionItems ActionItem[]
   auditEvents AuditEvent[]
+  notifications Notification[]
 }
 
 model Membership {
@@ -244,4 +251,19 @@ model AuditEvent {
   createdAt          DateTime    @default(now())
   workspace          Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   actorMembership    Membership? @relation("AuditActor", fields: [actorMembershipId], references: [id], onDelete: SetNull)
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  workspaceId String
+  type       NotificationType
+  title      String
+  body       String
+  link       String?
+  metadata   Json?
+  createdAt  DateTime         @default(now())
+  readAt     DateTime?
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace  Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 }

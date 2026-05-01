@@ -9,6 +9,7 @@ const {
 const { workspaceAuditRouter } = require("./modules/audit/audit.routes");
 const { workspaceAnalyticsRouter } = require("./modules/analytics/analytics.routes");
 const { authRouter } = require("./modules/auth/auth.routes");
+const { workspaceNotificationsRouter } = require("./modules/notifications/notifications.routes");
 const {
   announcementActionsRouter,
   workspaceAnnouncementsRouter,
@@ -37,6 +38,7 @@ app.use("/api/workspaces/:workspaceId/audit-events", workspaceAuditRouter);
 app.use("/api/workspaces/:workspaceId/analytics", workspaceAnalyticsRouter);
 app.use("/api/workspaces/:workspaceId/announcements", workspaceAnnouncementsRouter);
 app.use("/api/workspaces/:workspaceId/goals", goalsRouter);
+app.use("/api/workspaces/:workspaceId/notifications", workspaceNotificationsRouter);
 app.use("/api/workspaces", workspacesRouter);
 
 app.get("/api/health", (_request, response) => {

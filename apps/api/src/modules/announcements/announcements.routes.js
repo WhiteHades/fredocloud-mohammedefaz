@@ -2,6 +2,7 @@ const { Router } = require("express");
 
 const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
+const { emitNotificationEvent, emitWorkspaceEvent } = require("../../lib/realtime");
 const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
 
@@ -33,6 +34,10 @@ async function getAnnouncementContext(announcementId) {
       },
     },
   });
+}
+
+function extractMentionHandles(content) {
+  return [...content.matchAll(/(^|\s)@([a-z0-9._-]+)/gi)].map((match) => match[2].toLowerCase());
 }
 
 workspaceAnnouncementsRouter.get("/", requireAuth, async (request, response) => {
@@ -98,6 +103,11 @@ workspaceAnnouncementsRouter.post("/", requireAuth, async (request, response) =>
     summary: `Published announcement ${announcement.title}`,
   });
 
+  emitWorkspaceEvent(request.params.workspaceId, "announcement:created", {
+    workspaceId: request.params.workspaceId,
+    announcement: serializeAnnouncement(announcement),
+  });
+
   return response.status(201).json({ announcement: serializeAnnouncement(announcement) });
 });
 
@@ -132,6 +142,12 @@ announcementActionsRouter.post("/:announcementId/reactions", requireAuth, async 
 
   if (existingReaction) {
     await prisma.announcementReaction.delete({ where: { id: existingReaction.id } });
+    emitWorkspaceEvent(announcement.workspaceId, "announcement:reaction", {
+      workspaceId: announcement.workspaceId,
+      announcementId: announcement.id,
+      reacted: false,
+      emoji,
+    });
     return response.status(200).json({ reacted: false });
   }
 
@@ -141,6 +157,13 @@ announcementActionsRouter.post("/:announcementId/reactions", requireAuth, async 
       membershipId: membership.id,
       emoji,
     },
+  });
+
+  emitWorkspaceEvent(announcement.workspaceId, "announcement:reaction", {
+    workspaceId: announcement.workspaceId,
+    announcementId: announcement.id,
+    reacted: true,
+    emoji,
   });
 
   return response.status(200).json({ reacted: true });
@@ -189,6 +212,11 @@ announcementActionsRouter.patch("/:announcementId", requireAuth, async (request,
     summary: `${nextPinnedState ? "Pinned" : "Updated"} announcement ${updatedAnnouncement.title}`,
   });
 
+  emitWorkspaceEvent(announcement.workspaceId, "announcement:updated", {
+    workspaceId: announcement.workspaceId,
+    announcement: serializeAnnouncement(updatedAnnouncement),
+  });
+
   return response.status(200).json({ announcement: serializeAnnouncement(updatedAnnouncement) });
 });
 
@@ -226,6 +254,57 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
     targetType: "announcement_comment",
     targetId: comment.id,
     summary: `Commented on announcement ${announcement.title}`,
+  });
+
+  const mentionHandles = [...new Set(extractMentionHandles(content))];
+
+  if (mentionHandles.length) {
+    const workspaceMemberships = await prisma.membership.findMany({
+      where: { workspaceId: announcement.workspaceId },
+      include: { user: true },
+    });
+
+    const mentionedMemberships = workspaceMemberships.filter((workspaceMembership) => {
+      const localPart = workspaceMembership.user.email.split("@")[0]?.toLowerCase();
+
+      return (
+        workspaceMembership.id !== membership.id &&
+        mentionHandles.includes(localPart)
+      );
+    });
+
+    if (mentionedMemberships.length) {
+      await prisma.notification.createMany({
+        data: mentionedMemberships.map((mentionedMembership) => ({
+          workspaceId: announcement.workspaceId,
+          userId: mentionedMembership.userId,
+          type: "MENTION",
+          title: `Mentioned in ${announcement.title}`,
+          body: content,
+          link: `/dashboard?announcement=${announcement.id}`,
+          metadata: {
+            announcementId: announcement.id,
+            commentId: comment.id,
+          },
+        })),
+      });
+
+      mentionedMemberships.forEach((mentionedMembership) => {
+        emitNotificationEvent(mentionedMembership.userId, {
+          workspaceId: announcement.workspaceId,
+          type: "MENTION",
+          title: `Mentioned in ${announcement.title}`,
+          body: content,
+          link: `/dashboard?announcement=${announcement.id}`,
+        });
+      });
+    }
+  }
+
+  emitWorkspaceEvent(announcement.workspaceId, "announcement:comment_created", {
+    workspaceId: announcement.workspaceId,
+    announcementId: announcement.id,
+    comment,
   });
 
   return response.status(201).json({ comment });
