@@ -285,7 +285,7 @@ announcementActionsRouter.post("/:announcementId/attachments", requireAuth, uplo
     return response.status(403).json({ error: "Workspace membership is required." });
   }
 
-  if (!hasCloudinaryConfig) {
+  if (!hasCloudinaryConfig()) {
     return response.status(503).json({ error: "Cloudinary credentials are not configured for this environment." });
   }
 

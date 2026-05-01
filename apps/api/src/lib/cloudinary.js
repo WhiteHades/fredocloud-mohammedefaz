@@ -1,12 +1,17 @@
+const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "../../.env"), quiet: true });
+
 const cloudinary = require("cloudinary").v2;
 
-const hasCloudinaryConfig = Boolean(
-  process.env.CLOUDINARY_CLOUD_NAME &&
-    process.env.CLOUDINARY_API_KEY &&
-    process.env.CLOUDINARY_API_SECRET,
-);
+function hasCloudinaryConfig() {
+  return Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET,
+  );
+}
 
-if (hasCloudinaryConfig) {
+if (hasCloudinaryConfig()) {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,

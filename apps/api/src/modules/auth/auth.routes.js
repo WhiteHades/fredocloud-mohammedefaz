@@ -13,7 +13,7 @@ const {
   verifyRefreshToken,
 } = require("../../lib/auth");
 const { prisma } = require("../../lib/prisma");
-const { hasCloudinaryConfig, uploadImageBuffer } = require("../../lib/cloudinary");
+const { hasCloudinaryConfig, uploadAssetBuffer, uploadImageBuffer } = require("../../lib/cloudinary");
 const { requireAuth } = require("../../middleware/require-auth");
 
 const authRouter = Router();
@@ -190,7 +190,7 @@ authRouter.patch("/me", requireAuth, async (request, response) => {
 });
 
 authRouter.post("/avatar", requireAuth, upload.single("file"), async (request, response) => {
-  if (!hasCloudinaryConfig) {
+  if (!hasCloudinaryConfig()) {
     return response.status(503).json({
       error: "Cloudinary credentials are not configured for this environment.",
     });

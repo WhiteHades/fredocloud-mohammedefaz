@@ -10,7 +10,8 @@ const specification = swaggerJsdoc({
     },
     servers: [
       {
-        url: process.env.CLIENT_URL || "http://localhost:4000",
+        url: "/",
+        description: "Same origin as the API",
       },
     ],
     paths: {
