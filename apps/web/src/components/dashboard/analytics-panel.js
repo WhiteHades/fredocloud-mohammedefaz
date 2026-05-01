@@ -13,7 +13,7 @@ import {
 
 import { apiUrl } from "@/lib/runtime";
 
-export function AnalyticsPanel({ activeWorkspace }) {
+export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
   const [analytics, setAnalytics] = useState(null);
   const [analyticsError, setAnalyticsError] = useState("");
 
@@ -41,7 +41,7 @@ export function AnalyticsPanel({ activeWorkspace }) {
     }
 
     loadAnalytics();
-  }, [activeWorkspace]);
+  }, [activeWorkspace, refreshKey]);
 
   if (!activeWorkspace) {
     return null;

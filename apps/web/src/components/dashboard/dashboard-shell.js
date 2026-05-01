@@ -3,16 +3,19 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 import { apiUrl } from "@/lib/runtime";
 import { useAuthStore } from "@/stores/auth-store";
 import { useWorkspaceStore } from "@/stores/workspace-store";
+import { AnalyticsPanel } from "./analytics-panel";
 import { AnnouncementsPanel } from "./announcements-panel";
 import { ActionItemsPanel } from "./action-items-panel";
-import { GoalsPanel } from "./goals-panel";
-import { PermissionsPanel } from "./permissions-panel";
 import { AuditPanel } from "./audit-panel";
-import { AnalyticsPanel } from "./analytics-panel";
+import { GoalsPanel } from "./goals-panel";
+import { NotificationsPanel } from "./notifications-panel";
+import { PermissionsPanel } from "./permissions-panel";
+import { PresencePanel } from "./presence-panel";
 
 export function DashboardShell({ user, memberships, pendingInvitations }) {
   const router = useRouter();
@@ -23,6 +26,8 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
   const syncMemberships = useWorkspaceStore((state) => state.syncMemberships);
   const [avatarError, setAvatarError] = useState("");
   const [invitationError, setInvitationError] = useState("");
+  const [onlineUserIds, setOnlineUserIds] = useState([]);
+  const [realtimeVersion, setRealtimeVersion] = useState(0);
   const [workspaceError, setWorkspaceError] = useState("");
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSendingInvitation, setIsSendingInvitation] = useState(false);
@@ -39,6 +44,54 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
 
   const activeMembership =
     memberships.find(({ workspace }) => workspace.id === activeWorkspaceId) || memberships[0] || null;
+
+  useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_SOCKET_URL || apiUrl, {
+      withCredentials: true,
+    });
+
+    socket.on("connect", () => {
+      if (activeMembership?.workspace.id) {
+        socket.emit("workspace:subscribe", { workspaceId: activeMembership.workspace.id });
+      }
+    });
+
+    socket.on("workspace:presence", ({ workspaceId, onlineUserIds: ids }) => {
+      if (workspaceId === activeMembership?.workspace.id) {
+        setOnlineUserIds(ids);
+      }
+    });
+
+    const bumpRealtime = () => setRealtimeVersion((value) => value + 1);
+
+    [
+      "goal:created",
+      "goal:milestone_created",
+      "goal:update_posted",
+      "announcement:created",
+      "announcement:updated",
+      "announcement:reaction",
+      "announcement:comment_created",
+      "action_item:created",
+      "action_item:updated",
+    ].forEach((eventName) => {
+      socket.on(eventName, ({ workspaceId }) => {
+        if (workspaceId === activeMembership?.workspace.id) {
+          bumpRealtime();
+        }
+      });
+    });
+
+    socket.on("notification:created", ({ userId, workspaceId }) => {
+      if (userId === user.id && workspaceId === activeMembership?.workspace.id) {
+        bumpRealtime();
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [activeMembership?.workspace.id, user.id]);
 
   async function handleLogout() {
     setIsLoggingOut(true);
@@ -387,18 +440,20 @@ export function DashboardShell({ user, memberships, pendingInvitations }) {
                 </p>
               ) : null}
               <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
-                {isUploadingAvatar
+              {isUploadingAvatar
                   ? "Uploading avatar…"
                   : "Avatar uploads go straight to Cloudinary when credentials are configured."}
               </p>
             </div>
           </div>
-          <GoalsPanel activeWorkspace={activeMembership?.workspace || null} />
-          <AnnouncementsPanel activeMembership={activeMembership || null} />
-          <ActionItemsPanel activeWorkspace={activeMembership?.workspace || null} />
+          <PresencePanel activeWorkspace={activeMembership?.workspace || null} onlineUserIds={onlineUserIds} />
+          <NotificationsPanel activeWorkspace={activeMembership?.workspace || null} refreshKey={realtimeVersion} />
+          <GoalsPanel activeWorkspace={activeMembership?.workspace || null} refreshKey={realtimeVersion} />
+          <AnnouncementsPanel activeMembership={activeMembership || null} refreshKey={realtimeVersion} />
+          <ActionItemsPanel activeWorkspace={activeMembership?.workspace || null} refreshKey={realtimeVersion} />
           <PermissionsPanel activeMembership={activeMembership || null} />
-          <AuditPanel activeMembership={activeMembership || null} />
-          <AnalyticsPanel activeWorkspace={activeMembership?.workspace || null} />
+          <AuditPanel activeMembership={activeMembership || null} refreshKey={realtimeVersion} />
+          <AnalyticsPanel activeWorkspace={activeMembership?.workspace || null} refreshKey={realtimeVersion} />
         </div>
 
         <div className="col-span-12 flex flex-col justify-between border border-stone-200 bg-[#c8102e] p-6 text-stone-50 dark:border-stone-800 md:col-span-4 md:p-8 lg:p-10">

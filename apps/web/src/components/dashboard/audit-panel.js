@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { apiUrl } from "@/lib/runtime";
 
-export function AuditPanel({ activeMembership }) {
+export function AuditPanel({ activeMembership, refreshKey }) {
   const [auditError, setAuditError] = useState("");
   const [auditEvents, setAuditEvents] = useState([]);
 
@@ -35,7 +35,7 @@ export function AuditPanel({ activeMembership }) {
     }
 
     loadAuditEvents();
-  }, [activeMembership]);
+  }, [activeMembership, refreshKey]);
 
   if (!activeMembership?.permissions?.AUDIT_VIEW) {
     return null;

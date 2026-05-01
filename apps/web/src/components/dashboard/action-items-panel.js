@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { apiUrl } from "@/lib/runtime";
 
-export function ActionItemsPanel({ activeWorkspace }) {
+export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
   const [actionItemError, setActionItemError] = useState("");
   const [actionItems, setActionItems] = useState([]);
   const [goals, setGoals] = useState([]);
@@ -77,7 +77,7 @@ export function ActionItemsPanel({ activeWorkspace }) {
     }
 
     loadPanelData();
-  }, [activeWorkspace]);
+  }, [activeWorkspace, refreshKey]);
 
   async function handleCreateActionItem(event) {
     event.preventDefault();

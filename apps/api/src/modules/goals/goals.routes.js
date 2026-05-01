@@ -2,6 +2,7 @@ const { Router } = require("express");
 
 const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
+const { emitWorkspaceEvent } = require("../../lib/realtime");
 const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
 
@@ -87,6 +88,11 @@ goalsRouter.post("/", requireAuth, async (request, response) => {
     summary: `Created goal ${goal.title}`,
   });
 
+  emitWorkspaceEvent(request.params.workspaceId, "goal:created", {
+    workspaceId: request.params.workspaceId,
+    goal: serializeGoal(goal),
+  });
+
   return response.status(201).json({ goal: serializeGoal(goal) });
 });
 
@@ -159,6 +165,12 @@ goalDetailRouter.post("/:goalId/milestones", requireAuth, async (request, respon
     summary: `Added milestone ${milestone.title}`,
   });
 
+  emitWorkspaceEvent(goal.workspaceId, "goal:milestone_created", {
+    workspaceId: goal.workspaceId,
+    goalId: goal.id,
+    milestone,
+  });
+
   return response.status(201).json({ milestone });
 });
 
@@ -196,6 +208,12 @@ goalDetailRouter.post("/:goalId/updates", requireAuth, async (request, response)
     targetType: "goal_update",
     targetId: update.id,
     summary: `Posted a progress update on ${goal.title}`,
+  });
+
+  emitWorkspaceEvent(goal.workspaceId, "goal:update_posted", {
+    workspaceId: goal.workspaceId,
+    goalId: goal.id,
+    update,
   });
 
   return response.status(201).json({ update });

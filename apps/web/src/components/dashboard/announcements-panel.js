@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { apiUrl } from "@/lib/runtime";
 
-export function AnnouncementsPanel({ activeMembership }) {
+export function AnnouncementsPanel({ activeMembership, refreshKey }) {
   const [announcements, setAnnouncements] = useState([]);
   const [announcementError, setAnnouncementError] = useState("");
   const [isCommentingId, setIsCommentingId] = useState(null);
@@ -41,7 +41,7 @@ export function AnnouncementsPanel({ activeMembership }) {
     }
 
     loadAnnouncements();
-  }, [activeMembership]);
+  }, [activeMembership, refreshKey]);
 
   async function handleCreateAnnouncement(event) {
     event.preventDefault();

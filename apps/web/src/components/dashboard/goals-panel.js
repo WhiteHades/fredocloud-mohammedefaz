@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { apiUrl } from "@/lib/runtime";
 
-export function GoalsPanel({ activeWorkspace }) {
+export function GoalsPanel({ activeWorkspace, refreshKey }) {
   const [detailError, setDetailError] = useState("");
   const [detailGoal, setDetailGoal] = useState(null);
   const [goals, setGoals] = useState([]);
@@ -50,7 +50,7 @@ export function GoalsPanel({ activeWorkspace }) {
     }
 
     loadGoals();
-  }, [activeWorkspace]);
+  }, [activeWorkspace, refreshKey]);
 
   useEffect(() => {
     async function loadGoalDetail() {
@@ -79,7 +79,7 @@ export function GoalsPanel({ activeWorkspace }) {
     }
 
     loadGoalDetail();
-  }, [selectedGoalId]);
+  }, [selectedGoalId, refreshKey]);
 
   async function handleCreateGoal(event) {
     event.preventDefault();

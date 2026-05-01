@@ -2,6 +2,7 @@ const { Router } = require("express");
 
 const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
+const { emitWorkspaceEvent } = require("../../lib/realtime");
 const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
 
@@ -89,6 +90,11 @@ workspaceActionItemsRouter.post("/", requireAuth, async (request, response) => {
     summary: `Created action item ${actionItem.title}`,
   });
 
+  emitWorkspaceEvent(request.params.workspaceId, "action_item:created", {
+    workspaceId: request.params.workspaceId,
+    actionItem: serializeActionItem(actionItem),
+  });
+
   return response.status(201).json({ actionItem: serializeActionItem(actionItem) });
 });
 
@@ -133,6 +139,11 @@ actionItemActionsRouter.patch("/:actionItemId", requireAuth, async (request, res
     targetType: "action_item",
     targetId: updatedActionItem.id,
     summary: `Updated action item ${updatedActionItem.title}`,
+  });
+
+  emitWorkspaceEvent(actionItem.workspaceId, "action_item:updated", {
+    workspaceId: actionItem.workspaceId,
+    actionItem: serializeActionItem(updatedActionItem),
   });
 
   return response.status(200).json({ actionItem: serializeActionItem(updatedActionItem) });
