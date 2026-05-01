@@ -7,7 +7,7 @@
 
 <h1 align="center">notFredoHub</h1>
 
-<p align="center">notFredoHub. Complete team management system for FredoCloud.</p>
+<p align="center">Complete team management system for FredoCloud.</p>
 
 <p align="center">
   <a href="https://github.com/WhiteHades/notfredohub/actions"><img alt="build" src="https://img.shields.io/badge/build-passing-1c1917?style=flat-square"></a>
