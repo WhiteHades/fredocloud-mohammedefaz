@@ -50,7 +50,8 @@ async function main(){
     users.push({id:u.id,email,displayName:u.displayName});
   }
   const demo=await prisma.user.upsert({where:{email:DEMO_EMAIL},update:{displayName:"Demo Admin",passwordHash:hash},create:{email:DEMO_EMAIL,displayName:"Demo Admin",passwordHash:hash}});
-  console.log(`${users.length+1} users created.\n`);
+  users.unshift({id:demo.id,email:demo.email,displayName:demo.displayName});
+  console.log(`${users.length} users created.\n`);
 
   const wsDefs=[
     {name:"Engineering Hub",desc:"Core product engineering — backend, frontend, infrastructure, developer experience.",color:"#3b82f6"},
@@ -66,7 +67,7 @@ async function main(){
     let ws=await prisma.workspace.findFirst({where:{name:wd.name}});
     if(ws){console.log(`  Skipping "${wd.name}" (exists).`);continue}
     const creator=p(users);
-    ws=await prisma.workspace.create({data:{name:wd.name,description:wd.desc,accentColor:wd.color,createdById:creator.id,memberships:{create:pN(users,r(8,20)).map(u=>({userId:u.id,role:p(["ADMIN","ADMIN","MEMBER","MEMBER","MEMBER"])}))}},include:{memberships:{include:{user:true}}}});
+    ws=await prisma.workspace.create({data:{name:wd.name,description:wd.desc,accentColor:wd.color,createdById:demo.id,memberships:{create:[{userId:demo.id,role:"ADMIN"},...pN(users.filter(u=>u.id!==demo.id),r(7,19)).map(u=>({userId:u.id,role:p(["ADMIN","MEMBER","MEMBER","MEMBER"])}))]}},include:{memberships:{include:{user:true}}}});
     const mem=ws.memberships;
     console.log(`  Workspace "${ws.name}" — ${mem.length} members`);
 
