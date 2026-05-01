@@ -15,6 +15,7 @@ import {
 } from "@phosphor-icons/react";
 
 import { useAuthStore } from "@/stores/auth-store";
+import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,6 +92,7 @@ export function LandingPage() {
                 <a href="#features" className="hidden text-white/70 transition hover:text-white md:block">Features</a>
                 <a href="#stack" className="hidden text-white/70 transition hover:text-white md:block">Stack</a>
                 <a href={API_DOCS_URL} target="_blank" rel="noreferrer" className="hidden text-white/70 transition hover:text-white md:block">API Docs</a>
+                <ThemeToggle buttonClassName="text-white hover:bg-white/10 hover:text-white !border-white/15" />
                 {user ? (
                   <div className="ml-2 flex items-center gap-3">
                     <Link

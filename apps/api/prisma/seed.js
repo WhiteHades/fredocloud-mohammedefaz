@@ -32,6 +32,13 @@ function dAgo(d){const dt=new Date();dt.setDate(dt.getDate()-d);return dt}
 function dNow(d){const dt=new Date();dt.setDate(dt.getDate()+d);return dt}
 
 async function main(){
+  // force reseed when RESEED=true
+  if (process.env.RESEED === "true") {
+    console.log("Force reseed: truncating all tables...");
+    await prisma.$executeRawUnsafe('TRUNCATE TABLE "Notification","AuditEvent","AnnouncementAttachment","AnnouncementReaction","AnnouncementComment","Announcement","GoalUpdate","Milestone","Goal","ActionItem","Invitation","MembershipPermission","Membership","Workspace","Session","User" CASCADE');
+    console.log("Truncated.\n");
+  }
+
   console.log("Seeding massive notFredoHub demo data...\n");
   const hash=await bcrypt.hash(DEMO_PASS,10);
 
