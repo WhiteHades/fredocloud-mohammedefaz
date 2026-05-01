@@ -21,9 +21,9 @@ export const metadata = {
     description: "Complete team management system for FredoCloud.",
     images: [
       {
-        url: "/icon-512.png",
-        width: 512,
-        height: 512,
+        url: "/brand-banner.png",
+        width: 1600,
+        height: 900,
       },
     ],
   },

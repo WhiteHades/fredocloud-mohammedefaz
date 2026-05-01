@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 240" fill="none">
+  <rect width="960" height="240" fill="#e6e6dd"/>
+  <rect x="24" y="24" width="192" height="192" fill="#fafaf9" stroke="#000" stroke-width="4"/>
+  <rect x="52" y="52" width="136" height="56" fill="#ff0000"/>
+  <rect x="52" y="132" width="56" height="28" fill="#000"/>
+  <rect x="132" y="132" width="56" height="28" fill="#000"/>
+  <rect x="52" y="184" width="136" height="4" fill="#000"/>
+  <text x="260" y="106" fill="#000" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="84" font-weight="500" letter-spacing="-3">notFredoHub</text>
+  <text x="264" y="154" fill="#000" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="22" font-weight="500" letter-spacing="-0.8">Complete team management system for FredoCloud.</text>
+</svg>

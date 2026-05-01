@@ -20,10 +20,10 @@ describe("CommandPalette", () => {
     expect(screen.getByText("Command Palette")).toBeInTheDocument();
 
     fireEvent.change(screen.getByPlaceholderText("Search commands…"), {
-      target: { value: "dash" },
+      target: { value: "goal" },
     });
 
-    expect(screen.getByText("Dashboard")).toBeInTheDocument();
+    expect(screen.getByText("Goals")).toBeInTheDocument();
     expect(screen.queryByText("Register")).not.toBeInTheDocument();
   });
 });

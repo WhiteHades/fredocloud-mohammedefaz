@@ -1,3 +1,6 @@
+import Image from "next/image";
+
+import { AnimeIntro } from "@/components/app-shell/anime-intro";
 import { AuthForm } from "@/components/auth/auth-form";
 
 export const metadata = {
@@ -7,19 +10,32 @@ export const metadata = {
 export default function RegisterPage() {
   return (
     <main className="flex-1">
-      <section className="mx-auto grid min-h-screen max-w-7xl grid-cols-12 gap-[10px] px-4 py-16 md:px-8 md:py-24 lg:py-32">
-        <div className="col-span-12 md:col-span-7">
-          <AuthForm mode="register" />
-        </div>
-        <div className="col-span-12 border border-current p-[24px] md:col-span-5">
-          <p className="text-[11px] uppercase tracking-[-0.005em] opacity-60">
-            Identity
-          </p>
-          <p className="mt-[10px] text-[clamp(1.5rem,4vw,2.5rem)] font-medium leading-[0.95] tracking-[-0.02em]">
-            Create your workspace identity. One account, multiple workspaces.
-          </p>
-        </div>
-      </section>
+      <AnimeIntro>
+        <section className="mx-auto grid min-h-screen max-w-7xl grid-cols-12 gap-[10px] px-4 py-16 md:px-8 md:py-20 lg:py-24">
+          <div className="col-span-12 md:col-span-6" data-anime-item>
+            <AuthForm mode="register" />
+          </div>
+          <div className="col-span-12 nfh-panel md:col-span-6" data-anime-item>
+            <p className="nfh-eyebrow">Identity</p>
+            <div className="mt-[10px] overflow-hidden border border-current">
+              <Image
+                alt="notFredoHub brand lockup"
+                className="h-auto w-full object-cover"
+                src="/brand-lockup.png"
+                width={960}
+                height={240}
+                priority
+              />
+            </div>
+            <p className="mt-[10px] text-[clamp(1.5rem,4vw,2.5rem)] leading-[0.95] tracking-[-0.02em]">
+              Create your workspace identity. One account, multiple workspaces.
+            </p>
+            <p className="mt-[10px] text-[20px] leading-[1.1] tracking-[-0.009em] opacity-75">
+              Register, join a Workspace, and move directly into operational planning instead of a marketing funnel.
+            </p>
+          </div>
+        </section>
+      </AnimeIntro>
     </main>
   );
 }

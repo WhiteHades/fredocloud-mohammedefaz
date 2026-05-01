@@ -4,8 +4,15 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 const COMMANDS = [
-  { href: "/", label: "Home" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/", label: "Entry" },
+  { href: "/dashboard", label: "Overview" },
+  { href: "/dashboard/workspaces", label: "Workspaces" },
+  { href: "/dashboard/goals", label: "Goals" },
+  { href: "/dashboard/announcements", label: "Announcements" },
+  { href: "/dashboard/action-items", label: "Action Items" },
+  { href: "/dashboard/analytics", label: "Analytics" },
+  { href: "/dashboard/activity", label: "Activity" },
+  { href: "/dashboard/settings", label: "Settings" },
   { href: "/login", label: "Log in" },
   { href: "/register", label: "Register" },
 ];
