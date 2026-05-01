@@ -63,6 +63,8 @@ const STACK = [
   "Railway",
 ];
 
+const API_DOCS_URL = "https://fredocloud-mohammedefaz-production.up.railway.app/api/docs";
+
 export function LandingPage() {
   const user = useAuthStore((state) => state.user);
 
@@ -88,7 +90,7 @@ export function LandingPage() {
                 <span className="font-heading font-semibold tracking-[0.24em] text-white/80">notFredoHub</span>
                 <a href="#features" className="hidden text-white/70 transition hover:text-white md:block">Features</a>
                 <a href="#stack" className="hidden text-white/70 transition hover:text-white md:block">Stack</a>
-                <a href="/api/docs" target="_blank" rel="noreferrer" className="hidden text-white/70 transition hover:text-white md:block">API Docs</a>
+                <a href={API_DOCS_URL} target="_blank" rel="noreferrer" className="hidden text-white/70 transition hover:text-white md:block">API Docs</a>
                 {user ? (
                   <div className="ml-2 flex items-center gap-3">
                     <Link
@@ -138,7 +140,7 @@ export function LandingPage() {
                     </Link>
                   </Button>
                   <Button variant="outline" size="lg" asChild className="border-white/15 bg-black/30 text-white hover:bg-white/10 hover:text-white">
-                    <a href="/api/docs" target="_blank" rel="noreferrer">API Docs</a>
+                    <a href={API_DOCS_URL} target="_blank" rel="noreferrer">API Docs</a>
                   </Button>
                 </div>
               </div>
