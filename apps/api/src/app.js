@@ -43,7 +43,12 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.json());
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(specification));
+app.use("/api/docs", swaggerUi.serve, (request, _response, next) => {
+  if (!request.path.endsWith("/")) {
+    request.url = request.url.replace("/api/docs", "/api/docs/");
+  }
+  next();
+}, swaggerUi.setup(specification, { customSiteTitle: "notFredoHub API Docs" }));
 
 app.use("/api/action-items", actionItemActionsRouter);
 app.use("/api/auth", authRouter);
