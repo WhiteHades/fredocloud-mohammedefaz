@@ -132,7 +132,8 @@ describe("announcement routes", () => {
       .send({ emoji: "🔥" });
 
     expect(reactionResponse.statusCode).toBe(200);
-    expect(reactionResponse.body.reacted).toBe(true);
+    expect(Array.isArray(reactionResponse.body.reactions)).toBe(true);
+    expect(reactionResponse.body.reactions.some((r) => r.emoji === "🔥")).toBe(true);
 
     const commentResponse = await memberAgent
       .post(`/api/announcements/${announcementResponse.body.announcement.id}/comments`)

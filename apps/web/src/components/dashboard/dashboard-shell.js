@@ -337,8 +337,11 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
                 <SidebarMenuItem>
                   <Link href="/dashboard">
                     <div className="flex items-center gap-2 px-2 py-1.5 group-data-[collapsible=icon]:justify-center">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
-                        <span className="text-sm font-bold text-primary-foreground font-heading">nF</span>
+                      <div
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-primary-foreground font-heading"
+                        style={{ backgroundColor: activeMembership?.workspace.accentColor || "var(--primary)" }}
+                      >
+                        <span>nF</span>
                       </div>
                       <span className="text-lg font-semibold font-heading group-data-[collapsible=icon]:hidden">
                         notFredoHub
@@ -495,7 +498,7 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
               <SidebarTrigger />
               <Separator orientation="vertical" className="mx-1 h-full py-2" />
               <span
-                className="size-2.5 rounded-full border border-white/30 shadow-sm"
+                className="size-3 rounded-full ring-1 ring-border"
                 style={{ backgroundColor: activeMembership?.workspace.accentColor || "var(--primary)" }}
               />
               <span className="text-sm font-medium text-muted-foreground">

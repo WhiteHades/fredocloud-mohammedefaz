@@ -25,9 +25,9 @@ export function DashboardGoalsRoutePanel() {
 }
 
 export function DashboardAnnouncementsRoutePanel() {
-  const { activeMembership, realtimeVersion } = useDashboardContext();
+  const { activeMembership, lastRealtimeEvent } = useDashboardContext();
 
-  return <AnnouncementsPanel activeMembership={activeMembership || null} refreshKey={realtimeVersion} />;
+  return <AnnouncementsPanel activeMembership={activeMembership || null} lastRealtimeEvent={lastRealtimeEvent} />;
 }
 
 export function DashboardActionItemsRoutePanel() {

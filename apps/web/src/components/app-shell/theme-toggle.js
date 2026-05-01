@@ -1,52 +1,49 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback } from "react";
 import { useTheme } from "next-themes";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Sun, Moon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
-const THEME_LABELS = {
-  light: "Light",
-  dark: "Dark",
-  system: "System",
-};
-
-export function ThemeToggle({ align = "end", buttonClassName = "" }) {
+export function ThemeToggle({ className = "" }) {
   const { resolvedTheme, setTheme, theme } = useTheme();
 
-  const label = useMemo(() => {
-    if (theme === "system") {
-      return `System (${THEME_LABELS[resolvedTheme] || "Light"})`;
-    }
+  const cycle = useCallback(() => {
+    const order = ["light", "dark", "system"];
+    const current = order.indexOf(theme || "light");
+    setTheme(order[(current + 1) % order.length]);
+  }, [setTheme, theme]);
 
-    return THEME_LABELS[theme] || "Theme";
-  }, [resolvedTheme, theme]);
+  const isDark = resolvedTheme === "dark";
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className={buttonClassName}>
-          Theme: {label}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className="w-48">
-        <DropdownMenuLabel>Appearance</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuRadioGroup value={theme || "light"} onValueChange={setTheme}>
-          <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={cycle}
+      title={`Theme: ${isDark ? "Dark" : "Light"} (click to cycle)`}
+      className={className}
+    >
+      <span className="theme-toggle-icon relative flex size-5 items-center justify-center [--icon-swap-dur:350ms]">
+        <Sun
+          weight="fill"
+          className="theme-toggle-sun absolute inset-0 size-5 transition-all duration-[var(--icon-swap-dur)] ease-out"
+          style={{
+            opacity: isDark ? 0 : 1,
+            transform: isDark ? "scale(0.25) rotate(-90deg)" : "scale(1) rotate(0deg)",
+            filter: isDark ? "blur(2px)" : "blur(0)",
+          }}
+        />
+        <Moon
+          weight="fill"
+          className="theme-toggle-moon absolute inset-0 size-5 transition-all duration-[var(--icon-swap-dur)] ease-out"
+          style={{
+            opacity: isDark ? 1 : 0,
+            transform: isDark ? "scale(1) rotate(0deg)" : "scale(0.25) rotate(90deg)",
+            filter: isDark ? "blur(0)" : "blur(2px)",
+          }}
+        />
+      </span>
+    </Button>
   );
 }

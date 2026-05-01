@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { apiUrl } from "@/lib/runtime";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,16 +12,18 @@ import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Empty } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Megaphone, PushPin, Chat, Fire, HandHeart, CheckFat, ThumbsUp } from "@phosphor-icons/react";
 import { RichTextField } from "./rich-text-field";
 
 const EMOJI_REACTIONS = ["🔥", "👏", "✅", "📌"];
 
-export function AnnouncementsPanel({ activeMembership, refreshKey }) {
+export function AnnouncementsPanel({ activeMembership, lastRealtimeEvent }) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [error, setError] = useState("");
+  const pendingReactionsRef = useRef({});
 
   useEffect(() => {
     if (!activeMembership) return;
@@ -49,7 +51,17 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
     return () => {
       cancelled = true;
     };
-  }, [activeMembership, refreshKey]);
+  }, [activeMembership]);
+
+  useEffect(() => {
+    if (!lastRealtimeEvent || lastRealtimeEvent.type !== "announcement:reaction") return;
+    const { announcementId, reactions } = lastRealtimeEvent.payload || {};
+    if (!announcementId || !reactions) return;
+
+    setAnnouncements((prev) =>
+      prev.map((a) => (a.id === announcementId ? { ...a, reactions } : a))
+    );
+  }, [lastRealtimeEvent]);
 
   function handlePublish(e) {
     e.preventDefault();
@@ -115,8 +127,41 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
       });
   }
 
-  function handleReaction(id, emoji) {
-    fetch(`${apiUrl}/api/announcements/${id}/reactions`, {
+  function handleReaction(announcementId, emoji) {
+    const key = `${announcementId}:${emoji}`;
+    if (pendingReactionsRef.current[key]) return;
+    pendingReactionsRef.current[key] = true;
+
+    const prevAnnouncements = announcements;
+    const ann = announcements.find((a) => a.id === announcementId);
+    if (!ann) { delete pendingReactionsRef.current[key]; return; }
+
+    const existingReactions = ann.reactions || [];
+    const myReaction = existingReactions.find(
+      (r) => r.emoji === emoji && r.member?.id === activeMembership?.user?.id
+    );
+
+    const optimisticReactions = myReaction
+      ? existingReactions.filter((r) => r.id !== myReaction.id)
+      : [
+          ...existingReactions,
+          {
+            id: `optimistic_${key}_${Date.now()}`,
+            emoji,
+            createdAt: new Date().toISOString(),
+            member: {
+              id: activeMembership?.user?.id,
+              displayName: activeMembership?.user?.displayName,
+              email: activeMembership?.user?.email,
+            },
+          },
+        ];
+
+    setAnnouncements((prev) =>
+      prev.map((a) => (a.id === announcementId ? { ...a, reactions: optimisticReactions } : a))
+    );
+
+    fetch(`${apiUrl}/api/announcements/${announcementId}/reactions`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -124,8 +169,21 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
     })
       .then((r) => r.json())
       .then((data) => {
-        if (data.error) return;
-        setAnnouncements((prev) => prev.map((a) => (a.id === id ? { ...a, reactions: data.reactions } : a)));
+        if (data.error) {
+          setAnnouncements(prevAnnouncements);
+          return;
+        }
+        if (data.reactions) {
+          setAnnouncements((prev) =>
+            prev.map((a) => (a.id === announcementId ? { ...a, reactions: data.reactions } : a))
+          );
+        }
+      })
+      .catch(() => {
+        setAnnouncements(prevAnnouncements);
+      })
+      .finally(() => {
+        delete pendingReactionsRef.current[key];
       });
   }
 
@@ -199,11 +257,32 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
                 <Separator className="my-3" />
                 <div className="flex items-center gap-2 flex-wrap">
                   {EMOJI_REACTIONS.map((emoji) => {
-                    const count = (ann.reactions || []).filter((r) => r.emoji === emoji).length;
+                    const reactions = ann.reactions || [];
+                    const count = reactions.filter((r) => r.emoji === emoji).length;
+                    const reactedBy = reactions
+                      .filter((r) => r.emoji === emoji)
+                      .map((r) => r.member?.displayName || r.member?.email?.split("@")[0] || "Someone");
+
                     return (
-                      <Button key={emoji} variant="ghost" size="sm" onClick={() => handleReaction(ann.id, emoji)} className="text-base">
-                        {emoji} {count > 0 && <span className="ml-1 text-xs">{count}</span>}
-                      </Button>
+                      <Tooltip key={emoji}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleReaction(ann.id, emoji)}
+                            className="text-base hover:bg-accent"
+                          >
+                            {emoji}
+                            {count > 0 && <span className="ml-1 text-xs tabular-nums">{count}</span>}
+                          </Button>
+                        </TooltipTrigger>
+                        {count > 0 && (
+                          <TooltipContent side="top" className="max-w-[200px] text-xs">
+                            <p className="font-medium mb-0.5">{emoji}</p>
+                            <p className="text-muted-foreground">{reactedBy.join(", ")}</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
                     );
                   })}
                 </div>

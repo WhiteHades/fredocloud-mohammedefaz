@@ -29,6 +29,21 @@ function serializeAnnouncementComment(comment) {
   };
 }
 
+function serializeAnnouncementReactions(reactions) {
+  return (reactions || []).map((reaction) => ({
+    id: reaction.id,
+    emoji: reaction.emoji,
+    createdAt: reaction.createdAt,
+    member: reaction.membership?.user
+      ? {
+          id: reaction.membership.user.id,
+          displayName: reaction.membership.user.displayName,
+          email: reaction.membership.user.email,
+        }
+      : null,
+  }));
+}
+
 function serializeAnnouncement(announcement) {
   return {
     id: announcement.id,
@@ -38,7 +53,7 @@ function serializeAnnouncement(announcement) {
     createdAt: announcement.createdAt,
     updatedAt: announcement.updatedAt,
     comments: (announcement.comments || []).map(serializeAnnouncementComment),
-    reactions: announcement.reactions,
+    reactions: serializeAnnouncementReactions(announcement.reactions),
     attachments: announcement.attachments || [],
   };
 }
@@ -56,6 +71,11 @@ async function getAnnouncementContext(announcementId) {
         orderBy: { createdAt: "asc" },
       },
       reactions: {
+        include: {
+          membership: {
+            include: { user: true },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
       attachments: {
@@ -88,6 +108,11 @@ workspaceAnnouncementsRouter.get("/", requireAuth, async (request, response) => 
         orderBy: { createdAt: "asc" },
       },
       reactions: {
+        include: {
+          membership: {
+            include: { user: true },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
       attachments: {
@@ -133,7 +158,13 @@ workspaceAnnouncementsRouter.post("/", requireAuth, async (request, response) =>
           },
         },
       },
-      reactions: true,
+      reactions: {
+        include: {
+          membership: {
+            include: { user: true },
+          },
+        },
+      },
       attachments: true,
     },
   });
@@ -186,13 +217,13 @@ announcementActionsRouter.post("/:announcementId/reactions", requireAuth, async 
 
   if (existingReaction) {
     await prisma.announcementReaction.delete({ where: { id: existingReaction.id } });
+    const fresh = await getAnnouncementContext(announcement.id);
     emitWorkspaceEvent(announcement.workspaceId, "announcement:reaction", {
       workspaceId: announcement.workspaceId,
       announcementId: announcement.id,
-      reacted: false,
-      emoji,
+      reactions: serializeAnnouncementReactions(fresh.reactions),
     });
-    return response.status(200).json({ reacted: false });
+    return response.status(200).json({ reactions: serializeAnnouncementReactions(fresh.reactions) });
   }
 
   await prisma.announcementReaction.create({
@@ -203,14 +234,15 @@ announcementActionsRouter.post("/:announcementId/reactions", requireAuth, async 
     },
   });
 
+  const freshAnnouncement = await getAnnouncementContext(announcement.id);
+
   emitWorkspaceEvent(announcement.workspaceId, "announcement:reaction", {
     workspaceId: announcement.workspaceId,
     announcementId: announcement.id,
-    reacted: true,
-    emoji,
+    reactions: serializeAnnouncementReactions(freshAnnouncement.reactions),
   });
 
-  return response.status(200).json({ reacted: true });
+  return response.status(200).json({ reactions: serializeAnnouncementReactions(freshAnnouncement.reactions) });
 });
 
 announcementActionsRouter.patch("/:announcementId", requireAuth, async (request, response) => {
@@ -247,6 +279,11 @@ announcementActionsRouter.patch("/:announcementId", requireAuth, async (request,
         orderBy: { createdAt: "asc" },
       },
       reactions: {
+        include: {
+          membership: {
+            include: { user: true },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
       attachments: {
