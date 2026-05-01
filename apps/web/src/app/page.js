@@ -6,7 +6,7 @@ export default function Home() {
           <p className="text-xs uppercase tracking-[0.24em] text-stone-900/50 dark:text-stone-50/50">
             Collaborative Team Hub
           </p>
-          <h1 className="mt-6 max-w-[10ch] text-[clamp(3.25rem,10vw,7rem)] font-light leading-none tracking-tight text-balance">
+          <h1 className="mt-6 max-w-[12ch] text-[clamp(2.5rem,8vw,5rem)] font-light leading-[0.95] tracking-tight break-words">
             notFredoHub
           </h1>
           <p className="mt-6 max-w-[60ch] text-base leading-relaxed text-stone-900/70 dark:text-stone-50/70 md:text-lg">
@@ -58,7 +58,7 @@ export default function Home() {
           <div className="mt-10 grid gap-4 text-sm leading-relaxed text-stone-50/80">
             <a
               className="min-h-[44px] border border-stone-50/30 px-4 py-3 transition hover:bg-stone-50/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-50"
-              href="http://localhost:4000/api/health"
+              href="https://fredocloud-mohammedefaz-production.up.railway.app/api/health"
               target="_blank"
               rel="noreferrer"
             >

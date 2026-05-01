@@ -17,17 +17,31 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_URL || "https://notfredohub.mohammedefaz.com",
+  ),
   title: "notFredoHub",
   description: "Complete team management system for FredoCloud.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon.svg",
-    apple: "/icon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180" },
+    ],
   },
   openGraph: {
     title: "notFredoHub",
     description: "Complete team management system for FredoCloud.",
-    images: "/icon.svg",
+    images: [
+      {
+        url: "/icon-512.png",
+        width: 512,
+        height: 512,
+      },
+    ],
   },
 };
 
