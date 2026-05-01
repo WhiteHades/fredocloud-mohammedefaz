@@ -5,7 +5,8 @@
 - Date observed: 2026-05-01
 - Command: `railway project list --json`
 - Result: `Unauthorized. Please run railway login again.` after an OAuth refresh failure (`invalid_grant`).
-- Resolution: user re-authenticated with `railway login`, so Railway provisioning and deployment work can continue.
+- Follow-up: user re-authenticated manually, but the agent shell still reports `Unauthorized` and `railway login --browserless` refuses to run in non-interactive mode.
+- Impact: live Railway project creation, service wiring, and final public URLs are still blocked from this agent session even though the local codebase is otherwise deployment-ready.
 
 ## Cloudinary runtime verification
 
