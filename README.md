@@ -29,9 +29,9 @@ A full-stack workspace application where teams manage shared goals, post announc
 
 | Service | URL |
 |---|---|
-| Web | [`https://web-production-7acc2.up.railway.app`](https://web-production-7acc2.up.railway.app) |
-| API | [`https://fredocloud-mohammedefaz-production.up.railway.app`](https://fredocloud-mohammedefaz-production.up.railway.app) |
-| Swagger | [`/api/docs`](https://fredocloud-mohammedefaz-production.up.railway.app/api/docs) |
+| Web | [`https://notfredohub.mohammedefaz.com`](https://notfredohub.mohammedefaz.com) |
+| API | [`https://api.notfredohub.mohammedefaz.com`](https://api.notfredohub.mohammedefaz.com) |
+| Swagger | [`/api/docs`](https://api.notfredohub.mohammedefaz.com/api/docs) |
 
 **Demo login:** `demo@notfredohub.test` / `demo12345`
 
