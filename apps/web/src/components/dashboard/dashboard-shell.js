@@ -68,6 +68,7 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
   const [workspaceError, setWorkspaceError] = useState("");
   const [onlineUserIds, setOnlineUserIds] = useState([]);
   const [realtimeVersion, setRealtimeVersion] = useState(0);
+  const [lastRealtimeEvent, setLastRealtimeEvent] = useState(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSendingInvitation, setIsSendingInvitation] = useState(false);
   const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
@@ -180,18 +181,21 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
     socket.on("workspace:presence", ({ workspaceId, onlineUserIds: ids }) => {
       if (workspaceId === activeMembership?.workspace.id) setOnlineUserIds(ids);
     });
-    const bumpRealtime = () => setRealtimeVersion((v) => v + 1);
+    const bumpRealtime = (eventName, payload) => {
+      setRealtimeVersion((v) => v + 1);
+      setLastRealtimeEvent({ type: eventName, payload });
+    };
     [
       "goal:created", "goal:milestone_created", "goal:update_posted",
       "announcement:created", "announcement:updated", "announcement:reaction", "announcement:comment_created",
       "action_item:created", "action_item:updated",
     ].forEach((eventName) => {
-      socket.on(eventName, ({ workspaceId }) => {
-        if (workspaceId === activeMembership?.workspace.id) bumpRealtime();
+      socket.on(eventName, (data) => {
+        if (data.workspaceId === activeMembership?.workspace.id) bumpRealtime(eventName, data);
       });
     });
-    socket.on("notification:created", ({ userId, workspaceId }) => {
-      if (userId === currentUser.id && workspaceId === activeMembership?.workspace.id) bumpRealtime();
+    socket.on("notification:created", (data) => {
+      if (data.userId === currentUser.id && data.workspaceId === activeMembership?.workspace.id) bumpRealtime("notification:created", data);
     });
     return () => { socket.disconnect(); };
   }, [activeMembership?.workspace.id, currentUser?.id, socketToken]);
@@ -307,6 +311,7 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
     onlineUserIds,
     pendingInvitations: workspaceInvitations,
     realtimeVersion,
+    lastRealtimeEvent,
     refreshWorkspaceShell,
     mergeWorkspaceUpdate,
     setDashboardUser,
