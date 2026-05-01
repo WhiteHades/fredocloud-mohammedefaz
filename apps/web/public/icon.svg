@@ -1,5 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
-  <rect width="128" height="128" rx="32" fill="#d4510a"/>
-  <path d="M36 44h56v8H52v16h32v8H52v16h40v8H36V44z" fill="#fff"/>
-  <circle cx="96" cy="44" r="12" fill="#fdf2e9"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#d4510a"/>
+      <stop offset="1" stop-color="#e8782a"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="30" fill="url(#bg)"/>
+  <text x="30" y="90" font-family="system-ui,-apple-system,sans-serif" font-size="66" font-weight="700" fill="#fff" letter-spacing="-0.02em">nF</text>
 </svg>

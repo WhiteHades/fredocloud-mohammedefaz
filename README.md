@@ -7,7 +7,7 @@
 
 <h1 align="center">notFredoHub</h1>
 
-<p align="center">Complete team management system for FredoCloud.</p>
+<p align="center">Collaborative team hub — workspaces, goals, announcements, and action items in real time.</p>
 
 <br>
 
@@ -29,9 +29,9 @@
 - Email/password authentication with cookie JWT sessions
 - Multi-workspace creation, switching, invitations, and role-based membership
 - Goals with nested milestones and progress updates
-- Announcements with rich text, pinning, reactions, and comments
+- Announcements with rich text, pinning, reactions, comments, and file attachments
 - Action items with list and kanban views
-- Live workspace presence, live panel refresh via Socket.io
+- Live workspace presence, realtime panel refresh via Socket.io
 - Mention notifications with in-app delivery
 - Analytics dashboard with completion chart (Recharts) and CSV export
 
@@ -40,7 +40,7 @@
 - Immutable audit timeline with CSV export
 
 **Bonus:**
-- Dark/light theme via system preference
+- Dark/light theme with system preference detection
 - Email notifications (Nodemailer hooks)
 - Command palette (`Ctrl+K`)
 - Unit & integration tests (Jest + Supertest + RTL)
@@ -131,7 +131,7 @@ Open [`http://localhost:3000`](http://localhost:3000) and log in with `demo@notf
 | `JWT_ACCESS_SECRET` | Yes | JWT signing |
 | `JWT_REFRESH_SECRET` | Yes | JWT signing |
 | `CLIENT_URL` | Yes | CORS origin |
-| `CLOUDINARY_CLOUD_NAME` | No | Avatar upload |
+| `CLOUDINARY_CLOUD_NAME` | No | Avatar and attachment upload |
 | `SMTP_HOST` | No | Email delivery |
 
 Full list in `apps/api/.env.example`.
@@ -149,8 +149,9 @@ Full list in `apps/api/.env.example`.
 
 - **Design system:** shadcn/ui Luma (Radix primitives)
 - **Layout:** Collapsible sidebar with workspace switcher, card-based dashboard grid
-- **Theme:** System-aware dark/light mode via next-themes, OKLCH color system
-- **Animations:** Staggered entrance via anime.js, transitions-dev CSS
+- **Theme:** Light, dark, and system appearance with visible toggle, OKLCH color system
+- **Fonts:** Geist (headings), IBM Plex Sans (body), Geist Mono (code)
+- **Animations:** transitions-dev CSS transitions, anime.js entrance animations
 - **Icons:** Phosphor Icons (consistent stroke style)
 
 ## Known limitations

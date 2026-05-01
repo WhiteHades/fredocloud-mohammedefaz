@@ -24,6 +24,7 @@ import {
 } from "@phosphor-icons/react";
 
 const COMMANDS = [
+  { href: "/", label: "Home", icon: House },
   { href: "/dashboard", label: "Overview", icon: House },
   { href: "/dashboard/workspaces", label: "Workspaces", icon: Buildings },
   { href: "/dashboard/goals", label: "Goals", icon: Target },

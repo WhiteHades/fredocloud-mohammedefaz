@@ -11,9 +11,10 @@ const ibmPlexSans = IBM_Plex_Sans({
   weight: ["400", "500", "600", "700"],
 });
 
-const geistMonoHeading = Geist_Mono({
+const geistSansHeading = Geist({
   subsets: ["latin"],
   variable: "--font-heading",
+  weight: ["500", "600", "700"],
 });
 
 const fontMono = Geist_Mono({
@@ -29,7 +30,7 @@ export const metadata = {
     default: "notFredoHub",
     template: "%s | notFredoHub",
   },
-  description: "Collaborative team hub for FredoCloud — goals, announcements, and action items in real time.",
+  description: "Collaborative team hub — shared workspaces, goals, announcements, action items, realtime presence, and analytics.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -40,7 +41,7 @@ export const metadata = {
   },
   openGraph: {
     title: "notFredoHub",
-    description: "Collaborative team hub for FredoCloud.",
+    description: "Collaborative team hub for shared workspaces and realtime planning.",
     images: [{ url: "/brand-banner.png", width: 1600, height: 900 }],
   },
 };
@@ -50,7 +51,7 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${ibmPlexSans.variable} ${geistMonoHeading.variable} ${fontMono.variable} antialiased`}
+      className={`${ibmPlexSans.variable} ${geistSansHeading.variable} ${fontMono.variable} antialiased`}
     >
       <body>
         <Providers>

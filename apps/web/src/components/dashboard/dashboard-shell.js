@@ -64,7 +64,8 @@ import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview", icon: House },
+  { href: "/", label: "Home", icon: House },
+  { href: "/dashboard", label: "Overview", icon: ChartBar },
   { href: "/dashboard/workspaces", label: "Workspaces", icon: Buildings },
   { href: "/dashboard/goals", label: "Goals", icon: Target },
   { href: "/dashboard/announcements", label: "Announcements", icon: Megaphone },
@@ -412,7 +413,7 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {NAV_ITEMS.map((item) => {
-                      const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+                      const isActive = item.href === "/" ? pathname === "/" : pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
                       const Icon = item.icon;
                       return (
                         <SidebarMenuItem key={item.href}>

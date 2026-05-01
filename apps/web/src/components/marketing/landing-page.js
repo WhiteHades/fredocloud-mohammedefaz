@@ -11,8 +11,10 @@ import {
   SignIn,
   Target,
   UserPlus,
+  House,
 } from "@phosphor-icons/react";
 
+import { useAuthStore } from "@/stores/auth-store";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +42,7 @@ const FEATURE_CARDS = [
   },
   {
     title: "Realtime presence and notifications",
-    description: "Mentions, presence, and activity feel immediate, so the product behaves like a live hub instead of a static CRUD shell.",
+    description: "Mentions, presence, and activity feel immediate, so the product behaves like a live hub instead of a static shell.",
     icon: ActivityIcon,
   },
   {
@@ -62,6 +64,8 @@ const STACK = [
 ];
 
 export function LandingPage() {
+  const user = useAuthStore((state) => state.user);
+
   return (
     <main className="bg-black text-white">
       <section className="px-4 pb-4 pt-4 md:px-6 md:pb-6">
@@ -77,7 +81,6 @@ export function LandingPage() {
           </video>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_40%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/80" />
-          <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] [background-size:4rem_4rem]" />
 
           <div className="relative z-10 flex min-h-[92svh] flex-col">
             <header className="px-4 pt-4 md:px-6 md:pt-6">
@@ -85,46 +88,57 @@ export function LandingPage() {
                 <span className="font-heading font-semibold tracking-[0.24em] text-white/80">notFredoHub</span>
                 <a href="#features" className="hidden text-white/70 transition hover:text-white md:block">Features</a>
                 <a href="#stack" className="hidden text-white/70 transition hover:text-white md:block">Stack</a>
-                <a href="/api/docs" className="hidden text-white/70 transition hover:text-white md:block">API Docs</a>
-                <div className="ml-2 flex items-center gap-2">
-                  <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 hover:text-white">
-                    <Link href="/login">
-                      <SignIn data-icon="inline-start" /> Log in
+                <a href="/api/docs" target="_blank" rel="noreferrer" className="hidden text-white/70 transition hover:text-white md:block">API Docs</a>
+                {user ? (
+                  <div className="ml-2 flex items-center gap-3">
+                    <Link
+                      href="/dashboard"
+                      className="flex items-center gap-1.5 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs text-white/90 transition hover:bg-white/10 hover:text-white"
+                    >
+                      <House className="size-3.5" />
+                      {user.displayName || user.email}
                     </Link>
-                  </Button>
-                  <Button size="sm" asChild>
-                    <Link href="/register">
-                      <UserPlus data-icon="inline-start" /> Register
-                    </Link>
-                  </Button>
-                </div>
+                  </div>
+                ) : (
+                  <div className="ml-2 flex items-center gap-2">
+                    <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 hover:text-white">
+                      <Link href="/login">
+                        <SignIn data-icon="inline-start" /> Log in
+                      </Link>
+                    </Button>
+                    <Button size="sm" asChild>
+                      <Link href="/register">
+                        <UserPlus data-icon="inline-start" /> Register
+                      </Link>
+                    </Button>
+                  </div>
+                )}
               </div>
             </header>
 
-            <div className="mt-auto grid gap-8 px-6 pb-8 pt-16 md:grid-cols-12 md:px-10 md:pb-10 lg:px-14 lg:pb-14">
-              <div className="md:col-span-8">
+            <div className="mt-auto flex flex-col gap-8 px-6 pb-8 pt-16 md:grid md:grid-cols-12 md:px-10 md:pb-10 lg:px-14 lg:pb-14">
+              <div className="md:col-span-8 lg:col-span-7">
                 <div className="mb-6 flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary" className="border-white/10 bg-white/10 text-white">FredoCloud Assessment Build</Badge>
-                  <Badge variant="outline" className="border-white/15 bg-black/20 text-white/80">Realtime Team Hub</Badge>
+                  <Badge variant="secondary" className="border-white/10 bg-white/10 text-white">Collaborative Team Hub</Badge>
+                  <Badge variant="outline" className="border-white/15 bg-black/20 text-white/80">Realtime Planning</Badge>
                 </div>
-                <h1 className="font-heading text-[20vw] leading-[0.82] tracking-[-0.08em] text-[#f4f0e6] sm:text-[16vw] md:text-[10rem] lg:text-[12rem]">
+                <h1 className="font-heading text-[14vw] leading-[0.88] tracking-[-0.06em] text-[#f4f0e6] sm:text-[12vw] md:text-[7rem] lg:text-[9rem]">
                   notFredoHub
                 </h1>
               </div>
 
-              <div className="md:col-span-4 md:pb-6">
-                <p className="max-w-md text-sm leading-7 text-white/76 md:text-right">
-                  A collaborative team hub for shared workspaces, goals, announcements, action items, realtime presence,
-                  auditability, and fast decision-making. Built to feel more like a living product than a take-home shell.
+              <div className="md:col-span-4 lg:col-span-5 md:self-end md:pb-2 md:pt-10">
+                <p className="text-sm leading-7 text-white/76 md:text-right">
+                  A collaborative team hub for shared workspaces, goals, announcements, action items, realtime presence, and fast decision-making.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3 md:justify-end">
                   <Button size="lg" asChild>
-                    <Link href="/login">
-                      <SignIn data-icon="inline-start" /> Open the App
+                    <Link href={user ? "/dashboard" : "/login"}>
+                      <SignIn data-icon="inline-start" /> {user ? "Dashboard" : "Open the App"}
                     </Link>
                   </Button>
                   <Button variant="outline" size="lg" asChild className="border-white/15 bg-black/30 text-white hover:bg-white/10 hover:text-white">
-                    <a href="/api/docs">Swagger Docs</a>
+                    <a href="/api/docs" target="_blank" rel="noreferrer">API Docs</a>
                   </Button>
                 </div>
               </div>
@@ -136,13 +150,12 @@ export function LandingPage() {
       <section className="px-4 py-24 md:px-6" id="features">
         <div className="mx-auto max-w-6xl space-y-12">
           <div className="max-w-3xl space-y-4">
-            <Badge variant="outline" className="border-white/10 bg-white/5 text-white/70">What ships</Badge>
-            <h2 className="font-heading text-4xl tracking-tight text-[#f4f0e6] md:text-5xl">
-              Everything the assignment asked for, shaped into one cohesive product surface.
+            <Badge variant="outline" className="border-white/10 bg-white/5 text-white/70">Product features</Badge>
+            <h2 className="font-heading text-3xl tracking-tight text-[#f4f0e6] md:text-4xl">
+              Collaboration primitives kept close together in one cohesive surface.
             </h2>
             <p className="text-base leading-8 text-white/68">
-              The product keeps collaboration primitives close together: goals, announcements, action items, notifications,
-              presence, analytics, exports, and permission-aware workspace management.
+              Workspaces, goals, announcements, action items, notifications, presence, analytics, exports, and permission-aware management.
             </p>
           </div>
 
@@ -172,10 +185,9 @@ export function LandingPage() {
         <div className="mx-auto grid max-w-6xl gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
           <Card className="border-white/10 bg-[#111111] text-white shadow-none">
             <CardHeader>
-              <CardTitle className="font-heading text-3xl text-[#f4f0e6]">Built on the exact stack FredoCloud asked for.</CardTitle>
+              <CardTitle className="font-heading text-3xl text-[#f4f0e6]">Built on a modern full-stack stack.</CardTitle>
               <CardDescription className="text-sm leading-7 text-white/62">
-                Turborepo monorepo, Next.js frontend, Express API, Prisma/Postgres data layer, Zustand state, Socket.IO, Cloudinary,
-                Railway deployment, and Recharts analytics.
+                Turborepo monorepo, Next.js frontend, Express API, Prisma/Postgres data layer, Zustand state, Socket.IO, Cloudinary, Railway deployment, and Recharts analytics.
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-3 sm:grid-cols-2">
@@ -189,15 +201,15 @@ export function LandingPage() {
 
           <Card className="border-white/10 bg-white/[0.04] text-white shadow-none">
             <CardHeader>
-              <CardTitle className="font-heading text-2xl text-[#f4f0e6]">Polish that matters</CardTitle>
+              <CardTitle className="font-heading text-2xl text-[#f4f0e6]">Product polish</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-sm leading-7 text-white/68">
               <p>Light, dark, and system appearance controls.</p>
-              <p>Command palette navigation, audit export, workspace export, and recruiter-friendly seeded demo flows.</p>
-              <p>Dashboard interactions tuned to feel immediate instead of route-refresh heavy.</p>
+              <p>Command palette navigation, audit and workspace CSV exports, and seeded demo flows.</p>
+              <p>Dashboard interactions tuned to feel immediate, with realtime updates baked in.</p>
               <div className="pt-2">
                 <Button asChild>
-                  <Link href="/dashboard">Go to Dashboard</Link>
+                  <Link href={user ? "/dashboard" : "/login"}>{user ? "Go to Dashboard" : "Try the demo"}</Link>
                 </Button>
               </div>
             </CardContent>
