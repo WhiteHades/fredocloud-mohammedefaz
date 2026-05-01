@@ -71,7 +71,7 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
           <div className="nfh-subpanel">
             <p className="nfh-eyebrow">Goal Completion</p>
             <div className="mt-[10px] h-80 min-w-0">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={240}>
                 <BarChart data={analytics.goalCompletion} margin={{ top: 8, right: 16, left: -8, bottom: 8 }}>
                   <CartesianGrid strokeDasharray="2 6" stroke="currentColor" opacity={0.2} />
                   <XAxis dataKey="name" tickLine={false} axisLine={false} />
