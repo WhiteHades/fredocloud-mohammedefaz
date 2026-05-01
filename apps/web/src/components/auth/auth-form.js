@@ -50,31 +50,35 @@ export function AuthForm({ mode }) {
       payload.displayName = formData.get("displayName");
     }
 
-    const response = await fetch(copy.action, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(copy.action, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
 
-    const data = await response.json().catch(() => ({}));
+      const data = await response.json().catch(() => ({}));
 
-    if (!response.ok) {
-      setError(data.error || "The request could not be completed.");
+      if (!response.ok) {
+        setError(data.error || "The request could not be completed.");
+        setIsPending(false);
+        return;
+      }
+
+      setUser(data.user);
+
+      startTransition(() => {
+        router.push("/dashboard");
+        router.refresh();
+      });
+    } catch {
+      setError("The server could not be reached. Check your connection and try again.");
+    } finally {
       setIsPending(false);
-      return;
     }
-
-    setUser(data.user);
-
-    startTransition(() => {
-      router.push("/dashboard");
-      router.refresh();
-    });
-
-    setIsPending(false);
   }
 
   return (
@@ -85,7 +89,7 @@ export function AuthForm({ mode }) {
       <h1 className="mt-6 max-w-[14ch] text-4xl font-light leading-tight tracking-tight text-balance md:text-5xl">
         {copy.heading}
       </h1>
-      <form className="mt-8 grid gap-4" onSubmit={handleSubmit}>
+      <form className="mt-8 grid gap-4" action={copy.action} method="POST" onSubmit={handleSubmit}>
         {mode === "register" ? (
           <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
             Display name

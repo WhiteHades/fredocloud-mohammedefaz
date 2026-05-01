@@ -20,11 +20,24 @@ const { workspacesRouter } = require("./modules/workspaces/workspaces.routes");
 const { config } = require("./lib/env");
 const { specification } = require("./lib/openapi");
 
+const allowedOrigins = [
+  config.clientUrl,
+  "https://web-production-7acc2.up.railway.app",
+  "https://notfredohub.mohammedefaz.com",
+  "http://localhost:3000",
+];
+
 const app = express();
 
 app.use(
   cors({
-    origin: config.clientUrl,
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
@@ -53,7 +66,7 @@ app.get("/api/health", (_request, response) => {
 });
 
 app.get("/", (_request, response) => {
-  response.redirect(301, "https://web-production-7acc2.up.railway.app");
+  response.redirect(301, config.clientUrl);
 });
 
 module.exports = { app };
