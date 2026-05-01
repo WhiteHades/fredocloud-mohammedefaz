@@ -1,5 +1,6 @@
 const { Router } = require("express");
 
+const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
 const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
@@ -77,6 +78,15 @@ goalsRouter.post("/", requireAuth, async (request, response) => {
     },
   });
 
+  await recordAuditEvent({
+    workspaceId: request.params.workspaceId,
+    actorMembershipId: membership.id,
+    action: "goal.created",
+    targetType: "goal",
+    targetId: goal.id,
+    summary: `Created goal ${goal.title}`,
+  });
+
   return response.status(201).json({ goal: serializeGoal(goal) });
 });
 
@@ -140,6 +150,15 @@ goalDetailRouter.post("/:goalId/milestones", requireAuth, async (request, respon
     },
   });
 
+  await recordAuditEvent({
+    workspaceId: goal.workspaceId,
+    actorMembershipId: membership.id,
+    action: "milestone.created",
+    targetType: "milestone",
+    targetId: milestone.id,
+    summary: `Added milestone ${milestone.title}`,
+  });
+
   return response.status(201).json({ milestone });
 });
 
@@ -168,6 +187,15 @@ goalDetailRouter.post("/:goalId/updates", requireAuth, async (request, response)
       authorMembershipId: membership.id,
       content,
     },
+  });
+
+  await recordAuditEvent({
+    workspaceId: goal.workspaceId,
+    actorMembershipId: membership.id,
+    action: "goal.update_posted",
+    targetType: "goal_update",
+    targetId: update.id,
+    summary: `Posted a progress update on ${goal.title}`,
   });
 
   return response.status(201).json({ update });

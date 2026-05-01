@@ -1,5 +1,6 @@
 const { Router } = require("express");
 
+const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
 const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
@@ -88,6 +89,15 @@ workspaceAnnouncementsRouter.post("/", requireAuth, async (request, response) =>
     },
   });
 
+  await recordAuditEvent({
+    workspaceId: request.params.workspaceId,
+    actorMembershipId: membership.id,
+    action: "announcement.created",
+    targetType: "announcement",
+    targetId: announcement.id,
+    summary: `Published announcement ${announcement.title}`,
+  });
+
   return response.status(201).json({ announcement: serializeAnnouncement(announcement) });
 });
 
@@ -170,6 +180,15 @@ announcementActionsRouter.patch("/:announcementId", requireAuth, async (request,
     },
   });
 
+  await recordAuditEvent({
+    workspaceId: announcement.workspaceId,
+    actorMembershipId: membership.id,
+    action: "announcement.updated",
+    targetType: "announcement",
+    targetId: announcement.id,
+    summary: `${nextPinnedState ? "Pinned" : "Updated"} announcement ${updatedAnnouncement.title}`,
+  });
+
   return response.status(200).json({ announcement: serializeAnnouncement(updatedAnnouncement) });
 });
 
@@ -198,6 +217,15 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
       authorMembershipId: membership.id,
       content,
     },
+  });
+
+  await recordAuditEvent({
+    workspaceId: announcement.workspaceId,
+    actorMembershipId: membership.id,
+    action: "announcement.comment_created",
+    targetType: "announcement_comment",
+    targetId: comment.id,
+    summary: `Commented on announcement ${announcement.title}`,
   });
 
   return response.status(201).json({ comment });

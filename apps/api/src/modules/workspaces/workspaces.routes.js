@@ -1,5 +1,6 @@
 const { Router } = require("express");
 
+const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
 const {
   getWorkspaceAccess,
@@ -82,6 +83,15 @@ workspacesRouter.post("/", requireAuth, async (request, response) => {
 
   const membership = workspace.memberships[0];
 
+  await recordAuditEvent({
+    workspaceId: workspace.id,
+    actorMembershipId: membership.id,
+    action: "workspace.created",
+    targetType: "workspace",
+    targetId: workspace.id,
+    summary: `Created workspace ${workspace.name}`,
+  });
+
   return response.status(201).json({
     workspace: serializeMembership(membership).workspace,
     membership: {
@@ -112,6 +122,15 @@ workspacesRouter.post("/:workspaceId/invitations", requireAuth, async (request, 
       workspaceId: request.params.workspaceId,
       invitedByMembershipId: membership.id,
     },
+  });
+
+  await recordAuditEvent({
+    workspaceId: request.params.workspaceId,
+    actorMembershipId: membership.id,
+    action: "invitation.created",
+    targetType: "invitation",
+    targetId: invitation.id,
+    summary: `Invited ${invitation.email} as ${invitation.role}`,
   });
 
   return response.status(201).json({ invitation });
@@ -199,6 +218,15 @@ workspacesRouter.post("/invitations/:invitationId/accept", requireAuth, async (r
     },
   });
 
+  await recordAuditEvent({
+    workspaceId: invitation.workspaceId,
+    actorMembershipId: membership.id,
+    action: "invitation.accepted",
+    targetType: "membership",
+    targetId: membership.id,
+    summary: `${user.email} accepted the invitation`,
+  });
+
   return response.status(200).json({
     membership: {
       id: membership.id,
@@ -247,6 +275,16 @@ workspacesRouter.patch(
         user: true,
         workspace: true,
       },
+    });
+
+    await recordAuditEvent({
+      workspaceId: request.params.workspaceId,
+      actorMembershipId: membership.id,
+      action: "permission.updated",
+      targetType: "membership",
+      targetId: updatedMembership.id,
+      summary: `Updated ${permission} for ${updatedMembership.user.email}`,
+      metadata: { permission, allowed },
     });
 
     return response.status(200).json({ membership: serializeMembership(updatedMembership) });

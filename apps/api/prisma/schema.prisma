@@ -77,6 +77,7 @@ model Workspace {
   goals       Goal[]
   announcements Announcement[]
   actionItems ActionItem[]
+  auditEvents AuditEvent[]
 }
 
 model Membership {
@@ -96,6 +97,7 @@ model Membership {
   announcementComments AnnouncementComment[]
   announcementReactions AnnouncementReaction[]
   assignedActionItems ActionItem[] @relation("ActionItemAssignee")
+  auditEvents AuditEvent[] @relation("AuditActor")
 
   @@unique([userId, workspaceId])
 }
@@ -228,4 +230,18 @@ model ActionItem {
   workspace           Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   goal                Goal?              @relation(fields: [goalId], references: [id], onDelete: SetNull)
   assigneeMembership  Membership?        @relation("ActionItemAssignee", fields: [assigneeMembershipId], references: [id], onDelete: SetNull)
+}
+
+model AuditEvent {
+  id                 String      @id @default(cuid())
+  workspaceId        String
+  actorMembershipId  String?
+  action             String
+  targetType         String
+  targetId           String
+  summary            String
+  metadata           Json?
+  createdAt          DateTime    @default(now())
+  workspace          Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  actorMembership    Membership? @relation("AuditActor", fields: [actorMembershipId], references: [id], onDelete: SetNull)
 }

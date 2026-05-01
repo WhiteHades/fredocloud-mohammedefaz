@@ -6,6 +6,7 @@ const {
   actionItemActionsRouter,
   workspaceActionItemsRouter,
 } = require("./modules/action-items/action-items.routes");
+const { workspaceAuditRouter } = require("./modules/audit/audit.routes");
 const { authRouter } = require("./modules/auth/auth.routes");
 const {
   announcementActionsRouter,
@@ -31,6 +32,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/announcements", announcementActionsRouter);
 app.use("/api/goals", goalDetailRouter);
 app.use("/api/workspaces/:workspaceId/action-items", workspaceActionItemsRouter);
+app.use("/api/workspaces/:workspaceId/audit-events", workspaceAuditRouter);
 app.use("/api/workspaces/:workspaceId/announcements", workspaceAnnouncementsRouter);
 app.use("/api/workspaces/:workspaceId/goals", goalsRouter);
 app.use("/api/workspaces", workspacesRouter);
