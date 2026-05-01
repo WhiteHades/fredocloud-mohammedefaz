@@ -7,7 +7,7 @@ require("dotenv").config({ path: require("path").resolve(__dirname, "../.env"), 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
-const demoUserEmail = process.env.DEMO_EMAIL || "demo@fredohub.test";
+const demoUserEmail = process.env.DEMO_EMAIL || "demo@notfredohub.test";
 const demoPassword = process.env.DEMO_PASSWORD || "demo12345";
 
 async function main() {
@@ -30,7 +30,7 @@ async function main() {
     where: {
       userId: user.id,
       workspace: {
-        name: "FredoHub Demo Workspace",
+        name: "notFredoHub Demo Workspace",
       },
     },
   });
@@ -38,7 +38,7 @@ async function main() {
   if (!existingMembership) {
     const workspace = await prisma.workspace.create({
       data: {
-        name: "FredoHub Demo Workspace",
+        name: "notFredoHub Demo Workspace",
         description: "Seeded workspace for evaluator review.",
         accentColor: "#c8102e",
         createdById: user.id,
@@ -93,7 +93,7 @@ async function main() {
       data: {
         workspaceId: workspace.id,
         authorMembershipId: membership.id,
-        title: "Welcome to FredoHub",
+        title: "Welcome to notFredoHub",
         content: "This seeded workspace exists so evaluators can inspect the main surfaces without manual setup.",
         pinned: true,
       },

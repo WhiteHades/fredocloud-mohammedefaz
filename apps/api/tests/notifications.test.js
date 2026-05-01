@@ -30,7 +30,7 @@ describe("notification routes", () => {
     const adminAgent = request.agent(app);
 
     await adminAgent.post("/api/auth/register").send({
-      email: "notify-admin@fredohub.test",
+      email: "notify-admin@notfredohub.test",
       password: "password123",
       displayName: "Notify Admin",
     });
@@ -44,7 +44,7 @@ describe("notification routes", () => {
     const invitationResponse = await adminAgent
       .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
       .send({
-        email: "notify-member@fredohub.test",
+        email: "notify-member@notfredohub.test",
         role: "MEMBER",
       });
 
@@ -58,7 +58,7 @@ describe("notification routes", () => {
     const memberAgent = request.agent(app);
 
     await memberAgent.post("/api/auth/register").send({
-      email: "notify-member@fredohub.test",
+      email: "notify-member@notfredohub.test",
       password: "password123",
       displayName: "Notify Member",
     });

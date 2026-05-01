@@ -1,4 +1,4 @@
-const CACHE_NAME = "fredohub-shell-v1";
+const CACHE_NAME = "notfredohub-shell-v1";
 const SHELL_ROUTES = ["/", "/login", "/register", "/dashboard"];
 
 self.addEventListener("install", (event) => {

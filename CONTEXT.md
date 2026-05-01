@@ -1,6 +1,6 @@
-# FredoHub
+# notFredoHub
 
-FredoHub is a collaborative team hub for planning work inside shared workspaces. It exists to keep goals, announcements, action items, notifications, and audit history in one place without splitting the team across separate tools.
+notFredoHub is a collaborative team hub for planning work inside shared workspaces. It exists to keep goals, announcements, action items, notifications, and audit history in one place without splitting the team across separate tools.
 
 ## Language
 

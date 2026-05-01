@@ -80,7 +80,7 @@ export function AuthForm({ mode }) {
   return (
     <div className="border border-stone-200 bg-stone-100 p-6 dark:border-stone-800 dark:bg-stone-900 md:p-8">
       <p className="text-xs uppercase tracking-[0.24em] text-stone-900/45 dark:text-stone-50/45">
-        FredoHub Authentication
+        notFredoHub Authentication
       </p>
       <h1 className="mt-6 max-w-[14ch] text-4xl font-light leading-tight tracking-tight text-balance md:text-5xl">
         {copy.heading}

@@ -1,6 +1,6 @@
-# FredoHub
+# notFredoHub
 
-FredoHub is a Swiss-styled collaborative team hub built for the FredoCloud technical assessment. It keeps workspaces, goals, announcements, action items, audit history, notifications, and live presence in one monorepo with a separate Next.js frontend and Express API.
+notFredoHub is a Swiss-styled collaborative team hub built for the FredoCloud technical assessment. It keeps workspaces, goals, announcements, action items, audit history, notifications, and live presence in one monorepo with a separate Next.js frontend and Express API.
 
 ## What Was Built
 
@@ -62,7 +62,7 @@ packages/
 2. Start a local PostgreSQL instance if you are not using Railway yet:
 
 ```bash
-docker run -d --name fredohub-postgres -e POSTGRES_DB=fredohub -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16
+docker run -d --name notfredohub-postgres -e POSTGRES_DB=notfredohub -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:16
 ```
 
 3. Copy environment examples if needed:
@@ -129,7 +129,7 @@ See `apps/web/.env.example`.
 
 ## Demo Account
 
-- Email: `demo@fredohub.test`
+- Email: `demo@notfredohub.test`
 - Password: `demo12345`
 
 The local seed script creates a demo workspace with a goal, milestones, an announcement, and action items.

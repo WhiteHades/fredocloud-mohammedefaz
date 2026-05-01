@@ -1,7 +1,7 @@
 export default function manifest() {
   return {
-    name: "FredoHub",
-    short_name: "FredoHub",
+    name: "notFredoHub",
+    short_name: "notFredoHub",
     description: "Collaborative team hub for workspaces, goals, announcements, and action items.",
     start_url: "/dashboard",
     display: "standalone",

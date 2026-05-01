@@ -29,7 +29,7 @@ describe("analytics routes", () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "analytics@fredohub.test",
+      email: "analytics@notfredohub.test",
       password: "password123",
       displayName: "Analytics Owner",
     });

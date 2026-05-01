@@ -7,7 +7,7 @@ export default function Home() {
             Collaborative Team Hub
           </p>
           <h1 className="mt-6 max-w-[10ch] text-[clamp(3.25rem,10vw,7rem)] font-light leading-none tracking-tight text-balance">
-            FredoHub
+            notFredoHub
           </h1>
           <p className="mt-6 max-w-[60ch] text-base leading-relaxed text-stone-900/70 dark:text-stone-50/70 md:text-lg">
             A workspace for goals, announcements, and action items, built on a strict grid, a disciplined colour system, and a live collaboration core.

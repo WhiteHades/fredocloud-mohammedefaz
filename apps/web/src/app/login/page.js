@@ -1,7 +1,7 @@
 import { AuthForm } from "@/components/auth/auth-form";
 
 export const metadata = {
-  title: "Log in | FredoHub",
+  title: "Log in | notFredoHub",
 };
 
 export default function LoginPage() {

@@ -3,7 +3,7 @@ import { requireSessionUser } from "@/lib/auth-server";
 import { getPendingInvitations, getWorkspaceMemberships } from "@/lib/workspace-server";
 
 export const metadata = {
-  title: "Dashboard | FredoHub",
+  title: "Dashboard | notFredoHub",
 };
 
 export default async function DashboardPage() {

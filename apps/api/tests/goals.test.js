@@ -24,7 +24,7 @@ describe("goal routes", () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "goals@fredohub.test",
+      email: "goals@notfredohub.test",
       password: "password123",
       displayName: "Goal Owner",
     });
@@ -60,7 +60,7 @@ describe("goal routes", () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "detail-goals@fredohub.test",
+      email: "detail-goals@notfredohub.test",
       password: "password123",
       displayName: "Goal Detail Owner",
     });

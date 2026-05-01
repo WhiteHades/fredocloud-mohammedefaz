@@ -28,7 +28,7 @@ describe("rbac routes", () => {
     const adminAgent = request.agent(app);
 
     await adminAgent.post("/api/auth/register").send({
-      email: "rbac-admin@fredohub.test",
+      email: "rbac-admin@notfredohub.test",
       password: "password123",
       displayName: "RBAC Admin",
     });
@@ -42,14 +42,14 @@ describe("rbac routes", () => {
     const invitationResponse = await adminAgent
       .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
       .send({
-        email: "rbac-member@fredohub.test",
+        email: "rbac-member@notfredohub.test",
         role: "MEMBER",
       });
 
     const memberAgent = request.agent(app);
 
     await memberAgent.post("/api/auth/register").send({
-      email: "rbac-member@fredohub.test",
+      email: "rbac-member@notfredohub.test",
       password: "password123",
       displayName: "RBAC Member",
     });
@@ -69,7 +69,7 @@ describe("rbac routes", () => {
       `/api/workspaces/${workspaceResponse.body.workspace.id}/members`,
     );
     const memberRecord = membersResponse.body.memberships.find(
-      (membership) => membership.user.email === "rbac-member@fredohub.test",
+      (membership) => membership.user.email === "rbac-member@notfredohub.test",
     );
 
     const permissionResponse = await adminAgent

@@ -192,7 +192,7 @@ authRouter.post("/avatar", requireAuth, upload.single("file"), async (request, r
   }
 
   const uploadResult = await uploadImageBuffer(request.file.buffer, {
-    folder: "fredohub/avatars",
+    folder: "notfredohub/avatars",
     public_id: `user_${request.auth.userId}_${Date.now()}`,
     overwrite: true,
     resource_type: "image",

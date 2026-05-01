@@ -29,7 +29,7 @@ describe("AuthForm", () => {
       json: async () => ({
         user: {
           id: "user_1",
-          email: "new@fredohub.test",
+          email: "new@notfredohub.test",
           displayName: "New User",
         },
       }),
@@ -47,7 +47,7 @@ describe("AuthForm", () => {
       target: { value: "New User" },
     });
     fireEvent.change(screen.getByLabelText("Email"), {
-      target: { value: "new@fredohub.test" },
+      target: { value: "new@notfredohub.test" },
     });
     fireEvent.change(screen.getByLabelText("Password"), {
       target: { value: "password123" },
@@ -56,7 +56,7 @@ describe("AuthForm", () => {
 
     await waitFor(() => {
       expect(mockSetUser).toHaveBeenCalledWith(
-        expect.objectContaining({ email: "new@fredohub.test" }),
+        expect.objectContaining({ email: "new@notfredohub.test" }),
       );
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });

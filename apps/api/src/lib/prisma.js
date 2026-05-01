@@ -11,10 +11,10 @@ function createPrismaClient() {
   return new PrismaClient({ adapter });
 }
 
-const prisma = globalForPrisma.__fredohubPrisma || createPrismaClient();
+const prisma = globalForPrisma.__notfredohubPrisma || createPrismaClient();
 
 if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.__fredohubPrisma = prisma;
+  globalForPrisma.__notfredohubPrisma = prisma;
 }
 
 module.exports = { prisma };

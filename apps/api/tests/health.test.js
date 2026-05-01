@@ -8,7 +8,7 @@ describe("GET /api/health", () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body.ok).toBe(true);
-    expect(response.body.name).toBe("FredoHub API");
+    expect(response.body.name).toBe("notFredoHub API");
     expect(typeof response.body.timestamp).toBe("string");
   });
 });

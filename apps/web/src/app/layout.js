@@ -17,7 +17,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  title: "FredoHub",
+  title: "notFredoHub",
   description: "A Swiss-styled collaborative team hub for goals, announcements, and action items.",
   manifest: "/manifest.webmanifest",
 };

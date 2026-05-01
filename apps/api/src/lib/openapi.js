@@ -4,7 +4,7 @@ const specification = swaggerJsdoc({
   definition: {
     openapi: "3.0.3",
     info: {
-      title: "FredoHub API",
+      title: "notFredoHub API",
       version: "0.1.0",
       description: "Collaborative team hub API for authentication, workspaces, planning, broadcast, and analytics.",
     },

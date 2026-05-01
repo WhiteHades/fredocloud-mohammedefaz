@@ -21,7 +21,7 @@ describe("workspace routes", () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "workspaces@fredohub.test",
+      email: "workspaces@notfredohub.test",
       password: "password123",
       displayName: "Workspace Admin",
     });
@@ -48,7 +48,7 @@ describe("workspace routes", () => {
     const adminAgent = request.agent(app);
 
     await adminAgent.post("/api/auth/register").send({
-      email: "admin@fredohub.test",
+      email: "admin@notfredohub.test",
       password: "password123",
       displayName: "Admin User",
     });
@@ -62,17 +62,17 @@ describe("workspace routes", () => {
     const invitationResponse = await adminAgent
       .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
       .send({
-        email: "member@fredohub.test",
+        email: "member@notfredohub.test",
         role: "MEMBER",
       });
 
     expect(invitationResponse.statusCode).toBe(201);
-    expect(invitationResponse.body.invitation.email).toBe("member@fredohub.test");
+    expect(invitationResponse.body.invitation.email).toBe("member@notfredohub.test");
 
     const memberAgent = request.agent(app);
 
     await memberAgent.post("/api/auth/register").send({
-      email: "member@fredohub.test",
+      email: "member@notfredohub.test",
       password: "password123",
       displayName: "Member User",
     });
@@ -95,7 +95,7 @@ describe("workspace routes", () => {
     const adminAgent = request.agent(app);
 
     await adminAgent.post("/api/auth/register").send({
-      email: "listing-admin@fredohub.test",
+      email: "listing-admin@notfredohub.test",
       password: "password123",
       displayName: "Listing Admin",
     });
@@ -109,14 +109,14 @@ describe("workspace routes", () => {
     await adminAgent
       .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
       .send({
-        email: "pending@fredohub.test",
+        email: "pending@notfredohub.test",
         role: "MEMBER",
       });
 
     const memberAgent = request.agent(app);
 
     await memberAgent.post("/api/auth/register").send({
-      email: "pending@fredohub.test",
+      email: "pending@notfredohub.test",
       password: "password123",
       displayName: "Pending Member",
     });
@@ -132,7 +132,7 @@ describe("workspace routes", () => {
     const adminAgent = request.agent(app);
 
     await adminAgent.post("/api/auth/register").send({
-      email: "guard-admin@fredohub.test",
+      email: "guard-admin@notfredohub.test",
       password: "password123",
       displayName: "Guard Admin",
     });
@@ -146,14 +146,14 @@ describe("workspace routes", () => {
     await adminAgent
       .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
       .send({
-        email: "guard-member@fredohub.test",
+        email: "guard-member@notfredohub.test",
         role: "MEMBER",
       });
 
     const memberAgent = request.agent(app);
 
     await memberAgent.post("/api/auth/register").send({
-      email: "guard-member@fredohub.test",
+      email: "guard-member@notfredohub.test",
       password: "password123",
       displayName: "Guard Member",
     });
@@ -166,7 +166,7 @@ describe("workspace routes", () => {
     const forbiddenResponse = await memberAgent
       .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
       .send({
-        email: "blocked@fredohub.test",
+        email: "blocked@notfredohub.test",
         role: "MEMBER",
       });
 

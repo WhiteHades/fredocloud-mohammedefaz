@@ -28,7 +28,7 @@ describe("action item routes", () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "tasks@fredohub.test",
+      email: "tasks@notfredohub.test",
       password: "password123",
       displayName: "Task Owner",
     });

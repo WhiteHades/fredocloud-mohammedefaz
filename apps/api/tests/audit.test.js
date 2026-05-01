@@ -29,7 +29,7 @@ describe("audit routes", () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "audit@fredohub.test",
+      email: "audit@notfredohub.test",
       password: "password123",
       displayName: "Audit Admin",
     });

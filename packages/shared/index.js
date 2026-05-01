@@ -1,4 +1,4 @@
-const APP_NAME = "FredoHub";
+const APP_NAME = "notFredoHub";
 
 const WORKSPACE_ROLES = {
   ADMIN: "ADMIN",

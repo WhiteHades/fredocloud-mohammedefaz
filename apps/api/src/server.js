@@ -10,5 +10,5 @@ const server = http.createServer(app);
 attachRealtime(server, config.clientUrl);
 
 server.listen(port, () => {
-  console.log(`FredoHub API listening on ${port}`);
+  console.log(`notFredoHub API listening on ${port}`);
 });

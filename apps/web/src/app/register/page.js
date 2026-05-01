@@ -1,7 +1,7 @@
 import { AuthForm } from "@/components/auth/auth-form";
 
 export const metadata = {
-  title: "Register | FredoHub",
+  title: "Register | notFredoHub",
 };
 
 export default function RegisterPage() {

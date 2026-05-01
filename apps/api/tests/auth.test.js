@@ -21,32 +21,32 @@ describe("auth routes", () => {
     const agent = request.agent(app);
 
     const registerResponse = await agent.post("/api/auth/register").send({
-      email: "founder@fredohub.test",
+      email: "founder@notfredohub.test",
       password: "password123",
       displayName: "Founding Member",
     });
 
     expect(registerResponse.statusCode).toBe(201);
-    expect(registerResponse.body.user.email).toBe("founder@fredohub.test");
+    expect(registerResponse.body.user.email).toBe("founder@notfredohub.test");
     expect(registerResponse.body.user.displayName).toBe("Founding Member");
     expect(registerResponse.headers["set-cookie"]).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("fredohub_access_token="),
-        expect.stringContaining("fredohub_refresh_token="),
+        expect.stringContaining("notfredohub_access_token="),
+        expect.stringContaining("notfredohub_refresh_token="),
       ]),
     );
 
     const currentUserResponse = await agent.get("/api/auth/me");
 
     expect(currentUserResponse.statusCode).toBe(200);
-    expect(currentUserResponse.body.user.email).toBe("founder@fredohub.test");
+    expect(currentUserResponse.body.user.email).toBe("founder@notfredohub.test");
   });
 
   it("refreshes the cookie session and keeps the user signed in", async () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "refresh@fredohub.test",
+      email: "refresh@notfredohub.test",
       password: "password123",
       displayName: "Refresh User",
     });
@@ -56,22 +56,22 @@ describe("auth routes", () => {
     expect(refreshResponse.statusCode).toBe(200);
     expect(refreshResponse.headers["set-cookie"]).toEqual(
       expect.arrayContaining([
-        expect.stringContaining("fredohub_access_token="),
-        expect.stringContaining("fredohub_refresh_token="),
+        expect.stringContaining("notfredohub_access_token="),
+        expect.stringContaining("notfredohub_refresh_token="),
       ]),
     );
 
     const currentUserResponse = await agent.get("/api/auth/me");
 
     expect(currentUserResponse.statusCode).toBe(200);
-    expect(currentUserResponse.body.user.email).toBe("refresh@fredohub.test");
+    expect(currentUserResponse.body.user.email).toBe("refresh@notfredohub.test");
   });
 
   it("logs out the user and clears the current session", async () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "logout@fredohub.test",
+      email: "logout@notfredohub.test",
       password: "password123",
       displayName: "Logout User",
     });
@@ -89,7 +89,7 @@ describe("auth routes", () => {
     const agent = request.agent(app);
 
     await agent.post("/api/auth/register").send({
-      email: "profile@fredohub.test",
+      email: "profile@notfredohub.test",
       password: "password123",
       displayName: "Profile User",
     });

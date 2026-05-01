@@ -27,7 +27,7 @@ describe("announcement routes", () => {
     const adminAgent = request.agent(app);
 
     await adminAgent.post("/api/auth/register").send({
-      email: "announce-admin@fredohub.test",
+      email: "announce-admin@notfredohub.test",
       password: "password123",
       displayName: "Announcement Admin",
     });
@@ -61,7 +61,7 @@ describe("announcement routes", () => {
     const adminAgent = request.agent(app);
 
     await adminAgent.post("/api/auth/register").send({
-      email: "pin-admin@fredohub.test",
+      email: "pin-admin@notfredohub.test",
       password: "password123",
       displayName: "Pin Admin",
     });
@@ -91,7 +91,7 @@ describe("announcement routes", () => {
     const adminAgent = request.agent(app);
 
     await adminAgent.post("/api/auth/register").send({
-      email: "social-admin@fredohub.test",
+      email: "social-admin@notfredohub.test",
       password: "password123",
       displayName: "Social Admin",
     });
@@ -105,7 +105,7 @@ describe("announcement routes", () => {
     const invitationResponse = await adminAgent
       .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
       .send({
-        email: "social-member@fredohub.test",
+        email: "social-member@notfredohub.test",
         role: "MEMBER",
       });
 
@@ -119,7 +119,7 @@ describe("announcement routes", () => {
     const memberAgent = request.agent(app);
 
     await memberAgent.post("/api/auth/register").send({
-      email: "social-member@fredohub.test",
+      email: "social-member@notfredohub.test",
       password: "password123",
       displayName: "Social Member",
     });

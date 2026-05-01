@@ -1,5 +1,5 @@
 {
-  "name": "fredohub",
+  "name": "notfredohub",
   "private": true,
   "workspaces": [
     "apps/*",

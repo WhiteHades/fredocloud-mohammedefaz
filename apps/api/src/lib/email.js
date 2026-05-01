@@ -51,7 +51,7 @@ async function sendInvitationEmail({ to, workspaceName, inviterName }) {
   return sendEmail({
     to,
     subject: `Invitation to join ${workspaceName}`,
-    text: `${inviterName} invited you to join ${workspaceName} in FredoHub. Sign in with this email to accept the invitation.`,
+    text: `${inviterName} invited you to join ${workspaceName} in notFredoHub. Sign in with this email to accept the invitation.`,
   });
 }
 

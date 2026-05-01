@@ -47,7 +47,7 @@ app.use("/api/workspaces", workspacesRouter);
 app.get("/api/health", (_request, response) => {
   response.json({
     ok: true,
-    name: "FredoHub API",
+    name: "notFredoHub API",
     timestamp: new Date().toISOString(),
   });
 });
