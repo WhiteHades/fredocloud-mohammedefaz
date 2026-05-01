@@ -12,7 +12,6 @@ import {
   UploadSimple,
 } from "@phosphor-icons/react";
 
-import { APP_NAME } from "@notfredohub/shared";
 import { apiUrl } from "@/lib/runtime";
 import { apiFetch } from "@/lib/api";
 import { NAV_ITEMS } from "@/lib/navigation";
@@ -500,7 +499,7 @@ export function DashboardShell({ children, user, memberships, pendingInvitations
                 style={{ backgroundColor: activeMembership?.workspace.accentColor || "var(--primary)" }}
               />
               <span className="text-sm font-medium text-muted-foreground">
-                {activeMembership?.workspace.name || APP_NAME}
+                {activeMembership?.workspace.name || "notFredoHub"}
               </span>
               <div className="ml-auto">
                 <ThemeToggle />

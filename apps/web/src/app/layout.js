@@ -1,5 +1,4 @@
 import { Geist, Geist_Mono, IBM_Plex_Sans } from "next/font/google";
-import { APP_NAME } from "@notfredohub/shared";
 
 import { Providers } from "@/components/app-shell/providers";
 import { CommandPalette } from "@/components/app-shell/command-palette";
@@ -28,8 +27,8 @@ export const metadata = {
     process.env.NEXT_PUBLIC_URL || "https://notfredohub.mohammedefaz.com"
   ),
   title: {
-    default: APP_NAME,
-    template: "%s | " + APP_NAME,
+    default: "notFredoHub",
+    template: "%s | notFredoHub",
   },
   description: "Collaborative team hub — shared workspaces, goals, announcements, action items, realtime presence, and analytics.",
   manifest: "/manifest.webmanifest",
@@ -41,7 +40,7 @@ export const metadata = {
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   openGraph: {
-    title: APP_NAME,
+    title: "notFredoHub",
     description: "Collaborative team hub for shared workspaces and realtime planning.",
     images: [{ url: "/brand-banner.png", width: 1600, height: 900 }],
   },
