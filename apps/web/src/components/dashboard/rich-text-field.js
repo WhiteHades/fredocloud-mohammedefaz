@@ -21,9 +21,9 @@ export function RichTextField({ defaultValue = "", name, label, minHeight = "160
   }
 
   return (
-    <div className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-      <span>{label}</span>
-      <div className="flex flex-wrap gap-2">
+    <div className="nfh-stack">
+      <span className="nfh-eyebrow">{label}</span>
+      <div className="flex flex-wrap gap-[10px]">
         {[
           ["bold", "Bold"],
           ["italic", "Italic"],
@@ -31,7 +31,7 @@ export function RichTextField({ defaultValue = "", name, label, minHeight = "160
         ].map(([command, buttonLabel]) => (
           <button
             key={command}
-            className="min-h-[36px] border border-stone-300 px-3 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-stone-900 hover:text-stone-50 dark:border-stone-700 dark:hover:bg-stone-50 dark:hover:text-stone-950"
+            className="nfh-chip"
             onClick={(event) => {
               event.preventDefault();
               applyCommand(command);
@@ -44,7 +44,7 @@ export function RichTextField({ defaultValue = "", name, label, minHeight = "160
       </div>
       <div
         ref={editorRef}
-        className="border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+        className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
         contentEditable
         dangerouslySetInnerHTML={{ __html: defaultValue }}
         onBlur={syncValue}

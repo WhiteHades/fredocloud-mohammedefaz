@@ -78,27 +78,23 @@ export function PermissionsPanel({ activeMembership }) {
   }
 
   return (
-    <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
-      <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-        Permission Matrix
-      </p>
-      <div className="mt-4 grid gap-4">
+    <div className="nfh-panel t-panel-slide" data-open="true">
+      <p className="nfh-eyebrow">Permission Matrix</p>
+      <div className="mt-[10px] grid gap-[10px]">
         {memberships.map((membership) => (
-          <div key={membership.id} className="border border-stone-200 p-4 dark:border-stone-800">
-            <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
-              {membership.role}
-            </p>
-            <p className="mt-3 text-xl font-light tracking-tight">
+          <div key={membership.id} className="nfh-subpanel">
+            <p className="nfh-eyebrow">{membership.role}</p>
+            <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">
               {membership.user?.displayName || membership.user?.email}
             </p>
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-[10px] flex flex-wrap gap-[10px]">
               {MANAGEABLE_PERMISSIONS.map((permission) => (
                 <button
                   key={permission}
-                  className={`min-h-[44px] border px-3 py-2 text-xs uppercase tracking-[0.2em] transition ${
+                  className={`nfh-chip ${
                     membership.permissions?.[permission]
-                      ? "border-stone-900 bg-stone-900 text-stone-50 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950"
-                      : "border-stone-300 text-stone-900 hover:bg-stone-900 hover:text-stone-50 dark:border-stone-700 dark:text-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950"
+                      ? "nfh-chip-active"
+                      : ""
                   }`}
                   onClick={() =>
                     handleTogglePermission(
@@ -115,11 +111,7 @@ export function PermissionsPanel({ activeMembership }) {
             </div>
           </div>
         ))}
-        {permissionError ? (
-          <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
-            {permissionError}
-          </p>
-        ) : null}
+        {permissionError ? <p className="nfh-error">{permissionError}</p> : null}
       </div>
     </div>
   );

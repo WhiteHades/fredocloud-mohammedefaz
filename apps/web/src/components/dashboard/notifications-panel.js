@@ -35,25 +35,23 @@ export function NotificationsPanel({ activeWorkspace, refreshKey }) {
   }
 
   return (
-    <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
-      <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-        Notifications
-      </p>
-      <div className="mt-4 grid gap-3">
+    <div className="nfh-panel t-panel-slide" data-open="true">
+      <p className="nfh-eyebrow">Notifications</p>
+      <div className="mt-[10px] grid gap-[10px]">
         {notifications.length ? (
           notifications.map((notification) => (
-            <div key={notification.id} className="border border-stone-200 px-3 py-3 dark:border-stone-800">
-              <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
-                {notification.type}
+            <div key={notification.id} className="nfh-subpanel">
+              <p className="nfh-eyebrow">{notification.type}</p>
+              <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">
+                {notification.title}
               </p>
-              <p className="mt-2 text-base text-stone-900 dark:text-stone-50">{notification.title}</p>
-              <p className="mt-2 text-sm text-stone-900/70 dark:text-stone-50/70">
+              <p className="mt-[10px] text-[11px] uppercase tracking-[-0.005em] opacity-70">
                 {notification.body}
               </p>
             </div>
           ))
         ) : (
-          <p className="text-sm text-stone-900/60 dark:text-stone-50/60">No notifications yet.</p>
+          <p className="nfh-muted">No notifications yet.</p>
         )}
       </div>
     </div>

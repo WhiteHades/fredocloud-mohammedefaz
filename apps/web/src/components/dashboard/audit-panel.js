@@ -42,13 +42,11 @@ export function AuditPanel({ activeMembership, refreshKey }) {
   }
 
   return (
-    <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-          Audit Timeline
-        </p>
+    <div className="nfh-panel t-panel-slide" data-open="true">
+      <div className="flex items-center justify-between gap-[10px]">
+        <p className="nfh-eyebrow">Audit Timeline</p>
         <a
-          className="min-h-[44px] border border-stone-900 px-3 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+          className="nfh-pill"
           href={`${apiUrl}/api/workspaces/${activeMembership.workspace.id}/audit-events/export`}
           target="_blank"
           rel="noreferrer"
@@ -56,28 +54,20 @@ export function AuditPanel({ activeMembership, refreshKey }) {
           Export CSV
         </a>
       </div>
-      <div className="mt-4 grid gap-3">
+      <div className="mt-[10px] grid gap-[10px]">
         {auditEvents.map((event) => (
-          <div key={event.id} className="border border-stone-200 p-4 dark:border-stone-800">
-            <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
-              {event.action}
-            </p>
-            <p className="mt-3 text-xl font-light tracking-tight">{event.summary}</p>
-            <p className="mt-2 text-sm text-stone-900/60 dark:text-stone-50/60">
+          <div key={event.id} className="nfh-subpanel">
+            <p className="nfh-eyebrow">{event.action}</p>
+            <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">{event.summary}</p>
+            <p className="mt-[10px] nfh-muted">
               {new Date(event.createdAt).toLocaleString()}
             </p>
           </div>
         ))}
         {!auditEvents.length ? (
-          <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
-            No audit events yet.
-          </p>
+          <p className="nfh-muted">No audit events yet.</p>
         ) : null}
-        {auditError ? (
-          <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
-            {auditError}
-          </p>
-        ) : null}
+        {auditError ? <p className="nfh-error">{auditError}</p> : null}
       </div>
     </div>
   );

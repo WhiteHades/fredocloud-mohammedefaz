@@ -119,17 +119,15 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
   }
 
   return (
-    <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-          Action Items
-        </p>
-        <div className="flex gap-2">
+    <div className="nfh-panel t-panel-slide" data-open="true">
+      <div className="flex items-center justify-between gap-[10px]">
+        <p className="nfh-eyebrow">Action Items</p>
+        <div className="flex gap-[10px]">
           <button
-            className={`min-h-[44px] border px-3 py-2 text-xs uppercase tracking-[0.2em] transition ${
+            className={`nfh-chip ${
               viewMode === "list"
-                ? "border-stone-900 bg-stone-900 text-stone-50 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950"
-                : "border-stone-300 text-stone-900 hover:bg-stone-900 hover:text-stone-50 dark:border-stone-700 dark:text-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950"
+                ? "nfh-chip-active"
+                : ""
             }`}
             onClick={() => setViewMode("list")}
             type="button"
@@ -137,10 +135,10 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
             List
           </button>
           <button
-            className={`min-h-[44px] border px-3 py-2 text-xs uppercase tracking-[0.2em] transition ${
+            className={`nfh-chip ${
               viewMode === "board"
-                ? "border-stone-900 bg-stone-900 text-stone-50 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950"
-                : "border-stone-300 text-stone-900 hover:bg-stone-900 hover:text-stone-50 dark:border-stone-700 dark:text-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950"
+                ? "nfh-chip-active"
+                : ""
             }`}
             onClick={() => setViewMode("board")}
             type="button"
@@ -149,28 +147,24 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
           </button>
         </div>
       </div>
-      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-        <div className="grid gap-3">
+      <div className="mt-[10px] grid gap-[10px] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <div className="grid gap-[10px]">
           {viewMode === "list" ? (
             actionItems.length ? (
               actionItems.map((actionItem) => (
-                <div key={actionItem.id} className="border border-stone-200 p-4 dark:border-stone-800">
-                  <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
-                    {actionItem.status} · {actionItem.priority}
+                <div key={actionItem.id} className="nfh-subpanel">
+                  <p className="nfh-eyebrow">
+                    {actionItem.status.replaceAll("_", " ")} · {actionItem.priority}
                   </p>
-                  <p className="mt-3 text-xl font-light tracking-tight">{actionItem.title}</p>
-                  <p className="mt-2 text-sm text-stone-900/70 dark:text-stone-50/70">
+                  <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">{actionItem.title}</p>
+                  <p className="mt-[10px] nfh-muted">
                     {actionItem.goalId ? "Linked to a goal." : "No goal linked yet."}
                   </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-[10px] flex flex-wrap gap-[10px]">
                     {["TODO", "IN_PROGRESS", "BLOCKED", "DONE"].map((status) => (
                       <button
                         key={status}
-                        className={`min-h-[44px] border px-3 py-2 text-xs uppercase tracking-[0.2em] transition ${
-                          actionItem.status === status
-                            ? "border-stone-900 bg-stone-900 text-stone-50 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950"
-                            : "border-stone-300 text-stone-900 hover:bg-stone-900 hover:text-stone-50 dark:border-stone-700 dark:text-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950"
-                        }`}
+                        className={`nfh-chip ${actionItem.status === status ? "nfh-chip-active" : ""}`}
                         onClick={() => handleStatusChange(actionItem.id, status)}
                         type="button"
                       >
@@ -181,32 +175,30 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
-                No action items yet.
-              </p>
+              <p className="nfh-muted">No action items yet.</p>
             )
           ) : (
-            <div className="grid gap-4 xl:grid-cols-4">
+            <div className="grid gap-[10px] xl:grid-cols-4">
               {Object.entries(boardColumns).map(([status, items]) => (
-                <div key={status} className="border border-stone-200 p-4 dark:border-stone-800">
-                  <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
+                <div key={status} className="nfh-subpanel">
+                  <p className="nfh-eyebrow">
                     {status.replace("_", " ")}
                   </p>
-                  <div className="mt-4 grid gap-3">
+                  <div className="mt-[10px] grid gap-[10px]">
                     {items.length ? (
                       items.map((actionItem) => (
-                        <div key={actionItem.id} className="border border-stone-200 px-3 py-3 dark:border-stone-800">
-                          <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
+                        <div key={actionItem.id} className="border border-current px-[16px] py-[14px]">
+                          <p className="nfh-eyebrow">
                             {actionItem.priority}
                           </p>
-                          <p className="mt-2 text-base font-light tracking-tight text-stone-900 dark:text-stone-50">
+                          <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">
                             {actionItem.title}
                           </p>
-                          <div className="mt-3 flex flex-wrap gap-2">
+                          <div className="mt-[10px] flex flex-wrap gap-[10px]">
                             {["TODO", "IN_PROGRESS", "BLOCKED", "DONE"].map((nextStatus) => (
                               <button
                                 key={nextStatus}
-                                className="min-h-[36px] border border-stone-300 px-2 py-1 text-[10px] uppercase tracking-[0.16em] transition hover:bg-stone-900 hover:text-stone-50 dark:border-stone-700 dark:hover:bg-stone-50 dark:hover:text-stone-950"
+                                className={`nfh-chip ${actionItem.status === nextStatus ? "nfh-chip-active" : ""}`}
                                 onClick={() => handleStatusChange(actionItem.id, nextStatus)}
                                 type="button"
                               >
@@ -217,7 +209,7 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
                         </div>
                       ))
                     ) : (
-                      <p className="text-sm text-stone-900/60 dark:text-stone-50/60">No items.</p>
+                      <p className="nfh-muted">No items.</p>
                     )}
                   </div>
                 </div>
@@ -225,34 +217,32 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
             </div>
           )}
           {isLoadingActionItems ? (
-            <p className="text-sm text-stone-900/60 dark:text-stone-50/60">Loading action items…</p>
+            <p className="nfh-muted">Loading action items…</p>
           ) : null}
         </div>
-        <form className="grid gap-4 border border-stone-200 p-4 dark:border-stone-800" onSubmit={handleCreateActionItem}>
-          <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-            Create Action Item
-          </p>
-          <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-            Title
+        <form className="nfh-subpanel nfh-stack" onSubmit={handleCreateActionItem}>
+          <p className="nfh-eyebrow">Create Action Item</p>
+          <label className="nfh-label">
+            <span className="nfh-eyebrow">Title</span>
             <input
-              className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+              className="nfh-input outline-none focus:ring-2 focus:ring-accent"
               name="title"
               required
               type="text"
             />
           </label>
-          <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-            Description
+          <label className="nfh-label">
+            <span className="nfh-eyebrow">Description</span>
             <textarea
-              className="min-h-[112px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+              className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
               name="description"
             />
           </label>
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-              Status
+          <div className="nfh-divider-grid nfh-divider-grid-2">
+            <label className="nfh-label">
+              <span className="nfh-eyebrow">Status</span>
               <select
-                className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                className="nfh-select outline-none focus:ring-2 focus:ring-accent"
                 defaultValue="TODO"
                 name="status"
               >
@@ -262,10 +252,10 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
                 <option value="DONE">Done</option>
               </select>
             </label>
-            <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-              Priority
+            <label className="nfh-label">
+              <span className="nfh-eyebrow">Priority</span>
               <select
-                className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                className="nfh-select outline-none focus:ring-2 focus:ring-accent"
                 defaultValue="MEDIUM"
                 name="priority"
               >
@@ -276,19 +266,19 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
               </select>
             </label>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-              Due date
+          <div className="nfh-divider-grid nfh-divider-grid-2">
+            <label className="nfh-label">
+              <span className="nfh-eyebrow">Due date</span>
               <input
-                className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                className="nfh-input outline-none focus:ring-2 focus:ring-accent"
                 name="dueDate"
                 type="date"
               />
             </label>
-            <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-              Parent goal
+            <label className="nfh-label">
+              <span className="nfh-eyebrow">Parent goal</span>
               <select
-                className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                className="nfh-select outline-none focus:ring-2 focus:ring-accent"
                 defaultValue=""
                 name="goalId"
               >
@@ -301,13 +291,9 @@ export function ActionItemsPanel({ activeWorkspace, refreshKey }) {
               </select>
             </label>
           </div>
-          {actionItemError ? (
-            <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
-              {actionItemError}
-            </p>
-          ) : null}
+          {actionItemError ? <p className="nfh-error">{actionItemError}</p> : null}
           <button
-            className="min-h-[44px] border border-stone-900 bg-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] text-stone-50 transition hover:bg-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950 dark:hover:bg-stone-200 dark:focus-visible:ring-stone-50"
+            className="nfh-pill"
             disabled={isCreatingActionItem}
             type="submit"
           >

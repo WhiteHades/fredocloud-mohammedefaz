@@ -201,134 +201,110 @@ export function GoalsPanel({ activeWorkspace, refreshKey }) {
   const selectedGoal = detailGoal || goals.find((goal) => goal.id === selectedGoalId) || null;
 
   return (
-    <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
-      <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-        Goals
-      </p>
+    <div className="nfh-panel t-panel-slide" data-open="true">
+      <p className="nfh-eyebrow">Goals</p>
       {activeWorkspace ? (
-        <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-          <div className="grid gap-3">
+        <div className="mt-[10px] grid gap-[10px] lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+          <div className="grid gap-[10px]">
             {goals.map((goal) => {
               const isSelected = goal.id === selectedGoalId;
 
               return (
                 <button
                   key={goal.id}
-                  className={`border px-4 py-4 text-left transition ${
+                  className={`border p-[20px] text-left transition-transform hover:scale-[1.01] active:scale-[0.99] ${
                     isSelected
-                      ? "border-stone-900 bg-stone-900 text-stone-50 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950"
-                      : "border-stone-200 bg-stone-50 text-stone-900 hover:bg-stone-100 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-50 dark:hover:bg-stone-900"
+                      ? "border-current bg-black text-[#e6e6dd]"
+                      : "border-current bg-transparent"
                   }`}
                   onClick={() => setSelectedGoalId(goal.id)}
                   type="button"
                 >
-                  <p className="text-xs uppercase tracking-[0.2em] opacity-60">{goal.status}</p>
-                  <p className="mt-3 text-xl font-light tracking-tight">{goal.title}</p>
-                  <p className="mt-2 text-sm opacity-75">
+                  <p className="nfh-eyebrow">{goal.status.replaceAll("_", " ")}</p>
+                  <p className="mt-[5px] text-[20px] leading-[1] tracking-[-0.009em]">{goal.title}</p>
+                  <p className="mt-[10px] nfh-muted">
                     {goal.dueDate ? new Date(goal.dueDate).toLocaleDateString() : "No due date set."}
                   </p>
                 </button>
               );
             })}
             {isLoadingGoals ? (
-              <p className="text-sm text-stone-900/60 dark:text-stone-50/60">Loading goals…</p>
+              <p className="nfh-muted">Loading goals…</p>
             ) : null}
             {!isLoadingGoals && goals.length === 0 ? (
-              <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
-                No goals yet. Create the first one below.
-              </p>
+              <p className="nfh-muted">No goals yet. Create the first one below.</p>
             ) : null}
           </div>
-          <div className="grid gap-4">
-            <div className="border border-stone-200 p-4 dark:border-stone-800">
-              <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-                Goal Detail
-              </p>
+          <div className="grid gap-[10px]">
+            <div className="nfh-subpanel">
+              <p className="nfh-eyebrow">Goal Detail</p>
               {selectedGoal ? (
-                <div className="mt-4 grid gap-3">
-                  <h2 className="text-3xl font-light tracking-tight text-balance">{selectedGoal.title}</h2>
-                  <p className="text-sm uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
-                    {selectedGoal.status}
-                  </p>
-                  <p className="max-w-[60ch] text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70">
+                <div className="mt-[10px] grid gap-[10px]">
+                  <h2 className="text-[clamp(1.5rem,4vw,2.5rem)] leading-[0.95] tracking-[-0.02em]">{selectedGoal.title}</h2>
+                  <p className="nfh-eyebrow">{selectedGoal.status.replaceAll("_", " ")}</p>
+                  <p className="text-[20px] leading-[1.1] tracking-[-0.009em] opacity-75">
                     {selectedGoal.description || "No goal description yet."}
                   </p>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div className="border border-stone-200 p-4 dark:border-stone-800">
-                      <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-                        Milestones
-                      </p>
-                      <div className="mt-4 grid gap-3">
+                  <div className="grid gap-[10px] md:grid-cols-2">
+                    <div className="nfh-subpanel">
+                      <p className="nfh-eyebrow">Milestones</p>
+                      <div className="mt-[10px] grid gap-[10px]">
                         {selectedGoal.milestones?.length ? (
                           selectedGoal.milestones.map((milestone) => (
-                            <div key={milestone.id} className="border border-stone-200 px-3 py-3 dark:border-stone-800">
-                              <p className="text-base text-stone-900 dark:text-stone-50">{milestone.title}</p>
-                              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
+                            <div key={milestone.id} className="border border-current px-[16px] py-[14px]">
+                              <p className="text-[20px] leading-[1] tracking-[-0.009em]">{milestone.title}</p>
+                              <p className="mt-[5px] nfh-eyebrow">
                                 {milestone.progressPercentage}% complete
                               </p>
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
-                            No milestones yet.
-                          </p>
+                          <p className="nfh-muted">No milestones yet.</p>
                         )}
                       </div>
                     </div>
-                    <div className="border border-stone-200 p-4 dark:border-stone-800">
-                      <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-                        Progress Feed
-                      </p>
-                      <div className="mt-4 grid gap-3">
+                    <div className="nfh-subpanel">
+                      <p className="nfh-eyebrow">Progress Feed</p>
+                      <div className="mt-[10px] grid gap-[10px]">
                         {selectedGoal.updates?.length ? (
                           selectedGoal.updates.map((update) => (
-                            <div key={update.id} className="border border-stone-200 px-3 py-3 dark:border-stone-800">
-                              <p className="text-sm leading-relaxed text-stone-900 dark:text-stone-50">
+                            <div key={update.id} className="border border-current px-[16px] py-[14px]">
+                              <p className="text-[20px] leading-[1.1] tracking-[-0.009em]">
                                 {update.content}
                               </p>
                             </div>
                           ))
                         ) : (
-                          <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
-                            No progress updates yet.
-                          </p>
+                          <p className="nfh-muted">No progress updates yet.</p>
                         )}
                       </div>
                     </div>
                   </div>
-                  {detailError ? (
-                    <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
-                      {detailError}
-                    </p>
-                  ) : null}
+                  {detailError ? <p className="nfh-error">{detailError}</p> : null}
                   {isLoadingDetail ? (
-                    <p className="text-sm text-stone-900/60 dark:text-stone-50/60">Loading detail…</p>
+                    <p className="nfh-muted">Loading detail…</p>
                   ) : null}
                 </div>
               ) : (
-                <p className="mt-4 text-sm text-stone-900/60 dark:text-stone-50/60">
-                  Select a goal to inspect it.
-                </p>
+                <p className="mt-[10px] nfh-muted">Select a goal to inspect it.</p>
               )}
             </div>
-            <form className="grid gap-4 border border-stone-200 p-4 dark:border-stone-800" onSubmit={handleAddMilestone}>
-              <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-                Add Milestone
-              </p>
-              <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                Title
+            <form className="nfh-subpanel nfh-stack" onSubmit={handleAddMilestone}>
+              <p className="nfh-eyebrow">Add Milestone</p>
+              <label className="nfh-label">
+                <span className="nfh-eyebrow">Title</span>
                 <input
-                  className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                  className="nfh-input outline-none focus:ring-2 focus:ring-accent"
                   name="title"
                   required
                   type="text"
                 />
               </label>
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                  Progress percentage
+              <div className="nfh-divider-grid nfh-divider-grid-2">
+                <label className="nfh-label">
+                  <span className="nfh-eyebrow">Progress percentage</span>
                   <input
-                    className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                    className="nfh-input outline-none focus:ring-2 focus:ring-accent"
                     defaultValue="0"
                     name="progressPercentage"
                     max="100"
@@ -336,76 +312,72 @@ export function GoalsPanel({ activeWorkspace, refreshKey }) {
                     type="number"
                   />
                 </label>
-                <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                  Due date
+                <label className="nfh-label">
+                  <span className="nfh-eyebrow">Due date</span>
                   <input
-                    className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                    className="nfh-input outline-none focus:ring-2 focus:ring-accent"
                     name="dueDate"
                     type="date"
                   />
                 </label>
               </div>
               <button
-                className="min-h-[44px] border border-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+                className="nfh-pill"
                 disabled={!selectedGoalId || isAddingMilestone}
                 type="submit"
               >
                 {isAddingMilestone ? "Adding…" : "Add milestone"}
               </button>
             </form>
-            <form className="grid gap-4 border border-stone-200 p-4 dark:border-stone-800" onSubmit={handleAddUpdate}>
-              <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-                Post Progress Update
-              </p>
-              <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                Update
+            <form className="nfh-subpanel nfh-stack" onSubmit={handleAddUpdate}>
+              <p className="nfh-eyebrow">Post Progress Update</p>
+              <label className="nfh-label">
+                <span className="nfh-eyebrow">Update</span>
                 <textarea
-                  className="min-h-[112px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                  className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
                   name="content"
                   required
                 />
               </label>
               <button
-                className="min-h-[44px] border border-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+                className="nfh-pill"
                 disabled={!selectedGoalId || isAddingUpdate}
                 type="submit"
               >
                 {isAddingUpdate ? "Posting…" : "Post update"}
               </button>
             </form>
-            <form className="grid gap-4 border border-stone-200 p-4 dark:border-stone-800" onSubmit={handleCreateGoal}>
-              <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-                Create Goal
-              </p>
-              <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                Title
+            <form className="nfh-subpanel nfh-stack" onSubmit={handleCreateGoal}>
+              <p className="nfh-eyebrow">Create Goal</p>
+              <label className="nfh-label">
+                <span className="nfh-eyebrow">Title</span>
                 <input
-                  className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                  className="nfh-input outline-none focus:ring-2 focus:ring-accent"
                   name="title"
                   required
                   type="text"
                 />
               </label>
-              <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                Description
+              <label className="nfh-label">
+                <span className="nfh-eyebrow">Description</span>
                 <textarea
-                  className="min-h-[112px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                  className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
                   name="description"
                 />
               </label>
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                  Due date
+              <div className="nfh-divider-grid nfh-divider-grid-2">
+                <label className="nfh-label">
+                  <span className="nfh-eyebrow">Due date</span>
                   <input
-                    className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                    className="nfh-input outline-none focus:ring-2 focus:ring-accent"
                     name="dueDate"
                     type="date"
                   />
                 </label>
-                <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                  Status
+                <label className="nfh-label">
+                  <span className="nfh-eyebrow">Status</span>
                   <select
-                    className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                    className="nfh-select outline-none focus:ring-2 focus:ring-accent"
                     defaultValue="NOT_STARTED"
                     name="status"
                   >
@@ -416,13 +388,9 @@ export function GoalsPanel({ activeWorkspace, refreshKey }) {
                   </select>
                 </label>
               </div>
-              {goalError ? (
-                <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
-                  {goalError}
-                </p>
-              ) : null}
+              {goalError ? <p className="nfh-error">{goalError}</p> : null}
               <button
-                className="min-h-[44px] border border-stone-900 bg-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] text-stone-50 transition hover:bg-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950 dark:hover:bg-stone-200 dark:focus-visible:ring-stone-50"
+                className="nfh-pill"
                 disabled={isCreatingGoal}
                 type="submit"
               >
@@ -432,9 +400,7 @@ export function GoalsPanel({ activeWorkspace, refreshKey }) {
           </div>
         </div>
       ) : (
-        <p className="mt-4 text-sm text-stone-900/60 dark:text-stone-50/60">
-          Select or create a workspace before planning goals.
-        </p>
+        <p className="mt-[10px] nfh-muted">Select or create a workspace before planning goals.</p>
       )}
     </div>
   );

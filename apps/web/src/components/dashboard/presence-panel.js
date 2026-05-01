@@ -37,24 +37,22 @@ export function PresencePanel({ activeWorkspace, onlineUserIds }) {
   const onlineMembers = memberships.filter((membership) => onlineUserIds.includes(membership.user?.id));
 
   return (
-    <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
-      <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-        Online Members
-      </p>
-      <div className="mt-4 grid gap-3">
+    <div className="nfh-panel t-panel-slide" data-open="true">
+      <p className="nfh-eyebrow">Online Members</p>
+      <div className="mt-[10px] grid gap-[10px]">
         {onlineMembers.length ? (
           onlineMembers.map((membership) => (
-            <div key={membership.id} className="border border-stone-200 px-3 py-3 dark:border-stone-800">
-              <p className="text-base text-stone-900 dark:text-stone-50">
+            <div key={membership.id} className="nfh-subpanel">
+              <p className="text-[20px] leading-[1] tracking-[-0.009em]">
                 {membership.user?.displayName || membership.user?.email}
               </p>
-              <p className="mt-2 text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
+              <p className="mt-[5px] nfh-eyebrow">
                 {membership.role}
               </p>
             </div>
           ))
         ) : (
-          <p className="text-sm text-stone-900/60 dark:text-stone-50/60">No one else is online.</p>
+          <p className="nfh-muted">No one else is online.</p>
         )}
       </div>
     </div>

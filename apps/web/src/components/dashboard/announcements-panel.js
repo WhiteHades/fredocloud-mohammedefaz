@@ -175,26 +175,24 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
   }
 
   return (
-    <div className="mt-10 border border-stone-200 p-4 dark:border-stone-800">
-      <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-        Announcements
-      </p>
-      <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="grid gap-4">
+    <div className="nfh-panel t-panel-slide" data-open="true">
+      <p className="nfh-eyebrow">Announcements</p>
+      <div className="mt-[10px] grid gap-[10px] lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <div className="grid gap-[10px]">
           {announcements.map((announcement) => (
-            <article key={announcement.id} className="border border-stone-200 p-4 dark:border-stone-800">
-              <div className="flex items-start justify-between gap-4">
+            <article key={announcement.id} className="nfh-subpanel">
+              <div className="flex items-start justify-between gap-[10px]">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
+                  <p className="nfh-eyebrow">
                     {announcement.pinned ? "Pinned" : "Workspace-wide"}
                   </p>
-                  <h2 className="mt-3 text-2xl font-light tracking-tight text-balance">
+                  <h2 className="mt-[5px] text-[clamp(1.5rem,4vw,2.25rem)] leading-[0.95] tracking-[-0.02em]">
                     {announcement.title}
                   </h2>
                 </div>
                 {activeMembership?.role === "ADMIN" ? (
                   <button
-                    className="min-h-[44px] border border-stone-300 px-3 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-700 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+                    className="nfh-chip"
                     onClick={() => handleTogglePin(announcement.id, announcement.pinned)}
                     type="button"
                   >
@@ -202,14 +200,14 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
                   </button>
                 ) : null}
               </div>
-              <p className="mt-4 max-w-[60ch] text-sm leading-relaxed text-stone-900/70 dark:text-stone-50/70">
+              <div className="mt-[10px] max-w-[70ch] text-[20px] leading-[1.1] tracking-[-0.009em] opacity-75">
                 <span dangerouslySetInnerHTML={{ __html: announcement.content }} />
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
+              </div>
+              <div className="mt-[10px] flex flex-wrap gap-[10px]">
                 {["🔥", "👏", "✅", "📌"].map((emoji) => (
                   <button
                     key={emoji}
-                    className="min-h-[44px] border border-stone-300 px-3 py-2 text-sm transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-700 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+                    className="nfh-chip"
                     onClick={() => handleReaction(announcement.id, emoji)}
                     type="button"
                   >
@@ -217,30 +215,28 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
                   </button>
                 ))}
               </div>
-              <div className="mt-4 grid gap-3">
+              <div className="mt-[10px] grid gap-[10px]">
                 {announcement.comments.length ? (
                   announcement.comments.map((comment) => (
-                    <div key={comment.id} className="border border-stone-200 px-3 py-3 dark:border-stone-800">
-                      <p className="text-sm leading-relaxed text-stone-900 dark:text-stone-50">
-                        {comment.content}
-                      </p>
+                    <div key={comment.id} className="border border-current px-[16px] py-[14px]">
+                      <p className="text-[20px] leading-[1.1] tracking-[-0.009em]">{comment.content}</p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-stone-900/60 dark:text-stone-50/60">No comments yet.</p>
+                  <p className="nfh-muted">No comments yet.</p>
                 )}
               </div>
-              <form className="mt-4 grid gap-3" onSubmit={(event) => handleComment(event, announcement.id)}>
-                <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-                  Add comment
+              <form className="mt-[10px] nfh-stack" onSubmit={(event) => handleComment(event, announcement.id)}>
+                <label className="nfh-label">
+                  <span className="nfh-eyebrow">Add comment</span>
                   <textarea
-                    className="min-h-[88px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                    className="nfh-textarea outline-none focus:ring-2 focus:ring-accent"
                     name="content"
                     required
                   />
                 </label>
                 <button
-                  className="min-h-[44px] border border-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] transition hover:bg-stone-900 hover:text-stone-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:hover:bg-stone-50 dark:hover:text-stone-950 dark:focus-visible:ring-stone-50"
+                  className="nfh-pill"
                   disabled={isCommentingId === announcement.id}
                   type="submit"
                 >
@@ -250,40 +246,32 @@ export function AnnouncementsPanel({ activeMembership, refreshKey }) {
             </article>
           ))}
           {isLoadingAnnouncements ? (
-            <p className="text-sm text-stone-900/60 dark:text-stone-50/60">Loading announcements…</p>
+            <p className="nfh-muted">Loading announcements…</p>
           ) : null}
           {!isLoadingAnnouncements && announcements.length === 0 ? (
-            <p className="text-sm text-stone-900/60 dark:text-stone-50/60">
-              No announcements yet.
-            </p>
+            <p className="nfh-muted">No announcements yet.</p>
           ) : null}
         </div>
         {activeMembership?.role === "ADMIN" ? (
-          <form className="grid gap-4 border border-stone-200 p-4 dark:border-stone-800" onSubmit={handleCreateAnnouncement}>
-            <p className="text-xs uppercase tracking-[0.2em] text-stone-900/40 dark:text-stone-50/40">
-              Publish Announcement
-            </p>
-            <label className="grid gap-2 text-sm text-stone-900/70 dark:text-stone-50/70">
-              Title
+          <form className="nfh-subpanel nfh-stack" onSubmit={handleCreateAnnouncement}>
+            <p className="nfh-eyebrow">Publish Announcement</p>
+            <label className="nfh-label">
+              <span className="nfh-eyebrow">Title</span>
               <input
-                className="min-h-[44px] border border-stone-300 bg-stone-50 px-4 py-3 text-base text-stone-900 outline-none dark:border-stone-700 dark:bg-stone-950 dark:text-stone-50"
+                className="nfh-input outline-none focus:ring-2 focus:ring-accent"
                 name="title"
                 required
                 type="text"
               />
             </label>
             <RichTextField label="Content" name="content" />
-            <label className="flex items-center gap-3 text-sm text-stone-900/70 dark:text-stone-50/70">
+            <label className="flex items-center gap-[10px] text-[11px] uppercase tracking-[-0.005em] opacity-70">
               <input name="pinned" type="checkbox" />
               Pin immediately
             </label>
-            {announcementError ? (
-              <p className="border border-[#c8102e]/20 bg-[#c8102e]/10 px-4 py-3 text-sm text-[#9d1028] dark:text-[#ff8c9d]">
-                {announcementError}
-              </p>
-            ) : null}
+            {announcementError ? <p className="nfh-error">{announcementError}</p> : null}
             <button
-              className="min-h-[44px] border border-stone-900 bg-stone-900 px-4 py-3 text-sm uppercase tracking-[0.22em] text-stone-50 transition hover:bg-stone-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-900 dark:border-stone-50 dark:bg-stone-50 dark:text-stone-950 dark:hover:bg-stone-200 dark:focus-visible:ring-stone-50"
+              className="nfh-pill"
               disabled={isCreatingAnnouncement}
               type="submit"
             >

@@ -61,4 +61,13 @@ describe("AuthForm", () => {
       expect(mockPush).toHaveBeenCalledWith("/dashboard");
     });
   });
+
+  it("posts login through the same-origin api path", () => {
+    render(<AuthForm mode="login" />);
+
+    const form = screen.getByRole("button", { name: "Log in" }).closest("form");
+
+    expect(form).toHaveAttribute("action", "/api/auth/login");
+    expect(form).toHaveAttribute("method", "POST");
+  });
 });

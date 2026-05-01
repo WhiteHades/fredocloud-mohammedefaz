@@ -45,27 +45,25 @@ export function CommandPalette() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-stone-950/60 p-4 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
+    <div className="fixed inset-0 z-50 bg-black/70 p-4 backdrop-blur-[2px]" onClick={() => setIsOpen(false)}>
       <div
-        className="mx-auto mt-20 max-w-2xl border border-stone-200 bg-stone-50 p-4 text-stone-900 shadow-2xl dark:border-stone-800 dark:bg-stone-950 dark:text-stone-50"
+        className="mx-auto mt-20 max-w-2xl border border-current bg-background p-[24px] text-foreground"
         onClick={(event) => event.stopPropagation()}
       >
-        <p className="text-xs uppercase tracking-[0.2em] text-stone-900/45 dark:text-stone-50/45">
-          Command Palette
-        </p>
+        <p className="nfh-eyebrow">Command Palette</p>
         <input
           autoFocus
-          className="mt-4 min-h-[52px] w-full border border-stone-300 bg-stone-50 px-4 py-3 text-lg outline-none dark:border-stone-700 dark:bg-stone-950"
+          className="nfh-input mt-[10px] h-[56px] outline-none focus:ring-2 focus:ring-accent"
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search commands…"
           type="text"
           value={query}
         />
-        <div className="mt-4 grid gap-2">
+        <div className="mt-[10px] grid gap-[10px]">
           {filteredCommands.map((command) => (
             <Link
               key={command.href}
-              className="min-h-[44px] border border-stone-200 px-4 py-3 text-sm uppercase tracking-[0.18em] transition hover:bg-stone-900 hover:text-stone-50 dark:border-stone-800 dark:hover:bg-stone-50 dark:hover:text-stone-950"
+              className="nfh-chip"
               href={command.href}
               onClick={() => {
                 setIsOpen(false);
@@ -76,9 +74,7 @@ export function CommandPalette() {
             </Link>
           ))}
           {!filteredCommands.length ? (
-            <p className="px-4 py-3 text-sm text-stone-900/60 dark:text-stone-50/60">
-              No command matches that query.
-            </p>
+            <p className="nfh-muted px-[16px] py-[12px]">No command matches that query.</p>
           ) : null}
         </div>
       </div>
