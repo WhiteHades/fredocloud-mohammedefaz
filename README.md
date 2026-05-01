@@ -15,10 +15,8 @@
 
 | Service | URL |
 |---|---|
-| Web (primary) | [`https://notfredohub.mohammedefaz.com`](https://notfredohub.mohammedefaz.com) |
-| Web (Railway) | [`https://web-production-7acc2.up.railway.app`](https://web-production-7acc2.up.railway.app) |
-| API | [`https://fredocloud-mohammedefaz-production.up.railway.app`](https://fredocloud-mohammedefaz-production.up.railway.app) |
-| API Docs | [`/api/docs`](https://fredocloud-mohammedefaz-production.up.railway.app/api/docs) |
+| Web | [`https://notfredohub.mohammedefaz.com`](https://notfredohub.mohammedefaz.com) |
+| API Docs | [`https://fredocloud-mohammedefaz-production.up.railway.app/api/docs`](https://fredocloud-mohammedefaz-production.up.railway.app/api/docs) |
 
 **Demo login:** `demo@notfredohub.test` / `demo12345`
 
