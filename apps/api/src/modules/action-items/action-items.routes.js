@@ -9,6 +9,25 @@ const { requireAuth } = require("../../middleware/require-auth");
 const workspaceActionItemsRouter = Router({ mergeParams: true });
 const actionItemActionsRouter = Router();
 
+const ACTION_ITEM_PRIORITIES = new Set(["LOW", "MEDIUM", "HIGH", "CRITICAL"]);
+
+function normalizePriority(priority) {
+  if (priority === "URGENT") {
+    return "CRITICAL";
+  }
+
+  return ACTION_ITEM_PRIORITIES.has(priority) ? priority : "MEDIUM";
+}
+
+function parseDate(value) {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.valueOf()) ? null : parsed;
+}
+
 function serializeActionItem(actionItem) {
   return {
     id: actionItem.id,
@@ -59,13 +78,33 @@ workspaceActionItemsRouter.post("/", requireAuth, async (request, response) => {
       ? request.body.description.trim()
       : null;
   const status = request.body.status || "TODO";
-  const priority = request.body.priority || "MEDIUM";
-  const dueDate = request.body.dueDate ? new Date(request.body.dueDate) : null;
+  const priority = normalizePriority(request.body.priority);
+  const dueDate = parseDate(request.body.dueDate);
   const goalId = request.body.goalId || null;
-  const assigneeMembershipId = request.body.assigneeMembershipId || membership.id;
+  let assigneeMembershipId = request.body.assigneeMembershipId || membership.id;
 
   if (!title) {
     return response.status(400).json({ error: "Action item title is required." });
+  }
+
+  if (goalId) {
+    const goal = await prisma.goal.findUnique({ where: { id: goalId } });
+
+    if (!goal || goal.workspaceId !== request.params.workspaceId) {
+      return response.status(400).json({ error: "Parent goal must belong to this workspace." });
+    }
+  }
+
+  if (assigneeMembershipId) {
+    const requestedAssignee = await prisma.membership.findUnique({
+      where: { id: assigneeMembershipId },
+    });
+
+    if (!requestedAssignee || requestedAssignee.workspaceId !== request.params.workspaceId) {
+      return response.status(400).json({ error: "Assignee must belong to this workspace." });
+    }
+
+    assigneeMembershipId = requestedAssignee.id;
   }
 
   const actionItem = await prisma.actionItem.create({
@@ -113,6 +152,34 @@ actionItemActionsRouter.patch("/:actionItemId", requireAuth, async (request, res
     return response.status(403).json({ error: "Workspace membership is required." });
   }
 
+  let nextGoalId = actionItem.goalId;
+  if (Object.prototype.hasOwnProperty.call(request.body, "goalId")) {
+    nextGoalId = request.body.goalId || null;
+
+    if (nextGoalId) {
+      const nextGoal = await prisma.goal.findUnique({ where: { id: nextGoalId } });
+
+      if (!nextGoal || nextGoal.workspaceId !== actionItem.workspaceId) {
+        return response.status(400).json({ error: "Parent goal must belong to this workspace." });
+      }
+    }
+  }
+
+  let nextAssigneeMembershipId = actionItem.assigneeMembershipId;
+  if (Object.prototype.hasOwnProperty.call(request.body, "assigneeMembershipId")) {
+    nextAssigneeMembershipId = request.body.assigneeMembershipId || null;
+
+    if (nextAssigneeMembershipId) {
+      const requestedAssignee = await prisma.membership.findUnique({
+        where: { id: nextAssigneeMembershipId },
+      });
+
+      if (!requestedAssignee || requestedAssignee.workspaceId !== actionItem.workspaceId) {
+        return response.status(400).json({ error: "Assignee must belong to this workspace." });
+      }
+    }
+  }
+
   const updatedActionItem = await prisma.actionItem.update({
     where: { id: actionItem.id },
     data: {
@@ -124,9 +191,14 @@ actionItemActionsRouter.patch("/:actionItemId", requireAuth, async (request, res
         typeof request.body.description === "string" && request.body.description.trim()
           ? request.body.description.trim()
           : actionItem.description,
+      goalId: nextGoalId,
+      assigneeMembershipId: nextAssigneeMembershipId,
       status: request.body.status || actionItem.status,
-      priority: request.body.priority || actionItem.priority,
-      dueDate: request.body.dueDate ? new Date(request.body.dueDate) : actionItem.dueDate,
+      priority: normalizePriority(request.body.priority || actionItem.priority),
+      dueDate:
+        Object.prototype.hasOwnProperty.call(request.body, "dueDate")
+          ? parseDate(request.body.dueDate)
+          : actionItem.dueDate,
       position:
         typeof request.body.position === "number" ? request.body.position : actionItem.position,
     },

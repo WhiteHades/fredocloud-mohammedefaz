@@ -196,6 +196,19 @@ model Announcement {
   authorMembership  Membership             @relation("AnnouncementAuthor", fields: [authorMembershipId], references: [id], onDelete: Cascade)
   comments          AnnouncementComment[]
   reactions         AnnouncementReaction[]
+  attachments       AnnouncementAttachment[]
+}
+
+model AnnouncementAttachment {
+  id             String       @id @default(cuid())
+  announcementId String
+  filename       String
+  mimeType       String
+  publicId       String
+  url            String
+  bytes          Int
+  createdAt      DateTime     @default(now())
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
 }
 
 model AnnouncementComment {

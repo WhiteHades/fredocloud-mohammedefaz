@@ -172,4 +172,36 @@ describe("workspace routes", () => {
 
     expect(forbiddenResponse.statusCode).toBe(403);
   });
+
+  it("updates workspace settings and exports workspace data as csv", async () => {
+    const agent = request.agent(app);
+
+    await agent.post("/api/auth/register").send({
+      email: "workspace-settings@notfredohub.test",
+      password: "password123",
+      displayName: "Workspace Settings Admin",
+    });
+
+    const workspaceResponse = await agent.post("/api/workspaces").send({
+      name: "Studio Epsilon",
+      description: "Original description.",
+      accentColor: "#2d6a4f",
+    });
+
+    const updateResponse = await agent.patch(`/api/workspaces/${workspaceResponse.body.workspace.id}`).send({
+      name: "Studio Epsilon Updated",
+      description: "Updated description.",
+      accentColor: "#003b8e",
+    });
+
+    expect(updateResponse.statusCode).toBe(200);
+    expect(updateResponse.body.workspace.name).toBe("Studio Epsilon Updated");
+    expect(updateResponse.body.workspace.accentColor).toBe("#003b8e");
+
+    const exportResponse = await agent.get(`/api/workspaces/${workspaceResponse.body.workspace.id}/export`);
+
+    expect(exportResponse.statusCode).toBe(200);
+    expect(exportResponse.headers["content-type"]).toContain("text/csv");
+    expect(exportResponse.text).toContain("Studio Epsilon Updated");
+  });
 });

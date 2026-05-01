@@ -5,6 +5,7 @@ const { app } = require("../src/app");
 
 describe("announcement routes", () => {
   beforeEach(async () => {
+    await prisma.announcementAttachment.deleteMany();
     await prisma.announcementReaction.deleteMany();
     await prisma.announcementComment.deleteMany();
     await prisma.announcement.deleteMany();
@@ -146,5 +147,35 @@ describe("announcement routes", () => {
     expect(listResponse.statusCode).toBe(200);
     expect(listResponse.body.announcements[0].reactions).toHaveLength(1);
     expect(listResponse.body.announcements[0].comments).toHaveLength(1);
+  });
+
+  it("returns a clear error when attachment uploads are attempted without Cloudinary config", async () => {
+    const adminAgent = request.agent(app);
+
+    await adminAgent.post("/api/auth/register").send({
+      email: "attachment-admin@notfredohub.test",
+      password: "password123",
+      displayName: "Attachment Admin",
+    });
+
+    const workspaceResponse = await adminAgent.post("/api/workspaces").send({
+      name: "Studio Attachments",
+      description: "Attachment workspace.",
+      accentColor: "#111827",
+    });
+
+    const announcementResponse = await adminAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/announcements`)
+      .send({
+        title: "Attachment Test",
+        content: "Upload a file to this announcement.",
+      });
+
+    const attachmentResponse = await adminAgent
+      .post(`/api/announcements/${announcementResponse.body.announcement.id}/attachments`)
+      .attach("file", Buffer.from("attachment body"), "brief.txt");
+
+    expect(attachmentResponse.statusCode).toBe(503);
+    expect(attachmentResponse.body.error).toContain("Cloudinary credentials");
   });
 });

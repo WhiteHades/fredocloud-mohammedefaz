@@ -12,6 +12,18 @@ const { requireAuth } = require("../../middleware/require-auth");
 
 const workspacesRouter = Router();
 
+function parseDate(value) {
+  if (!value) {
+    return "";
+  }
+
+  return value instanceof Date ? value.toISOString() : String(value);
+}
+
+function toCsvCell(value) {
+  return `"${String(value ?? "").replaceAll('"', '""')}"`;
+}
+
 function serializeMembership(membership) {
   return {
     id: membership.id,
@@ -141,6 +153,205 @@ workspacesRouter.post("/:workspaceId/invitations", requireAuth, async (request, 
   });
 
   return response.status(201).json({ invitation });
+});
+
+workspacesRouter.patch("/:workspaceId", requireAuth, async (request, response) => {
+  const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
+
+  if (!membership || !hasPermission(membership, "WORKSPACE_UPDATE")) {
+    return response.status(403).json({ error: "Only workspace admins can update workspace details." });
+  }
+
+  const nextName = typeof request.body.name === "string" ? request.body.name.trim() : membership.workspace.name;
+  const nextDescription =
+    typeof request.body.description === "string"
+      ? request.body.description.trim() || null
+      : membership.workspace.description;
+  const nextAccentColor =
+    typeof request.body.accentColor === "string" && request.body.accentColor.trim()
+      ? request.body.accentColor.trim()
+      : membership.workspace.accentColor;
+
+  if (!nextName) {
+    return response.status(400).json({ error: "Workspace name is required." });
+  }
+
+  const workspace = await prisma.workspace.update({
+    where: { id: request.params.workspaceId },
+    data: {
+      name: nextName,
+      description: nextDescription,
+      accentColor: nextAccentColor,
+    },
+  });
+
+  await recordAuditEvent({
+    workspaceId: workspace.id,
+    actorMembershipId: membership.id,
+    action: "workspace.updated",
+    targetType: "workspace",
+    targetId: workspace.id,
+    summary: `Updated workspace ${workspace.name}`,
+    metadata: {
+      name: workspace.name,
+      description: workspace.description,
+      accentColor: workspace.accentColor,
+    },
+  });
+
+  return response.status(200).json({
+    workspace: {
+      id: workspace.id,
+      name: workspace.name,
+      description: workspace.description,
+      accentColor: workspace.accentColor,
+      createdAt: workspace.createdAt,
+      updatedAt: workspace.updatedAt,
+    },
+  });
+});
+
+workspacesRouter.get("/:workspaceId/export", requireAuth, async (request, response) => {
+  const membership = await getWorkspaceAccess(request.auth.userId, request.params.workspaceId);
+
+  if (!membership) {
+    return response.status(403).json({ error: "Workspace membership is required." });
+  }
+
+  const [workspace, memberships, goals, announcements, actionItems] = await Promise.all([
+    prisma.workspace.findUnique({ where: { id: request.params.workspaceId } }),
+    prisma.membership.findMany({
+      where: { workspaceId: request.params.workspaceId },
+      include: { user: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.goal.findMany({
+      where: { workspaceId: request.params.workspaceId },
+      include: {
+        ownerMembership: { include: { user: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.announcement.findMany({
+      where: { workspaceId: request.params.workspaceId },
+      include: {
+        authorMembership: { include: { user: true } },
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.actionItem.findMany({
+      where: { workspaceId: request.params.workspaceId },
+      include: {
+        assigneeMembership: { include: { user: true } },
+        goal: true,
+      },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
+
+  if (!workspace) {
+    return response.status(404).json({ error: "Workspace not found." });
+  }
+
+  const rows = [
+    [
+      "kind",
+      "id",
+      "title",
+      "status",
+      "priority",
+      "owner",
+      "assignee",
+      "email",
+      "pinned",
+      "dueDate",
+      "createdAt",
+      "updatedAt",
+      "notes",
+    ].map(toCsvCell).join(","),
+    [
+      "workspace",
+      workspace.id,
+      workspace.name,
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      parseDate(workspace.createdAt),
+      parseDate(workspace.updatedAt),
+      workspace.description || "",
+    ].map(toCsvCell).join(","),
+    ...memberships.map((entry) => [
+      "membership",
+      entry.id,
+      entry.user.displayName || entry.user.email,
+      entry.role,
+      "",
+      "",
+      "",
+      entry.user.email,
+      "",
+      "",
+      parseDate(entry.createdAt),
+      parseDate(entry.updatedAt),
+      "",
+    ].map(toCsvCell).join(",")),
+    ...goals.map((goal) => [
+      "goal",
+      goal.id,
+      goal.title,
+      goal.status,
+      "",
+      goal.ownerMembership.user.displayName || goal.ownerMembership.user.email,
+      "",
+      goal.ownerMembership.user.email,
+      "",
+      parseDate(goal.dueDate),
+      parseDate(goal.createdAt),
+      parseDate(goal.updatedAt),
+      goal.description || "",
+    ].map(toCsvCell).join(",")),
+    ...announcements.map((announcement) => [
+      "announcement",
+      announcement.id,
+      announcement.title,
+      "",
+      "",
+      announcement.authorMembership.user.displayName || announcement.authorMembership.user.email,
+      "",
+      announcement.authorMembership.user.email,
+      announcement.pinned ? "yes" : "no",
+      "",
+      parseDate(announcement.createdAt),
+      parseDate(announcement.updatedAt),
+      announcement.content,
+    ].map(toCsvCell).join(",")),
+    ...actionItems.map((actionItem) => [
+      "action_item",
+      actionItem.id,
+      actionItem.title,
+      actionItem.status,
+      actionItem.priority,
+      actionItem.goal?.title || "",
+      actionItem.assigneeMembership?.user?.displayName || actionItem.assigneeMembership?.user?.email || "",
+      actionItem.assigneeMembership?.user?.email || "",
+      "",
+      parseDate(actionItem.dueDate),
+      parseDate(actionItem.createdAt),
+      parseDate(actionItem.updatedAt),
+      actionItem.description || "",
+    ].map(toCsvCell).join(",")),
+  ];
+
+  response.setHeader("Content-Type", "text/csv; charset=utf-8");
+  response.setHeader(
+    "Content-Disposition",
+    `attachment; filename="workspace-${workspace.id}.csv"`,
+  );
+  return response.status(200).send(rows.join("\n"));
 });
 
 workspacesRouter.get("/:workspaceId/members", requireAuth, async (request, response) => {

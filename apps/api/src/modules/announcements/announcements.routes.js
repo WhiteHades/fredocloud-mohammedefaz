@@ -1,7 +1,9 @@
 const { Router } = require("express");
+const multer = require("multer");
 
 const { recordAuditEvent } = require("../../lib/audit");
 const { sendMentionEmail } = require("../../lib/email");
+const { hasCloudinaryConfig, uploadAssetBuffer } = require("../../lib/cloudinary");
 const { prisma } = require("../../lib/prisma");
 const { emitNotificationEvent, emitWorkspaceEvent } = require("../../lib/realtime");
 const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
@@ -9,6 +11,23 @@ const { requireAuth } = require("../../middleware/require-auth");
 
 const workspaceAnnouncementsRouter = Router({ mergeParams: true });
 const announcementActionsRouter = Router();
+const upload = multer({ storage: multer.memoryStorage() });
+
+function serializeAnnouncementComment(comment) {
+  return {
+    id: comment.id,
+    content: comment.content,
+    createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt,
+    author: comment.authorMembership?.user
+      ? {
+          id: comment.authorMembership.user.id,
+          email: comment.authorMembership.user.email,
+          displayName: comment.authorMembership.user.displayName,
+        }
+      : null,
+  };
+}
 
 function serializeAnnouncement(announcement) {
   return {
@@ -18,8 +37,9 @@ function serializeAnnouncement(announcement) {
     pinned: announcement.pinned,
     createdAt: announcement.createdAt,
     updatedAt: announcement.updatedAt,
-    comments: announcement.comments,
+    comments: (announcement.comments || []).map(serializeAnnouncementComment),
     reactions: announcement.reactions,
+    attachments: announcement.attachments || [],
   };
 }
 
@@ -28,9 +48,17 @@ async function getAnnouncementContext(announcementId) {
     where: { id: announcementId },
     include: {
       comments: {
+        include: {
+          authorMembership: {
+            include: { user: true },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
       reactions: {
+        orderBy: { createdAt: "asc" },
+      },
+      attachments: {
         orderBy: { createdAt: "asc" },
       },
     },
@@ -52,9 +80,17 @@ workspaceAnnouncementsRouter.get("/", requireAuth, async (request, response) => 
     where: { workspaceId: request.params.workspaceId },
     include: {
       comments: {
+        include: {
+          authorMembership: {
+            include: { user: true },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
       reactions: {
+        orderBy: { createdAt: "asc" },
+      },
+      attachments: {
         orderBy: { createdAt: "asc" },
       },
     },
@@ -90,8 +126,15 @@ workspaceAnnouncementsRouter.post("/", requireAuth, async (request, response) =>
       pinned,
     },
     include: {
-      comments: true,
+      comments: {
+        include: {
+          authorMembership: {
+            include: { user: true },
+          },
+        },
+      },
       reactions: true,
+      attachments: true,
     },
   });
 
@@ -196,9 +239,17 @@ announcementActionsRouter.patch("/:announcementId", requireAuth, async (request,
     },
     include: {
       comments: {
+        include: {
+          authorMembership: {
+            include: { user: true },
+          },
+        },
         orderBy: { createdAt: "asc" },
       },
       reactions: {
+        orderBy: { createdAt: "asc" },
+      },
+      attachments: {
         orderBy: { createdAt: "asc" },
       },
     },
@@ -219,6 +270,67 @@ announcementActionsRouter.patch("/:announcementId", requireAuth, async (request,
   });
 
   return response.status(200).json({ announcement: serializeAnnouncement(updatedAnnouncement) });
+});
+
+announcementActionsRouter.post("/:announcementId/attachments", requireAuth, upload.single("file"), async (request, response) => {
+  const announcement = await getAnnouncementContext(request.params.announcementId);
+
+  if (!announcement) {
+    return response.status(404).json({ error: "Announcement not found." });
+  }
+
+  const membership = await getWorkspaceAccess(request.auth.userId, announcement.workspaceId);
+
+  if (!membership) {
+    return response.status(403).json({ error: "Workspace membership is required." });
+  }
+
+  if (!hasCloudinaryConfig) {
+    return response.status(503).json({ error: "Cloudinary credentials are not configured for this environment." });
+  }
+
+  if (!request.file) {
+    return response.status(400).json({ error: "Attachment file is required." });
+  }
+
+  const uploadResult = await uploadAssetBuffer(request.file.buffer, {
+    folder: "notfredohub/attachments",
+    public_id: `announcement_${announcement.id}_${Date.now()}`,
+    overwrite: true,
+    resource_type: "auto",
+  });
+
+  const attachment = await prisma.announcementAttachment.create({
+    data: {
+      announcementId: announcement.id,
+      filename: request.file.originalname,
+      mimeType: request.file.mimetype,
+      publicId: uploadResult.public_id,
+      url: uploadResult.secure_url,
+      bytes: request.file.size,
+    },
+  });
+
+  const updatedAnnouncement = await getAnnouncementContext(announcement.id);
+
+  await recordAuditEvent({
+    workspaceId: announcement.workspaceId,
+    actorMembershipId: membership.id,
+    action: "announcement.attachment_added",
+    targetType: "announcement_attachment",
+    targetId: attachment.id,
+    summary: `Added attachment ${attachment.filename} to ${announcement.title}`,
+  });
+
+  emitWorkspaceEvent(announcement.workspaceId, "announcement:updated", {
+    workspaceId: announcement.workspaceId,
+    announcement: serializeAnnouncement(updatedAnnouncement),
+  });
+
+  return response.status(201).json({
+    attachment,
+    announcement: serializeAnnouncement(updatedAnnouncement),
+  });
 });
 
 announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (request, response) => {
@@ -245,6 +357,11 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
       announcementId: announcement.id,
       authorMembershipId: membership.id,
       content,
+    },
+    include: {
+      authorMembership: {
+        include: { user: true },
+      },
     },
   });
 
@@ -316,10 +433,10 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
   emitWorkspaceEvent(announcement.workspaceId, "announcement:comment_created", {
     workspaceId: announcement.workspaceId,
     announcementId: announcement.id,
-    comment,
+    comment: serializeAnnouncementComment(comment),
   });
 
-  return response.status(201).json({ comment });
+  return response.status(201).json({ comment: serializeAnnouncementComment(comment) });
 });
 
 module.exports = {

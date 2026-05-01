@@ -73,4 +73,54 @@ describe("action item routes", () => {
     expect(listResponse.body.actionItems).toHaveLength(1);
     expect(listResponse.body.actionItems[0].status).toBe("DONE");
   });
+
+  it("creates an action item assigned to another workspace member", async () => {
+    const adminAgent = request.agent(app);
+
+    await adminAgent.post("/api/auth/register").send({
+      email: "assign-admin@notfredohub.test",
+      password: "password123",
+      displayName: "Assignment Admin",
+    });
+
+    const workspaceResponse = await adminAgent.post("/api/workspaces").send({
+      name: "Studio Assignments",
+      description: "Assignment workspace.",
+      accentColor: "#2d6a4f",
+    });
+
+    const invitationResponse = await adminAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
+      .send({
+        email: "assign-member@notfredohub.test",
+        role: "MEMBER",
+      });
+
+    const memberAgent = request.agent(app);
+
+    await memberAgent.post("/api/auth/register").send({
+      email: "assign-member@notfredohub.test",
+      password: "password123",
+      displayName: "Assignment Member",
+    });
+
+    await memberAgent.post(`/api/workspaces/invitations/${invitationResponse.body.invitation.id}/accept`);
+
+    const membersResponse = await adminAgent.get(`/api/workspaces/${workspaceResponse.body.workspace.id}/members`);
+    const memberMembership = membersResponse.body.memberships.find(
+      (membership) => membership.user.email === "assign-member@notfredohub.test",
+    );
+
+    const createResponse = await adminAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/action-items`)
+      .send({
+        title: "Assign the board",
+        status: "TODO",
+        priority: "HIGH",
+        assigneeMembershipId: memberMembership.id,
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+    expect(createResponse.body.actionItem.assigneeMembershipId).toBe(memberMembership.id);
+  });
 });

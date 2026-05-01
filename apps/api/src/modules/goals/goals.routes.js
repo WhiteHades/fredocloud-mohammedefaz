@@ -9,6 +9,25 @@ const { requireAuth } = require("../../middleware/require-auth");
 const goalsRouter = Router({ mergeParams: true });
 const goalDetailRouter = Router();
 
+const GOAL_STATUSES = new Set(["NOT_STARTED", "IN_PROGRESS", "AT_RISK", "COMPLETED", "ARCHIVED"]);
+
+function normalizeGoalStatus(status) {
+  if (status === "BLOCKED") {
+    return "AT_RISK";
+  }
+
+  return GOAL_STATUSES.has(status) ? status : "NOT_STARTED";
+}
+
+function parseDate(value) {
+  if (!value) {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.valueOf()) ? null : parsed;
+}
+
 function serializeGoal(goal) {
   return {
     id: goal.id,
@@ -61,17 +80,30 @@ goalsRouter.post("/", requireAuth, async (request, response) => {
     typeof request.body.description === "string" && request.body.description.trim()
       ? request.body.description.trim()
       : null;
-  const dueDate = request.body.dueDate ? new Date(request.body.dueDate) : null;
-  const status = request.body.status || "NOT_STARTED";
+  const dueDate = parseDate(request.body.dueDate);
+  const status = normalizeGoalStatus(request.body.status);
+  let ownerMembershipId = membership.id;
 
   if (!title) {
     return response.status(400).json({ error: "Goal title is required." });
   }
 
+  if (request.body.ownerMembershipId) {
+    const requestedOwner = await prisma.membership.findUnique({
+      where: { id: request.body.ownerMembershipId },
+    });
+
+    if (!requestedOwner || requestedOwner.workspaceId !== request.params.workspaceId) {
+      return response.status(400).json({ error: "Goal owner must belong to this workspace." });
+    }
+
+    ownerMembershipId = requestedOwner.id;
+  }
+
   const goal = await prisma.goal.create({
     data: {
       workspaceId: request.params.workspaceId,
-      ownerMembershipId: membership.id,
+      ownerMembershipId,
       title,
       description,
       dueDate,
@@ -141,7 +173,7 @@ goalDetailRouter.post("/:goalId/milestones", requireAuth, async (request, respon
 
   const title = typeof request.body.title === "string" ? request.body.title.trim() : "";
   const progressPercentage = Number(request.body.progressPercentage || 0);
-  const dueDate = request.body.dueDate ? new Date(request.body.dueDate) : null;
+  const dueDate = parseDate(request.body.dueDate);
 
   if (!title) {
     return response.status(400).json({ error: "Milestone title is required." });

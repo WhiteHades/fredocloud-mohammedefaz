@@ -103,4 +103,53 @@ describe("goal routes", () => {
     expect(detailResponse.body.goal.milestones).toHaveLength(1);
     expect(detailResponse.body.goal.updates).toHaveLength(1);
   });
+
+  it("creates a goal for another member in the same workspace", async () => {
+    const adminAgent = request.agent(app);
+
+    await adminAgent.post("/api/auth/register").send({
+      email: "goal-admin@notfredohub.test",
+      password: "password123",
+      displayName: "Goal Admin",
+    });
+
+    const workspaceResponse = await adminAgent.post("/api/workspaces").send({
+      name: "Studio Owners",
+      description: "Goal owner workspace.",
+      accentColor: "#c8102e",
+    });
+
+    const invitationResponse = await adminAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/invitations`)
+      .send({
+        email: "goal-member@notfredohub.test",
+        role: "MEMBER",
+      });
+
+    const memberAgent = request.agent(app);
+
+    await memberAgent.post("/api/auth/register").send({
+      email: "goal-member@notfredohub.test",
+      password: "password123",
+      displayName: "Goal Member",
+    });
+
+    await memberAgent.post(`/api/workspaces/invitations/${invitationResponse.body.invitation.id}/accept`);
+
+    const membersResponse = await adminAgent.get(`/api/workspaces/${workspaceResponse.body.workspace.id}/members`);
+    const memberMembership = membersResponse.body.memberships.find(
+      (membership) => membership.user.email === "goal-member@notfredohub.test",
+    );
+
+    const createResponse = await adminAgent
+      .post(`/api/workspaces/${workspaceResponse.body.workspace.id}/goals`)
+      .send({
+        title: "Hand off ownership",
+        status: "IN_PROGRESS",
+        ownerMembershipId: memberMembership.id,
+      });
+
+    expect(createResponse.statusCode).toBe(201);
+    expect(createResponse.body.goal.ownerMembershipId).toBe(memberMembership.id);
+  });
 });

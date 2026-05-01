@@ -29,7 +29,23 @@ function uploadImageBuffer(buffer, options) {
   });
 }
 
+function uploadAssetBuffer(buffer, options) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve(result);
+    });
+
+    stream.end(buffer);
+  });
+}
+
 module.exports = {
   hasCloudinaryConfig,
+  uploadAssetBuffer,
   uploadImageBuffer,
 };
