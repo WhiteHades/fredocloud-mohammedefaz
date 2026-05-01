@@ -7,20 +7,16 @@
 
 <h1 align="center">notFredoHub</h1>
 
-<p align="center">A Swiss-styled collaborative team hub &mdash; not Fredo&rsquo;s, yours.</p>
+<p align="center">Complete team management system for FredoCloud.</p>
 
 <br>
-
-## What is this
-
-A full-stack workspace application where teams manage shared goals, post announcements, track action items, and stay in sync in real time. Built for the FredoCloud technical assessment on a strict grid system with one disciplined accent colour.
 
 <br>
 
 ## Live
 
 | Service | URL |
-|---|---|---|
+|---|---|
 | Web (primary) | [`https://notfredohub.mohammedefaz.com`](https://notfredohub.mohammedefaz.com) |
 | Web (Railway) | [`https://web-production-7acc2.up.railway.app`](https://web-production-7acc2.up.railway.app) |
 | API | [`https://fredocloud-mohammedefaz-production.up.railway.app`](https://fredocloud-mohammedefaz-production.up.railway.app) |
@@ -153,13 +149,12 @@ Full list in `apps/api/.env.example`.
 
 ## Known limitations
 
-- Cloudinary avatar upload needs runtime credentials on the API service
 - Nodemailer needs valid SMTP credentials for actual delivery
-- One custom domain (Railway free tier) &mdash; the web gets it, API uses Railway's URL
+- One custom domain (Railway free tier) — the web gets it, API uses Railway's URL
 - Command palette is navigation-focused
 
 <br>
 
 <p align="center">
-  <sub>Built with Swiss precision. Grid-first. One accent. No decoration beyond what the data asks for.</sub>
+  <sub>Complete team management system for FredoCloud.</sub>
 </p>
