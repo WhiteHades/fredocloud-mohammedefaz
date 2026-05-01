@@ -11,8 +11,6 @@
 
 <br>
 
-<br>
-
 ## Live
 
 | Service | URL |
@@ -154,7 +152,3 @@ Full list in `apps/api/.env.example`.
 - Command palette is navigation-focused
 
 <br>
-
-<p align="center">
-  <sub>Complete team management system for FredoCloud.</sub>
-</p>
