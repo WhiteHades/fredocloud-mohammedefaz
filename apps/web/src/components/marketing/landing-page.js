@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import {
   ArrowUpRight,
   SignIn,
@@ -36,28 +37,38 @@ const BENTO_CARDS = [
   { emoji: "\uD83D\uDCCA", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
 ];
 
-function statSvg(label, value) {
+function statSvg(label, value, bgCenter, bgEdge, textColor, subColor) {
   return `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
       <defs>
         <radialGradient id="bg" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" style="stop-color:#f5f0e8"/>
-          <stop offset="100%" style="stop-color:#e8e4dc"/>
+          <stop offset="0%" style="stop-color:${bgCenter}"/>
+          <stop offset="100%" style="stop-color:${bgEdge}"/>
         </radialGradient>
       </defs>
       <rect width="1600" height="1200" fill="url(#bg)" shape-rendering="crispEdges"/>
-      <text x="800" y="500" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="700" font-size="180" fill="#1a1a1a" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">${value}</text>
-      <text x="800" y="680" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="500" font-size="52" fill="#6b6b6b" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">${label}</text>
+      <text x="800" y="500" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="200" fill="${textColor}" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">${value}</text>
+      <text x="800" y="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="600" font-size="56" fill="${subColor}" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">${label}</text>
     </svg>`
   )}`;
 }
 
-const STAT_ITEMS = [
-  { image: statSvg("Workspaces", "7"), text: "" },
-  { image: statSvg("Members", "26"), text: "" },
-  { image: statSvg("Goals", "200+"), text: "" },
-  { image: statSvg("Items", "400+"), text: "" },
-];
+function buildStatItems(isDark) {
+  if (isDark) {
+    return [
+      { image: statSvg("Workspaces", "7", "#2a1f1f", "#141010", "#e8e0d8", "#9e958b"), text: "" },
+      { image: statSvg("Members", "26", "#2a201f", "#141010", "#e8e0d8", "#9e958b"), text: "" },
+      { image: statSvg("Goals", "200+", "#2a221f", "#141010", "#e8e0d8", "#9e958b"), text: "" },
+      { image: statSvg("Items", "400+", "#2a1e1f", "#141010", "#e8e0d8", "#9e958b"), text: "" },
+    ];
+  }
+  return [
+    { image: statSvg("Workspaces", "7", "#f5f0e8", "#e8e4dc", "#1a1816", "#6b6762"), text: "" },
+    { image: statSvg("Members", "26", "#f5f0e8", "#e8e4dc", "#1a1816", "#6b6762"), text: "" },
+    { image: statSvg("Goals", "200+", "#f5f0e8", "#e8e4dc", "#1a1816", "#6b6762"), text: "" },
+    { image: statSvg("Items", "400+", "#f5f0e8", "#e8e4dc", "#1a1816", "#6b6762"), text: "" },
+  ];
+}
 
 const POLISH = [
   { icon: PaintBrush, label: "Light, dark, and system appearance controls", accent: "#ec4899", anim: "float" },
@@ -71,9 +82,13 @@ const STACK_LABELS = ["Next.js", "Express + Prisma", "PostgreSQL", "Zustand", "S
 
 export function LandingPage() {
   const user = useAuthStore((state) => state.user);
+  const { resolvedTheme } = useTheme();
   const heroRef = useRef(null);
   const videoRef = useRef(null);
   const [videoReady, setVideoReady] = useState(false);
+
+  const isDark = resolvedTheme === "dark";
+  const statItems = useMemo(() => buildStatItems(isDark), [isDark]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -177,11 +192,11 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ROTATING TAGLINE */}
+      {/* ROTATING TAGLINE - CSS Grid 3-column for centered layout */}
       <section className="relative z-10 px-4 py-20 md:px-6" id="tagline">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-5xl flex flex-wrap items-center justify-center gap-x-3">
-            <span className="text-muted-foreground whitespace-nowrap">notFredoHub helps you</span>
+        <div className="mx-auto max-w-4xl">
+          <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-5xl grid" style={{ gridTemplateColumns: "1fr auto 1fr" }}>
+            <span className="text-muted-foreground whitespace-nowrap text-right">notFredoHub helps you</span>
             <span className="inline-flex min-w-[160px] sm:min-w-[200px] justify-start">
               <RotatingText
                 texts={ROTATING_WORDS}
@@ -195,6 +210,7 @@ export function LandingPage() {
                 exit={{ y: "-120%", opacity: 0 }}
               />
             </span>
+            <span />
           </h2>
         </div>
       </section>
@@ -203,7 +219,7 @@ export function LandingPage() {
       <section className="relative z-10 px-4 pb-16 md:px-6">
         <div className="mx-auto max-w-4xl">
           <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden">
-            <CircularGallery items={STAT_ITEMS} bend={3} textColor="#ffffff" borderRadius={0.05} scrollSpeed={2} />
+            <CircularGallery items={statItems} bend={3} textColor="#ffffff" borderRadius={0.05} scrollSpeed={2} />
           </div>
         </div>
       </section>
@@ -232,51 +248,56 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* CARD SWAP - Stack + Polish */}
+      {/* CARD SWAP - centered, themed, responsive */}
       <section className="relative z-10 px-4 pb-24 md:px-6" id="stack">
-        <div className="mx-auto max-w-4xl">
-          <div className="relative h-[420px] sm:h-[380px]">
-            <CardSwap cardDistance={60} verticalDistance={70} delay={3000} pauseOnHover={true}>
-              <Card className="p-6 sm:p-8 flex flex-col justify-center">
-                <Badge variant="outline" className="mb-4 w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Stack</Badge>
-                <h3 className="font-heading text-2xl mb-3">Modern full-stack stack.</h3>
-                <p className="text-sm leading-7 text-muted-foreground mb-4">
-                  Turborepo monorepo, Next.js App Router, Express API, Prisma/Postgres, Zustand, Socket.IO, Cloudinary, Recharts, Railway.
-                </p>
-                <div className="grid grid-cols-4 gap-2">
-                  {STACK_LABELS.map((label) => (
-                    <div key={label} className="rounded-xl border bg-muted/30 px-3 py-2 text-xs text-center text-muted-foreground dark:border-white/8 dark:bg-white/[0.02] dark:text-white/78">
-                      {label}
-                    </div>
-                  ))}
-                </div>
-              </Card>
+        <div className="mx-auto max-w-lg min-h-[380px] sm:min-h-[420px] flex items-center justify-center">
+          <CardSwap
+            width={380}
+            height={360}
+            cardDistance={40}
+            verticalDistance={50}
+            delay={3000}
+            pauseOnHover={true}
+          >
+            <Card className="p-5 sm:p-6 flex flex-col justify-center gap-3">
+              <Badge variant="outline" className="w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Stack</Badge>
+              <h3 className="font-heading text-xl">Modern full-stack stack.</h3>
+              <p className="text-xs leading-6 text-muted-foreground">
+                Turborepo monorepo, Next.js, Express, Prisma/Postgres, Zustand, Socket.IO, Cloudinary, Recharts, Railway.
+              </p>
+              <div className="grid grid-cols-4 gap-1.5">
+                {STACK_LABELS.map((label) => (
+                  <div key={label} className="rounded-lg border bg-muted/30 px-2 py-1.5 text-[10px] text-center text-muted-foreground dark:border-white/8 dark:bg-white/[0.02] dark:text-white/78">
+                    {label}
+                  </div>
+                ))}
+              </div>
+            </Card>
 
-              <Card className="p-6 sm:p-8 flex flex-col justify-center">
-                <Badge variant="outline" className="mb-4 w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Polish</Badge>
-                <h3 className="font-heading text-2xl mb-3">Built to ship.</h3>
-                <p className="text-sm leading-7 text-muted-foreground mb-4">Every detail tuned for speed and usability.</p>
-                <div className="space-y-2">
-                  {POLISH.map((p) => (
-                    <div key={p.label} className="flex items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300 hover:bg-muted/50 dark:hover:bg-white/5">
-                      <AnimatedIcon icon={p.icon} accent={p.accent} animation={p.anim} size="sm" />
-                      <span className="text-sm text-muted-foreground dark:text-white/78">{p.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
+            <Card className="p-5 sm:p-6 flex flex-col justify-center gap-3">
+              <Badge variant="outline" className="w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Polish</Badge>
+              <h3 className="font-heading text-xl">Built to ship.</h3>
+              <p className="text-xs leading-6 text-muted-foreground">Every detail tuned for speed and usability.</p>
+              <div className="space-y-1.5">
+                {POLISH.map((p) => (
+                  <div key={p.label} className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-300 hover:bg-muted/50 dark:hover:bg-white/5">
+                    <AnimatedIcon icon={p.icon} accent={p.accent} animation={p.anim} size="sm" />
+                    <span className="text-xs text-muted-foreground dark:text-white/78">{p.label}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
 
-              <Card className="p-6 sm:p-8 flex flex-col items-center justify-center text-center gap-4">
-                <h3 className="font-heading text-2xl">Ready to start?</h3>
-                <p className="text-sm text-muted-foreground">Join teams already shipping with notFredoHub.</p>
-                <Button size="lg" asChild>
-                  <Link href={user ? "/dashboard" : "/login"}>
-                    {user ? "Go to Dashboard" : "Try the demo"} <ArrowUpRight data-icon="inline-end" />
-                  </Link>
-                </Button>
-              </Card>
-            </CardSwap>
-          </div>
+            <Card className="p-5 sm:p-6 flex flex-col items-center justify-center text-center gap-4">
+              <h3 className="font-heading text-xl">Ready to start?</h3>
+              <p className="text-sm text-muted-foreground">Join teams already shipping with notFredoHub.</p>
+              <Button size="lg" asChild>
+                <Link href={user ? "/dashboard" : "/login"}>
+                  {user ? "Go to Dashboard" : "Try the demo"} <ArrowUpRight data-icon="inline-end" />
+                </Link>
+              </Button>
+            </Card>
+          </CardSwap>
         </div>
       </section>
     </main>
