@@ -7,6 +7,16 @@
 
 <h1 align="center">notFredoHub</h1>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="MIT License">
+  <img src="https://img.shields.io/badge/deploy-Railway-%23000000" alt="Railway">
+  <img src="https://img.shields.io/badge/frontend-Next.js%2016-black" alt="Next.js">
+  <img src="https://img.shields.io/badge/backend-Express-333" alt="Express">
+  <img src="https://img.shields.io/badge/db-PostgreSQL%20%2B%20Prisma-336791" alt="PostgreSQL + Prisma">
+</p>
+
+<br>
+
 <p align="center">Collaborative team hub. Workspaces, goals, announcements, and action items in real time.</p>
 
 <br>
