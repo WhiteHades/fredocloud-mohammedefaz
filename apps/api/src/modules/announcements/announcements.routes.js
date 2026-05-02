@@ -455,7 +455,7 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
         });
       });
 
-      await Promise.all(
+      Promise.all(
         mentionedMemberships.map((mentionedMembership) =>
           sendMentionEmail({
             to: mentionedMembership.user.email,
@@ -463,7 +463,7 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
             announcementTitle: announcement.title,
             commentBody: content,
             goUrl: `${config.clientUrl}/dashboard?announcement=${announcement.id}`,
-          }),
+          }).catch((error) => console.error("Mention email failed:", error)),
         ),
       );
     }

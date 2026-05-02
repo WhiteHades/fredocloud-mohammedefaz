@@ -136,12 +136,12 @@ workspacesRouter.post("/:workspaceId/invitations", requireAuth, async (request, 
     summary: `Invited ${invitation.email} as ${invitation.role}`,
   });
 
-  await sendInvitationEmail({
+  sendInvitationEmail({
     to: invitation.email,
     workspaceName: membership.workspace.name,
     inviterName: membership.user.displayName || membership.user.email,
     acceptUrl: `${config.clientUrl}/dashboard`,
-  });
+  }).catch((error) => console.error("Invitation email failed:", error));
 
   return response.status(201).json({ invitation });
 });
