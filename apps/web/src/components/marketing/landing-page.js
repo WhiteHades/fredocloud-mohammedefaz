@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { animate, stagger } from "animejs";
-
 import {
   ActivityIcon,
   Buildings,
@@ -83,6 +81,7 @@ const API_DOCS_URL = "https://fredocloud-mohammedefaz-production.up.railway.app/
 function AnimatedCard({ card, index }) {
   const cardRef = useRef(null);
   const Icon = card.icon;
+  const styleDelay = { "--delay": `${index * 80}ms` };
 
   useEffect(() => {
     const el = cardRef.current;
@@ -92,69 +91,38 @@ function AnimatedCard({ card, index }) {
       const rect = el.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
-
-      animate({
-        targets: el,
-        rotateY: x * 10,
-        rotateX: -y * 10,
-        duration: 500,
-        easing: "easeOutCubic",
-      });
-
+      el.style.transform = `perspective(800px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg)`;
       const glare = el.querySelector(".card-glare");
       if (glare) {
-        animate({
-          targets: glare,
-          opacity: 0.12,
-          translateX: `${x * 80}px`,
-          translateY: `${y * 80}px`,
-          duration: 500,
-          easing: "easeOutCubic",
-        });
+        glare.style.opacity = "0.12";
+        glare.style.transform = `translate(${x * 80}px, ${y * 80}px)`;
       }
     }
 
     function handleMouseLeave() {
-      animate({
-        targets: el,
-        rotateY: 0,
-        rotateX: 0,
-        duration: 700,
-        easing: "easeOutElastic(1, 0.55)",
-      });
-
+      el.style.transition = "transform 0.7s cubic-bezier(0.34, 1.36, 0.64, 1)";
+      el.style.transform = "perspective(800px) rotateY(0deg) rotateX(0deg)";
       const glare = el.querySelector(".card-glare");
       if (glare) {
-        animate({ targets: glare, opacity: 0, duration: 300 });
+        glare.style.transition = "opacity 0.3s ease";
+        glare.style.opacity = "0";
       }
+    }
+
+    function handleMouseEnter() {
+      el.style.transition = "transform 0.3s ease-out";
     }
 
     el.addEventListener("mousemove", handleMouseMove);
     el.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      el.removeEventListener("mousemove", handleMouseMove);
-      el.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, []);
-
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el) return;
+    el.addEventListener("mouseenter", handleMouseEnter);
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            animate({
-              targets: entry.target,
-              opacity: [0, 1],
-              translateY: [40, 0],
-              scale: [0.9, 1],
-              duration: 700,
-              delay: index * 100,
-              easing: "easeOutCubic",
-            });
+            entry.target.style.opacity = "1";
+            entry.target.style.transform = "perspective(800px) translateY(0) scale(1)";
             observer.unobserve(entry.target);
           }
         });
@@ -163,22 +131,35 @@ function AnimatedCard({ card, index }) {
     );
 
     observer.observe(el);
-    return () => observer.disconnect();
-  }, [index]);
+
+    return () => {
+      el.removeEventListener("mousemove", handleMouseMove);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+      el.removeEventListener("mouseenter", handleMouseEnter);
+      observer.disconnect();
+    };
+  }, []);
 
   return (
     <div
       ref={cardRef}
       className="group relative cursor-default overflow-hidden rounded-2xl border bg-card p-6 shadow-sm transition-colors hover:border-foreground/10 dark:bg-black/40 dark:border-white/10"
-      style={{ transformStyle: "preserve-3d", perspective: "800px", opacity: 0 }}
+      style={{
+        ...styleDelay,
+        opacity: 0,
+        transform: "perspective(800px) translateY(40px) scale(0.92)",
+        transition: "opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1), transform 0.6s cubic-bezier(0.22, 1, 0.36, 1)",
+        transitionDelay: "var(--delay, 0ms)",
+        transformStyle: "preserve-3d",
+      }}
     >
       <div
-        className="card-glare pointer-events-none absolute inset-0 rounded-2xl opacity-0"
+        className="card-glare pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300"
         style={{
           background: `radial-gradient(circle at center, ${card.accent}18 0%, transparent 65%)`,
         }}
       />
-      <div style={{ transform: "translateZ(20px)" }}>
+      <div>
         <div className="mb-3 flex items-center gap-3">
           <div
             className="flex size-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110"
@@ -215,17 +196,22 @@ export function LandingPage() {
   }, []);
 
   useEffect(() => {
-    if (!heroRef.current) return;
-    const chars = heroRef.current.querySelectorAll(".hero-char");
-
-    animate({
-      targets: chars,
-      opacity: [0, 1],
-      translateY: [50, 0],
-      rotateX: [50, 0],
-      duration: 800,
-      delay: stagger(35, { from: "center" }),
-      easing: "easeOutCubic",
+    const el = heroRef.current;
+    if (!el) return;
+    const chars = el.querySelectorAll(".hero-char");
+    chars.forEach((char, i) => {
+      char.animate(
+        [
+          { opacity: 0, transform: "translateY(50px) rotateX(50deg)" },
+          { opacity: 1, transform: "translateY(0) rotateX(0)" },
+        ],
+        {
+          duration: 800,
+          delay: Math.abs((chars.length - 1) / 2 - i) * 35,
+          fill: "forwards",
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+        },
+      );
     });
   }, []);
 
