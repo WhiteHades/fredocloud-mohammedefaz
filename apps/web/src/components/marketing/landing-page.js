@@ -23,7 +23,6 @@ import {
 import { useAuthStore } from "@/stores/auth-store";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 import { AnimatedIcon } from "@/components/ui/animated-icon";
-import { RotatingWords } from "@/components/ui/rotating-words";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import BlurText from "@/components/BlurText";
