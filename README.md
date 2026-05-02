@@ -154,10 +154,4 @@ Full list in `apps/api/.env.example`.
 - **Animations:** transitions-dev CSS transitions, anime.js entrance animations
 - **Icons:** Phosphor Icons (consistent stroke style)
 
-## Known limitations
-
-- Nodemailer needs valid SMTP credentials for actual delivery
-- One custom domain (Railway free tier) — the web gets it, API uses Railway's URL
-- Command palette is navigation-focused via shadcn CommandDialog
-
 <br>
