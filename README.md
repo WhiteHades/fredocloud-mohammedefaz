@@ -145,13 +145,4 @@ Full list in `apps/api/.env.example`.
 
 <br>
 
-## UI Design
-
-- **Design system:** shadcn/ui Luma (Radix primitives)
-- **Layout:** Collapsible sidebar with workspace switcher, card-based dashboard grid
-- **Theme:** Light and dark with toggle, OKLCH color system, dark default
-- **Fonts:** Geist (headings), IBM Plex Sans (body), Geist Mono (code)
-- **Animations:** transitions-dev CSS transitions, anime.js entrance animations
-- **Icons:** Phosphor Icons (consistent stroke style)
-
 <br>
