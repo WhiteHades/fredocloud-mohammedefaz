@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
 import { Sun, Moon, Desktop } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,16 @@ const THEME_LABELS = { light: "Light", dark: "Dark", system: "System" };
 export function ThemeToggle({ className = "" }) {
   const { resolvedTheme, setTheme, theme } = useTheme();
   const [display, setDisplay] = useState(theme || "light");
-  const prevTheme = useRef(theme);
+  const prevDisplay = useRef(display);
 
-  useLayoutEffect(() => {
-    if (theme === prevTheme.current) return;
-    prevTheme.current = theme;
-    const timer = requestAnimationFrame(() => setDisplay(theme));
-    return () => cancelAnimationFrame(timer);
+  useEffect(() => {
+    prevDisplay.current = display;
+  }, [display]);
+
+  useEffect(() => {
+    if (!theme) return;
+    const id = requestAnimationFrame(() => setDisplay(theme));
+    return () => cancelAnimationFrame(id);
   }, [theme]);
 
   const cycle = useCallback(() => {
@@ -27,7 +30,20 @@ export function ThemeToggle({ className = "" }) {
   }, [setTheme, display]);
 
   const label = THEME_LABELS[display] || "Light";
-  const isSystem = display === "system";
+  const wasActive = prevDisplay.current;
+
+  const iconStyle = (name) => ({
+    opacity: display === name ? 1 : 0,
+    transitionDelay: wasActive === name ? "0ms" : "70ms",
+    transform: display === name
+      ? "scale(1) rotate(0deg)"
+      : name === "dark"
+        ? "scale(0.25) rotate(90deg)"
+        : name === "light"
+          ? "scale(0.25) rotate(-90deg)"
+          : "scale(0.25) rotate(0deg)",
+    filter: display === name ? "blur(0)" : "blur(2px)",
+  });
 
   return (
     <Tooltip>
@@ -43,29 +59,17 @@ export function ThemeToggle({ className = "" }) {
             <Sun
               weight="fill"
               className="theme-toggle-sun absolute inset-0 size-5 transition-all duration-[var(--icon-swap-dur)] ease-out"
-              style={{
-                opacity: display === "light" ? 1 : 0,
-                transform: display === "light" ? "scale(1) rotate(0deg)" : "scale(0.25) rotate(-90deg)",
-                filter: display === "light" ? "blur(0)" : "blur(2px)",
-              }}
+              style={iconStyle("light")}
             />
             <Moon
               weight="fill"
               className="theme-toggle-moon absolute inset-0 size-5 transition-all duration-[var(--icon-swap-dur)] ease-out"
-              style={{
-                opacity: display === "dark" ? 1 : 0,
-                transform: display === "dark" ? "scale(1) rotate(0deg)" : "scale(0.25) rotate(90deg)",
-                filter: display === "dark" ? "blur(0)" : "blur(2px)",
-              }}
+              style={iconStyle("dark")}
             />
             <Desktop
               weight="fill"
               className="theme-toggle-system absolute inset-0 size-5 transition-all duration-[var(--icon-swap-dur)] ease-out"
-              style={{
-                opacity: isSystem ? 1 : 0,
-                transform: isSystem ? "scale(1) rotate(0deg)" : "scale(0.25) rotate(0deg)",
-                filter: isSystem ? "blur(0)" : "blur(2px)",
-              }}
+              style={iconStyle("system")}
             />
           </span>
         </Button>
