@@ -32,25 +32,8 @@ export function LandingPage() {
   const { resolvedTheme } = useTheme();
   const heroRef = useRef(null);
   const videoRef = useRef(null);
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const [videoError, setVideoError] = useState(false);
-
   const isDark = resolvedTheme === "dark";
   const carouselItems = useCarouselItems(isDark);
-
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const onReady = () => setVideoLoaded(true);
-    const onError = () => setVideoError(true);
-    if (v.readyState >= 2) onReady();
-    v.addEventListener("canplay", onReady, { once: true });
-    v.addEventListener("error", onError, { once: true });
-    return () => {
-      v.removeEventListener("canplay", onReady);
-      v.removeEventListener("error", onError);
-    };
-  }, []);
 
   useEffect(() => {
     const el = heroRef.current;
@@ -89,12 +72,10 @@ export function LandingPage() {
 
       {/* HERO */}
       <section className="relative z-10 px-4 pb-4 pt-4 md:px-6 md:pb-6">
-        <div className="relative min-h-[92svh] overflow-hidden rounded-[2rem] border bg-card shadow-2xl dark:bg-black dark:border-white/10">
-          {videoError ? null : (
-            <video ref={videoRef} autoPlay loop muted playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out dark:opacity-70 ${videoLoaded ? "opacity-100" : "opacity-0"}`}>
-              <source src="/ascii-art.mp4" type="video/mp4" />
-            </video>
-          )}
+        <div className="relative min-h-[92svh] overflow-hidden rounded-[2rem] border bg-neutral-950 shadow-2xl dark:bg-black dark:border-white/10">
+          <video ref={videoRef} autoPlay loop muted playsInline preload="auto" className="absolute inset-0 h-full w-full object-cover dark:opacity-70">
+            <source src="/ascii-art.mp4" type="video/mp4" />
+          </video>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_40%)] dark:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_40%)]" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background/85 dark:from-black/60 dark:via-black/30 dark:to-black/85" />
 
@@ -156,7 +137,8 @@ export function LandingPage() {
             <span className="text-muted-foreground whitespace-nowrap">notFredoHub helps you</span>
             <RotatingText
               texts={ROTATING_WORDS}
-              mainClassName="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#fb2c36] via-[#fb2c36]/80 to-[#fb2c36]"
+              mainClassName="font-bold"
+              innerWrapperClassName="text-transparent bg-clip-text bg-gradient-to-r from-[#fb2c36] via-[#fb2c36]/80 to-[#fb2c36]"
               rotationInterval={2200}
               staggerDuration={0.03}
               staggerFrom="last"

@@ -8,8 +8,8 @@ function bakeTextOnImage(bgSrc, value, label, isDark) {
     img.crossOrigin = "anonymous";
     img.onload = () => {
       const canvas = document.createElement("canvas");
-      const w = 1600;
-      const h = 1200;
+      const w = 400;
+      const h = 300;
       canvas.width = w;
       canvas.height = h;
       const ctx = canvas.getContext("2d");
@@ -29,24 +29,24 @@ function bakeTextOnImage(bgSrc, value, label, isDark) {
       ctx.fillStyle = "rgba(255,255,255,0.6)";
       ctx.fillText(label, w / 2, h * 0.55);
 
-      resolve(canvas.toDataURL("image/png"));
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
     };
     img.onerror = () => {
       const canvas = document.createElement("canvas");
-      canvas.width = 1600;
-      canvas.height = 1200;
+      canvas.width = 400;
+      canvas.height = 300;
       const ctx = canvas.getContext("2d");
       ctx.fillStyle = isDark ? "#1c1c1c" : "#f5f5f5";
-      ctx.fillRect(0, 0, 1600, 1200);
+      ctx.fillRect(0, 0, 400, 300);
       ctx.fillStyle = isDark ? "#ffffff" : "#333333";
-      ctx.font = "bold 280px system-ui, -apple-system, sans-serif";
+      ctx.font = "bold 70px system-ui, -apple-system, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(value, 800, 510);
-      ctx.font = "72px system-ui, -apple-system, sans-serif";
+      ctx.fillText(value, 200, 130);
+      ctx.font = "18px system-ui, -apple-system, sans-serif";
       ctx.fillStyle = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
-      ctx.fillText(label, 800, 660);
-      resolve(canvas.toDataURL("image/png"));
+      ctx.fillText(label, 200, 165);
+      resolve(canvas.toDataURL("image/jpeg", 0.85));
     };
     img.src = bgSrc;
   });
