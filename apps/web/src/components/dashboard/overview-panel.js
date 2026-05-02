@@ -104,7 +104,7 @@ export function OverviewPanel({ activeMembership, onlineUserIds, refreshKey }) {
           <CardHeader className="gap-4">
             <div className="flex items-center gap-3">
               <span
-                className="size-3 rounded-full border border-white/20 shadow-sm"
+                className="size-3 rounded-full border border-border shadow-sm"
                 style={{ backgroundColor: activeMembership.workspace.accentColor }}
               />
               <Badge variant="outline">{activeMembership.role}</Badge>

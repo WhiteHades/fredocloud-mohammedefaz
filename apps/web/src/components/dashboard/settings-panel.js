@@ -156,7 +156,7 @@ export function SettingsPanel({
             <div className="rounded-2xl border p-4">
               <p className="text-sm font-medium">Current Workspace Accent</p>
               <div className="mt-3 flex items-center gap-3">
-                <span className="size-4 rounded-full border border-white/20" style={{ backgroundColor: accentColor }} />
+                <span className="size-4 rounded-full border border-border" style={{ backgroundColor: accentColor }} />
                 <code className="text-xs text-muted-foreground">{accentColor}</code>
               </div>
             </div>

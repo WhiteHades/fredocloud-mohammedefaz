@@ -105,10 +105,18 @@ export function AnalyticsPanel({ activeWorkspace, refreshKey }) {
             <CardContent ref={chartHostRef}>
               {goalCompletion.length > 0 ? (
                 <BarChart width={chartWidth} height={300} data={goalCompletion} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                  <XAxis dataKey="name" tick={{ fill: "var(--muted-foreground)" }} />
+                  <YAxis tick={{ fill: "var(--muted-foreground)" }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "var(--popover)",
+                      border: "1px solid var(--border)",
+                      color: "var(--popover-foreground)",
+                      borderRadius: "var(--radius)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    }}
+                  />
                   <Bar dataKey="progress" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               ) : (
