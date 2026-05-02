@@ -58,6 +58,11 @@ export function AnnouncementsPanel({ activeMembership, lastRealtimeEvent }) {
     const { announcementId, reactions } = lastRealtimeEvent.payload || {};
     if (!announcementId || !reactions) return;
 
+    const hasPendingReaction = Object.keys(pendingReactionsRef.current).some(
+      (key) => key.startsWith(`${announcementId}:`)
+    );
+    if (hasPendingReaction) return;
+
     setAnnouncements((prev) =>
       prev.map((a) => (a.id === announcementId ? { ...a, reactions } : a))
     );
