@@ -594,9 +594,9 @@ const MagicBento = ({
             }`;
 
             const cardStyle = {
-              backgroundColor: card.color || 'var(--background-dark)',
-              borderColor: 'var(--border-color)',
-              color: 'var(--white)',
+              backgroundColor: 'var(--card)',
+              borderColor: 'var(--border)',
+              color: 'var(--card-foreground)',
               '--glow-x': '50%',
               '--glow-y': '50%',
               '--glow-intensity': '0',
@@ -615,19 +615,19 @@ const MagicBento = ({
                   enableTilt={enableTilt}
                   clickEffect={clickEffect}
                   enableMagnetism={enableMagnetism}>
-                  <div className="card__header flex justify-between gap-3 relative text-white">
+                  <div className="card__header flex justify-between gap-3 relative">
                     <span className="card__label text-base">{card.label}</span>
                   </div>
                   <div className="card__visual flex-1 flex items-center justify-center relative">
-                    <span className="text-3xl opacity-20 select-none">{card.emoji || ""}</span>
+                    <span className="text-3xl opacity-10 select-none">{card.emoji || ""}</span>
                   </div>
-                  <div className="card__content flex flex-col relative text-white">
+                  <div className="card__content flex flex-col relative">
                     <h3
                       className={`card__title font-normal text-base m-0 mb-1 ${textAutoHide ? 'text-clamp-1' : ''}`}>
                       {card.title}
                     </h3>
                     <p
-                      className={`card__description text-xs leading-5 opacity-90 ${textAutoHide ? 'text-clamp-2' : ''}`}>
+                      className={`card__description text-xs leading-5 opacity-70 ${textAutoHide ? 'text-clamp-2' : ''}`}>
                       {card.description}
                     </p>
                   </div>
@@ -745,19 +745,19 @@ const MagicBento = ({
                   el.addEventListener('mouseleave', handleMouseLeave);
                   el.addEventListener('click', handleClick);
                 }}>
-                <div className="card__header flex justify-between gap-3 relative text-white">
+                <div className="card__header flex justify-between gap-3 relative">
                   <span className="card__label text-base">{card.label}</span>
                 </div>
                 <div className="card__visual flex-1 flex items-center justify-center relative">
-                  <span className="text-3xl opacity-20 select-none">{card.emoji || ""}</span>
+                  <span className="text-3xl opacity-10 select-none">{card.emoji || ""}</span>
                 </div>
-                <div className="card__content flex flex-col relative text-white">
+                <div className="card__content flex flex-col relative">
                   <h3
                     className={`card__title font-normal text-base m-0 mb-1 ${textAutoHide ? 'text-clamp-1' : ''}`}>
                     {card.title}
                   </h3>
                   <p
-                    className={`card__description text-xs leading-5 opacity-90 ${textAutoHide ? 'text-clamp-2' : ''}`}>
+                    className={`card__description text-xs leading-5 opacity-70 ${textAutoHide ? 'text-clamp-2' : ''}`}>
                     {card.description}
                   </p>
                 </div>

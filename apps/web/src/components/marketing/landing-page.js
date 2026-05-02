@@ -23,6 +23,7 @@ import RotatingText from "@/components/RotatingText";
 import DotGrid from "@/components/DotGrid";
 import MagicBento from "@/components/MagicBento";
 import CircularGallery from "@/components/CircularGallery";
+import CardSwap, { Card } from "@/components/CardSwap";
 
 const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
 
@@ -35,27 +36,27 @@ const BENTO_CARDS = [
   { emoji: "\uD83D\uDCCA", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
 ];
 
-function statSvg(label, value, bg1) {
+function statSvg(label, value) {
   return `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
       <defs>
         <radialGradient id="bg" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" style="stop-color:${bg1}"/>
-          <stop offset="100%" style="stop-color:#0d0d0d"/>
+          <stop offset="0%" style="stop-color:#f5f0e8"/>
+          <stop offset="100%" style="stop-color:#e8e4dc"/>
         </radialGradient>
       </defs>
-      <rect width="800" height="600" fill="url(#bg)"/>
-      <text x="400" y="250" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="700" font-size="100" fill="#f5f0e8">${value}</text>
-      <text x="400" y="350" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="500" font-size="34" fill="#f5f0e8" opacity="0.6">${label}</text>
+      <rect width="1600" height="1200" fill="url(#bg)" shape-rendering="crispEdges"/>
+      <text x="800" y="500" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="700" font-size="180" fill="#1a1a1a" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">${value}</text>
+      <text x="800" y="680" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="500" font-size="52" fill="#6b6b6b" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">${label}</text>
     </svg>`
   )}`;
 }
 
 const STAT_ITEMS = [
-  { image: statSvg("Workspaces", "7", "#fb2c36"), text: "" },
-  { image: statSvg("Members", "26", "#fb2c36"), text: "" },
-  { image: statSvg("Goals", "200+", "#fb2c36"), text: "" },
-  { image: statSvg("Items", "400+", "#fb2c36"), text: "" },
+  { image: statSvg("Workspaces", "7"), text: "" },
+  { image: statSvg("Members", "26"), text: "" },
+  { image: statSvg("Goals", "200+"), text: "" },
+  { image: statSvg("Items", "400+"), text: "" },
 ];
 
 const POLISH = [
@@ -65,6 +66,8 @@ const POLISH = [
   { icon: LockSimple, label: "Role-aware permissions and seeded demo flows", accent: "#6366f1", anim: "pulse" },
   { icon: Timer, label: "Realtime updates tuned to feel immediate", accent: "#ef4444", anim: "tick" },
 ];
+
+const STACK_LABELS = ["Next.js", "Express + Prisma", "PostgreSQL", "Zustand", "Socket.IO", "Cloudinary", "Recharts", "Railway"];
 
 export function LandingPage() {
   const user = useAuthStore((state) => state.user);
@@ -96,9 +99,26 @@ export function LandingPage() {
   const API_DOCS_URL = "https://fredocloud-mohammedefaz-production.up.railway.app/api/docs";
 
   return (
-    <main className="bg-background text-foreground">
+    <main className="bg-background text-foreground relative">
+      {/* DOT GRID - full page background */}
+      <div className="fixed inset-0 z-0 pointer-events-none" aria-hidden="true">
+        <DotGrid
+          dotSize={2}
+          gap={29}
+          baseColor="#2F293A"
+          activeColor="#fb2c36"
+          proximity={50}
+          speedTrigger={100}
+          shockRadius={50}
+          shockStrength={1}
+          maxSpeed={8000}
+          resistance={900}
+          returnDuration={1.9}
+        />
+      </div>
+
       {/* HERO */}
-      <section className="px-4 pb-4 pt-4 md:px-6 md:pb-6">
+      <section className="relative z-10 px-4 pb-4 pt-4 md:px-6 md:pb-6">
         <div className="relative min-h-[92svh] overflow-hidden rounded-[2rem] border bg-card shadow-2xl dark:bg-black dark:border-white/10">
           <video ref={videoRef} autoPlay loop muted playsInline preload="auto" className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out dark:opacity-70" style={{ opacity: videoReady ? undefined : 0 }}>
             <source src="/ascii-art.mp4" type="video/mp4" />
@@ -158,14 +178,14 @@ export function LandingPage() {
       </section>
 
       {/* ROTATING TAGLINE */}
-      <section className="px-4 py-20 md:px-6" id="tagline">
+      <section className="relative z-10 px-4 py-20 md:px-6" id="tagline">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-5xl flex flex-wrap items-center justify-center gap-x-3">
             <span className="text-muted-foreground whitespace-nowrap">notFredoHub helps you</span>
             <span className="inline-flex min-w-[160px] sm:min-w-[200px] justify-start">
               <RotatingText
                 texts={ROTATING_WORDS}
-                mainClassName="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#d4510a] via-[#f97316] to-[#d4510a]"
+                mainClassName="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#fb2c36] via-[#fb2c36]/80 to-[#fb2c36]"
                 rotationInterval={2200}
                 staggerDuration={0.03}
                 staggerFrom="last"
@@ -179,105 +199,83 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* STATS + FEATURES with DotGrid background */}
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <DotGrid
-            dotSize={2}
-            gap={29}
-            baseColor="#2F293A"
-            activeColor="#fb2c36"
-            proximity={50}
-            speedTrigger={100}
-            shockRadius={50}
-            shockStrength={1}
-            maxSpeed={8000}
-            resistance={900}
-            returnDuration={1.9}
+      {/* STATS */}
+      <section className="relative z-10 px-4 pb-16 md:px-6">
+        <div className="mx-auto max-w-4xl">
+          <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden">
+            <CircularGallery items={STAT_ITEMS} bend={3} textColor="#ffffff" borderRadius={0.05} scrollSpeed={2} />
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES */}
+      <section className="relative z-10 px-4 py-16 md:px-6" id="features">
+        <div className="mx-auto max-w-4xl space-y-8">
+          <div className="text-center space-y-4">
+            <Badge variant="outline" className="dark:border-white/10 dark:bg-white/5 dark:text-white/70">Features</Badge>
+            <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-4xl">
+              Built for teams that move fast.
+            </h2>
+          </div>
+          <MagicBento
+            cards={BENTO_CARDS}
+            enableStars={true}
+            enableSpotlight={true}
+            enableBorderGlow={true}
+            enableTilt={false}
+            enableMagnetism={true}
+            clickEffect={true}
+            glowColor="251, 44, 54"
+            spotlightRadius={250}
+            particleCount={8}
           />
         </div>
+      </section>
 
-        {/* STATS CIRCULAR GALLERY */}
-        <section className="relative z-10 px-4 pb-16 md:px-6">
-          <div className="mx-auto max-w-4xl">
-            <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden">
-              <CircularGallery
-                items={STAT_ITEMS}
-                bend={3}
-                textColor="#ffffff"
-                borderRadius={0.05}
-                scrollSpeed={2}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* FEATURES - MAGIC BENTO */}
-        <section className="relative z-10 px-4 py-16 md:px-6" id="features">
-          <div className="mx-auto max-w-4xl space-y-8">
-            <div className="text-center space-y-4">
-              <Badge variant="outline" className="dark:border-white/10 dark:bg-white/5 dark:text-white/70">Features</Badge>
-              <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-4xl">
-                Built for teams that move fast.
-              </h2>
-            </div>
-            <MagicBento
-              cards={BENTO_CARDS}
-              enableStars={true}
-              enableSpotlight={true}
-              enableBorderGlow={true}
-              enableTilt={false}
-              enableMagnetism={true}
-              clickEffect={true}
-              glowColor="251, 44, 54"
-              spotlightRadius={250}
-              particleCount={8}
-            />
-          </div>
-        </section>
-      </div>
-
-      {/* STACK + POLISH */}
-      <section className="px-4 pb-24 md:px-6" id="stack">
-        <div className="mx-auto max-w-6xl">
-          <div className="rounded-2xl border bg-card p-6 sm:p-8 md:p-12 dark:border-white/10 dark:bg-black/40">
-            <div className="grid gap-10 lg:grid-cols-2">
-              <div>
-                <Badge variant="outline" className="mb-4 dark:border-white/10 dark:bg-white/5 dark:text-white/70">Stack</Badge>
-                <h3 className="font-heading text-2xl mb-3 dark:text-[#f4f0e6]">Modern full-stack stack.</h3>
-                <p className="text-sm leading-7 text-muted-foreground mb-6 dark:text-white/62">
+      {/* CARD SWAP - Stack + Polish */}
+      <section className="relative z-10 px-4 pb-24 md:px-6" id="stack">
+        <div className="mx-auto max-w-4xl">
+          <div className="relative h-[420px] sm:h-[380px]">
+            <CardSwap cardDistance={60} verticalDistance={70} delay={3000} pauseOnHover={true}>
+              <Card className="p-6 sm:p-8 flex flex-col justify-center">
+                <Badge variant="outline" className="mb-4 w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Stack</Badge>
+                <h3 className="font-heading text-2xl mb-3">Modern full-stack stack.</h3>
+                <p className="text-sm leading-7 text-muted-foreground mb-4">
                   Turborepo monorepo, Next.js App Router, Express API, Prisma/Postgres, Zustand, Socket.IO, Cloudinary, Recharts, Railway.
                 </p>
-                <div className="grid gap-2.5 sm:grid-cols-2">
-                  {["Next.js", "Express + Prisma", "PostgreSQL", "Zustand", "Socket.IO", "Cloudinary", "Recharts", "Railway"].map((label) => (
-                    <div key={label} className="group flex items-center gap-3 rounded-xl border bg-muted/30 px-4 py-3 text-sm text-muted-foreground transition-all duration-300 hover:border-foreground/10 hover:text-foreground hover:bg-muted dark:border-white/8 dark:bg-white/[0.02] dark:text-white/78 dark:hover:text-white dark:hover:bg-white/5">
-                      <span className="flex size-2 shrink-0 rounded-full bg-primary/40 transition-all duration-300 group-hover:bg-primary group-hover:scale-125" />
+                <div className="grid grid-cols-4 gap-2">
+                  {STACK_LABELS.map((label) => (
+                    <div key={label} className="rounded-xl border bg-muted/30 px-3 py-2 text-xs text-center text-muted-foreground dark:border-white/8 dark:bg-white/[0.02] dark:text-white/78">
                       {label}
                     </div>
                   ))}
                 </div>
-              </div>
-              <div>
-                <Badge variant="outline" className="mb-4 dark:border-white/10 dark:bg-white/5 dark:text-white/70">Polish</Badge>
-                <h3 className="font-heading text-2xl mb-3 dark:text-[#f4f0e6]">Built to ship.</h3>
-                <p className="text-sm leading-7 text-muted-foreground mb-6 dark:text-white/62">Every detail tuned for speed and usability.</p>
-                <div className="space-y-1">
+              </Card>
+
+              <Card className="p-6 sm:p-8 flex flex-col justify-center">
+                <Badge variant="outline" className="mb-4 w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Polish</Badge>
+                <h3 className="font-heading text-2xl mb-3">Built to ship.</h3>
+                <p className="text-sm leading-7 text-muted-foreground mb-4">Every detail tuned for speed and usability.</p>
+                <div className="space-y-2">
                   {POLISH.map((p) => (
-                    <div key={p.label} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-300 hover:bg-muted/50 dark:hover:bg-white/5">
+                    <div key={p.label} className="flex items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300 hover:bg-muted/50 dark:hover:bg-white/5">
                       <AnimatedIcon icon={p.icon} accent={p.accent} animation={p.anim} size="sm" />
                       <span className="text-sm text-muted-foreground dark:text-white/78">{p.label}</span>
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-            <div className="mt-10 flex justify-center">
-              <Button size="lg" asChild>
-                <Link href={user ? "/dashboard" : "/login"}>
-                  {user ? "Go to Dashboard" : "Try the demo"} <ArrowUpRight data-icon="inline-end" />
-                </Link>
-              </Button>
-            </div>
+              </Card>
+
+              <Card className="p-6 sm:p-8 flex flex-col items-center justify-center text-center gap-4">
+                <h3 className="font-heading text-2xl">Ready to start?</h3>
+                <p className="text-sm text-muted-foreground">Join teams already shipping with notFredoHub.</p>
+                <Button size="lg" asChild>
+                  <Link href={user ? "/dashboard" : "/login"}>
+                    {user ? "Go to Dashboard" : "Try the demo"} <ArrowUpRight data-icon="inline-end" />
+                  </Link>
+                </Button>
+              </Card>
+            </CardSwap>
           </div>
         </div>
       </section>
