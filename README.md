@@ -19,7 +19,7 @@
 
 <p align="center">Collaborative team hub. Workspaces, goals, announcements, and action items in real time.</p>
 
-[Watch demo walkthrough](https://raw.githubusercontent.com/WhiteHades/notfredohub/main/apps/web/public/walkthrough.mp4)
+https://github.com/user-attachments/assets/13fef550-8158-45fc-8e3c-3691bb6bb9ee
 
 ### `Live`
 
