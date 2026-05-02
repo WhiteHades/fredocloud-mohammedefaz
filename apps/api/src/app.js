@@ -83,13 +83,22 @@ app.post("/api/test/email", requireAuth, async (request, response) => {
 
   const to = request.body.to || request.auth.email;
 
-  const result = await sendEmail({
-    to,
-    subject: "notFredoHub email test",
-    html: `<p>Hi! This is a test email from <strong>notFredoHub</strong>. If you're reading this, email delivery is working. Sent at ${new Date().toISOString()}.</p>`,
-  });
+  try {
+    const result = await sendEmail({
+      to,
+      subject: "notFredoHub email test",
+      html: `<p>Hi! This is a test email from <strong>notFredoHub</strong>. If you're reading this, email delivery is working. Sent at ${new Date().toISOString()}.</p>`,
+    });
 
-  return response.status(200).json({ success: true, to, ...result });
+    return response.status(200).json({ success: true, to, ...result });
+  } catch (error) {
+    return response.status(500).json({ error: error.message, details: error.toString() });
+  }
+});
+
+app.use((error, _request, response, _next) => {
+  console.error("Unhandled error:", error);
+  response.status(500).json({ error: error.message || "Internal Server Error" });
 });
 
 module.exports = { app };
