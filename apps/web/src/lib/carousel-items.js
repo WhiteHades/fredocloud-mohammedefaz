@@ -17,7 +17,7 @@ function bakeTextOnImage(bgSrc, value, label, isDark) {
       ctx.drawImage(img, 0, 0, w, h);
 
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold " + Math.round(w * 0.18) + "px system-ui, -apple-system, sans-serif";
+      ctx.font = "bold " + Math.round(w * 0.09) + "px system-ui, -apple-system, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.shadowColor = "rgba(0,0,0,0.4)";
@@ -25,9 +25,9 @@ function bakeTextOnImage(bgSrc, value, label, isDark) {
       ctx.fillText(value, w / 2, h * 0.43);
 
       ctx.shadowBlur = 0;
-      ctx.font = Math.round(w * 0.045) + "px system-ui, -apple-system, sans-serif";
+      ctx.font = Math.round(w * 0.028) + "px system-ui, -apple-system, sans-serif";
       ctx.fillStyle = "rgba(255,255,255,0.6)";
-      ctx.fillText(label, w / 2, h * 0.55);
+      ctx.fillText(label, w / 2, h * 0.56);
 
       resolve(canvas.toDataURL("image/jpeg", 0.85));
     };
@@ -39,13 +39,13 @@ function bakeTextOnImage(bgSrc, value, label, isDark) {
       ctx.fillStyle = isDark ? "#1c1c1c" : "#f5f5f5";
       ctx.fillRect(0, 0, 512, 256);
       ctx.fillStyle = isDark ? "#ffffff" : "#333333";
-      ctx.font = "bold 90px system-ui, -apple-system, sans-serif";
+      ctx.font = "bold 46px system-ui, -apple-system, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(value, 256, 110);
-      ctx.font = "22px system-ui, -apple-system, sans-serif";
+      ctx.fillText(value, 256, 108);
+      ctx.font = "14px system-ui, -apple-system, sans-serif";
       ctx.fillStyle = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
-      ctx.fillText(label, 256, 140);
+      ctx.fillText(label, 256, 143);
       resolve(canvas.toDataURL("image/jpeg", 0.85));
     };
     img.src = bgSrc;
