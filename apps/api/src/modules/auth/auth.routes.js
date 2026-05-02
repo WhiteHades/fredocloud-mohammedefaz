@@ -2,6 +2,8 @@ const bcrypt = require("bcryptjs");
 const { Router } = require("express");
 const multer = require("multer");
 
+const { normalizeEmail } = require("@notfredohub/shared");
+
 const {
   REFRESH_COOKIE_NAME,
   REFRESH_TOKEN_MAX_AGE_MS,
@@ -18,10 +20,6 @@ const { requireAuth } = require("../../middleware/require-auth");
 
 const authRouter = Router();
 const upload = multer({ storage: multer.memoryStorage() });
-
-function normalizeEmail(email) {
-  return email.trim().toLowerCase();
-}
 
 function serializeUser(user) {
   return {

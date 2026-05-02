@@ -1,5 +1,6 @@
 const { Router } = require("express");
 
+const { parseDateValue } = require("@notfredohub/shared");
 const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
 const { emitWorkspaceEvent } = require("../../lib/realtime");
@@ -17,15 +18,6 @@ function normalizePriority(priority) {
   }
 
   return ACTION_ITEM_PRIORITIES.has(priority) ? priority : "MEDIUM";
-}
-
-function parseDate(value) {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.valueOf()) ? null : parsed;
 }
 
 function serializeActionItem(actionItem) {
@@ -79,7 +71,7 @@ workspaceActionItemsRouter.post("/", requireAuth, async (request, response) => {
       : null;
   const status = request.body.status || "TODO";
   const priority = normalizePriority(request.body.priority);
-  const dueDate = parseDate(request.body.dueDate);
+  const dueDate = parseDateValue(request.body.dueDate);
   const goalId = request.body.goalId || null;
   let assigneeMembershipId = request.body.assigneeMembershipId || membership.id;
 
@@ -197,7 +189,7 @@ actionItemActionsRouter.patch("/:actionItemId", requireAuth, async (request, res
       priority: normalizePriority(request.body.priority || actionItem.priority),
       dueDate:
         Object.prototype.hasOwnProperty.call(request.body, "dueDate")
-          ? parseDate(request.body.dueDate)
+          ? parseDateValue(request.body.dueDate)
           : actionItem.dueDate,
       position:
         typeof request.body.position === "number" ? request.body.position : actionItem.position,

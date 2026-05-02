@@ -1,5 +1,6 @@
 const { Router } = require("express");
 
+const { parseDateValue } = require("@notfredohub/shared");
 const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
 const { emitWorkspaceEvent } = require("../../lib/realtime");
@@ -17,15 +18,6 @@ function normalizeGoalStatus(status) {
   }
 
   return GOAL_STATUSES.has(status) ? status : "NOT_STARTED";
-}
-
-function parseDate(value) {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = new Date(value);
-  return Number.isNaN(parsed.valueOf()) ? null : parsed;
 }
 
 function serializeGoal(goal) {
@@ -80,7 +72,7 @@ goalsRouter.post("/", requireAuth, async (request, response) => {
     typeof request.body.description === "string" && request.body.description.trim()
       ? request.body.description.trim()
       : null;
-  const dueDate = parseDate(request.body.dueDate);
+  const dueDate = parseDateValue(request.body.dueDate);
   const status = normalizeGoalStatus(request.body.status);
   let ownerMembershipId = membership.id;
 
@@ -173,7 +165,7 @@ goalDetailRouter.post("/:goalId/milestones", requireAuth, async (request, respon
 
   const title = typeof request.body.title === "string" ? request.body.title.trim() : "";
   const progressPercentage = Number(request.body.progressPercentage || 0);
-  const dueDate = parseDate(request.body.dueDate);
+  const dueDate = parseDateValue(request.body.dueDate);
 
   if (!title) {
     return response.status(400).json({ error: "Milestone title is required." });

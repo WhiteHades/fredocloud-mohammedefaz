@@ -5,6 +5,7 @@ const { recordAuditEvent } = require("../../lib/audit");
 const { sendMentionEmail } = require("../../lib/email");
 const { hasCloudinaryConfig, uploadAssetBuffer } = require("../../lib/cloudinary");
 const { prisma } = require("../../lib/prisma");
+const { config } = require("../../lib/env");
 const { emitNotificationEvent, emitWorkspaceEvent } = require("../../lib/realtime");
 const { getWorkspaceAccess, hasPermission } = require("../../lib/workspace-access");
 const { requireAuth } = require("../../middleware/require-auth");
@@ -461,6 +462,7 @@ announcementActionsRouter.post("/:announcementId/comments", requireAuth, async (
             workspaceName: membership.workspace.name,
             announcementTitle: announcement.title,
             commentBody: content,
+            goUrl: `${config.clientUrl}/dashboard?announcement=${announcement.id}`,
           }),
         ),
       );

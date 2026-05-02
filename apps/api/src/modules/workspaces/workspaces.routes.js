@@ -1,6 +1,8 @@
 const { Router } = require("express");
 
+const { parseDateString, toCsvCell } = require("@notfredohub/shared");
 const { recordAuditEvent } = require("../../lib/audit");
+const { config } = require("../../lib/env");
 const { sendInvitationEmail } = require("../../lib/email");
 const { prisma } = require("../../lib/prisma");
 const {
@@ -11,18 +13,6 @@ const {
 const { requireAuth } = require("../../middleware/require-auth");
 
 const workspacesRouter = Router();
-
-function parseDate(value) {
-  if (!value) {
-    return "";
-  }
-
-  return value instanceof Date ? value.toISOString() : String(value);
-}
-
-function toCsvCell(value) {
-  return `"${String(value ?? "").replaceAll('"', '""')}"`;
-}
 
 function serializeMembership(membership) {
   return {
@@ -150,6 +140,7 @@ workspacesRouter.post("/:workspaceId/invitations", requireAuth, async (request, 
     to: invitation.email,
     workspaceName: membership.workspace.name,
     inviterName: membership.user.displayName || membership.user.email,
+    acceptUrl: `${config.clientUrl}/dashboard`,
   });
 
   return response.status(201).json({ invitation });
@@ -280,8 +271,8 @@ workspacesRouter.get("/:workspaceId/export", requireAuth, async (request, respon
       "",
       "",
       "",
-      parseDate(workspace.createdAt),
-      parseDate(workspace.updatedAt),
+      parseDateString(workspace.createdAt),
+      parseDateString(workspace.updatedAt),
       workspace.description || "",
     ].map(toCsvCell).join(","),
     ...memberships.map((entry) => [
@@ -295,8 +286,8 @@ workspacesRouter.get("/:workspaceId/export", requireAuth, async (request, respon
       entry.user.email,
       "",
       "",
-      parseDate(entry.createdAt),
-      parseDate(entry.updatedAt),
+      parseDateString(entry.createdAt),
+      parseDateString(entry.updatedAt),
       "",
     ].map(toCsvCell).join(",")),
     ...goals.map((goal) => [
@@ -309,9 +300,9 @@ workspacesRouter.get("/:workspaceId/export", requireAuth, async (request, respon
       "",
       goal.ownerMembership.user.email,
       "",
-      parseDate(goal.dueDate),
-      parseDate(goal.createdAt),
-      parseDate(goal.updatedAt),
+      parseDateString(goal.dueDate),
+      parseDateString(goal.createdAt),
+      parseDateString(goal.updatedAt),
       goal.description || "",
     ].map(toCsvCell).join(",")),
     ...announcements.map((announcement) => [
@@ -325,8 +316,8 @@ workspacesRouter.get("/:workspaceId/export", requireAuth, async (request, respon
       announcement.authorMembership.user.email,
       announcement.pinned ? "yes" : "no",
       "",
-      parseDate(announcement.createdAt),
-      parseDate(announcement.updatedAt),
+      parseDateString(announcement.createdAt),
+      parseDateString(announcement.updatedAt),
       announcement.content,
     ].map(toCsvCell).join(",")),
     ...actionItems.map((actionItem) => [
@@ -339,9 +330,9 @@ workspacesRouter.get("/:workspaceId/export", requireAuth, async (request, respon
       actionItem.assigneeMembership?.user?.displayName || actionItem.assigneeMembership?.user?.email || "",
       actionItem.assigneeMembership?.user?.email || "",
       "",
-      parseDate(actionItem.dueDate),
-      parseDate(actionItem.createdAt),
-      parseDate(actionItem.updatedAt),
+      parseDateString(actionItem.dueDate),
+      parseDateString(actionItem.createdAt),
+      parseDateString(actionItem.updatedAt),
       actionItem.description || "",
     ].map(toCsvCell).join(",")),
   ];
