@@ -16,18 +16,18 @@ function bakeTextOnImage(bgSrc, value, label, isDark) {
 
       ctx.drawImage(img, 0, 0, w, h);
 
-      ctx.fillStyle = isDark ? "#ffffff" : "#1a1210";
-      ctx.font = "bold " + Math.round(w * 0.75) + "px system-ui, -apple-system, sans-serif";
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold " + Math.round(w * 0.18) + "px system-ui, -apple-system, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.shadowColor = isDark ? "rgba(0,0,0,0.5)" : "rgba(255,255,255,0.5)";
-      ctx.shadowBlur = 6;
-      ctx.fillText(value, w / 2, h * 0.44);
+      ctx.shadowColor = "rgba(0,0,0,0.4)";
+      ctx.shadowBlur = 4;
+      ctx.fillText(value, w / 2, h * 0.43);
 
       ctx.shadowBlur = 0;
-      ctx.font = Math.round(w * 0.06) + "px system-ui, -apple-system, sans-serif";
-      ctx.fillStyle = isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.6)";
-      ctx.fillText(label, w / 2, h * 0.56);
+      ctx.font = Math.round(w * 0.045) + "px system-ui, -apple-system, sans-serif";
+      ctx.fillStyle = "rgba(255,255,255,0.6)";
+      ctx.fillText(label, w / 2, h * 0.55);
 
       resolve(canvas.toDataURL("image/png"));
     };

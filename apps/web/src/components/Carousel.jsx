@@ -51,8 +51,8 @@ function CarouselItem({ item, index, itemWidth, round, trackItemOffset, x, trans
       key={`${item?.id ?? index}-${index}`}
       className={`relative shrink-0 flex flex-col ${
         round
-          ? 'items-center justify-center text-center bg-[#120F17] border-0'
-          : 'items-start justify-between bg-[#222] border border-[#222] rounded-[12px]'
+          ? 'items-center justify-center text-center bg-card border-0'
+          : 'items-start justify-between bg-card border border-border rounded-[12px]'
       } overflow-hidden cursor-grab active:cursor-grabbing`}
       style={{
         width: itemWidth,
@@ -62,14 +62,13 @@ function CarouselItem({ item, index, itemWidth, round, trackItemOffset, x, trans
       }}
       transition={transition}>
       <div className={`${round ? 'p-0 m-0' : 'mb-4 p-5'}`}>
-        <span
-          className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-[#120F17]">
+        <span className="flex h-[28px] w-[28px] items-center justify-center rounded-full bg-primary/10 text-primary">
           {item.icon}
         </span>
       </div>
       <div className="p-5">
-        <div className="mb-1 font-black text-lg text-white">{item.title}</div>
-        <p className="text-sm text-white">{item.description}</p>
+        <div className="mb-1 font-black text-lg text-foreground">{item.title}</div>
+        <p className="text-sm text-muted-foreground">{item.description}</p>
       </div>
     </motion.div>
   );
@@ -211,7 +210,8 @@ export default function Carousel({
     <div
       ref={containerRef}
       className={`relative overflow-hidden p-4 ${
-        round ? 'rounded-full border border-white' : 'rounded-[24px] border border-[#222]'
+        round           ? 'rounded-full border border-border'
+          : 'rounded-[24px] border border-border'
       }`}
       style={{
         width: `${baseWidth}px`,
@@ -254,11 +254,11 @@ export default function Carousel({
               className={`h-2 w-2 rounded-full cursor-pointer transition-colors duration-150 ${
                 activeIndex === index
                   ? round
-                    ? 'bg-white'
-                    : 'bg-[#333333]'
+                    ? 'bg-foreground'
+                    : 'bg-foreground'
                   : round
-                    ? 'bg-[#555]'
-                    : 'bg-[rgba(51,51,51,0.4)]'
+                    ? 'bg-muted-foreground'
+                    : 'bg-muted/50'
               }`}
               animate={{
                 scale: activeIndex === index ? 1.2 : 1
