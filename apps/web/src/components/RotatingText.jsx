@@ -139,7 +139,7 @@ const RotatingText = forwardRef((props, ref) => {
         <motion.span
           key={currentTextIndex}
           className={cn(
-            splitBy === 'lines' ? 'flex flex-col w-full' : 'inline-block whitespace-pre-wrap relative',
+            splitBy === 'lines' ? 'flex flex-col w-full' : 'flex flex-wrap whitespace-pre-wrap relative',
             innerWrapperClassName
           )}
           layout

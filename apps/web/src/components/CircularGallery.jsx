@@ -130,7 +130,7 @@ class Media {
   }
   createShader() {
     const texture = new Texture(this.gl, {
-      generateMipmaps: true
+      generateMipmaps: false
     });
     this.program = new Program(this.gl, {
       depthTest: false,

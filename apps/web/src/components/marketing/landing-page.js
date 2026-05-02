@@ -138,7 +138,7 @@ export function LandingPage() {
             <RotatingText
               texts={ROTATING_WORDS}
               mainClassName="font-bold"
-              innerWrapperClassName="text-transparent bg-clip-text bg-gradient-to-r from-[#fb2c36] via-[#fb2c36]/80 to-[#fb2c36]"
+              elementLevelClassName="text-transparent bg-clip-text bg-gradient-to-r from-[#fb2c36] via-[#fb2c36]/80 to-[#fb2c36]"
               rotationInterval={2200}
               staggerDuration={0.03}
               staggerFrom="last"
