@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import {
@@ -22,8 +22,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RotatingText from "@/components/RotatingText";
 import DotGrid from "@/components/DotGrid";
+import Silk from "@/components/Silk";
 import MagicBento from "@/components/MagicBento";
-import CircularGallery from "@/components/CircularGallery";
 import CardSwap, { Card } from "@/components/CardSwap";
 
 const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
@@ -36,39 +36,6 @@ const BENTO_CARDS = [
   { emoji: "\u26A1", title: "Realtime", description: "Mentions, presence, activity feel immediate — behaves like a live hub.", label: "Live" },
   { emoji: "\uD83D\uDCCA", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
 ];
-
-function statSvg(label, value, bgCenter, bgEdge, textColor, subColor) {
-  return `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
-      <defs>
-        <radialGradient id="bg" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" style="stop-color:${bgCenter}"/>
-          <stop offset="100%" style="stop-color:${bgEdge}"/>
-        </radialGradient>
-      </defs>
-      <rect width="1600" height="1200" fill="url(#bg)" shape-rendering="crispEdges"/>
-      <text x="800" y="500" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="200" fill="${textColor}" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">${value}</text>
-      <text x="800" y="700" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="600" font-size="56" fill="${subColor}" text-rendering="geometricPrecision" shape-rendering="geometricPrecision">${label}</text>
-    </svg>`
-  )}`;
-}
-
-function buildStatItems(isDark) {
-  if (isDark) {
-    return [
-      { image: statSvg("Workspaces", "7", "#2a1a18", "#140c0c", "#f0e8e6", "#a69590"), text: "" },
-      { image: statSvg("Members", "26", "#2a1b18", "#140c0c", "#f0e8e6", "#a69590"), text: "" },
-      { image: statSvg("Goals", "200+", "#2a1d18", "#140c0c", "#f0e8e6", "#a69590"), text: "" },
-      { image: statSvg("Items", "400+", "#2a1918", "#140c0c", "#f0e8e6", "#a69590"), text: "" },
-    ];
-  }
-  return [
-    { image: statSvg("Workspaces", "7", "#fef5f3", "#fde8e3", "#1a1210", "#6b5b56"), text: "" },
-    { image: statSvg("Members", "26", "#fef5f3", "#fde8e3", "#1a1210", "#6b5b56"), text: "" },
-    { image: statSvg("Goals", "200+", "#fef5f3", "#fde8e3", "#1a1210", "#6b5b56"), text: "" },
-    { image: statSvg("Items", "400+", "#fef5f3", "#fde8e3", "#1a1210", "#6b5b56"), text: "" },
-  ];
-}
 
 const POLISH = [
   { icon: PaintBrush, label: "Light, dark, and system appearance controls", accent: "#ec4899", anim: "float" },
@@ -88,7 +55,6 @@ export function LandingPage() {
   const [videoReady, setVideoReady] = useState(false);
 
   const isDark = resolvedTheme === "dark";
-  const statItems = useMemo(() => buildStatItems(isDark), [isDark]);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -215,11 +181,32 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* STATS */}
+      {/* STATS with Silk background */}
       <section className="relative z-10 px-4 pb-16 md:px-6">
         <div className="mx-auto max-w-4xl">
-          <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}>
-            <CircularGallery items={statItems} bend={3} textColor="#ffffff" borderRadius={0.05} scrollSpeed={2} />
+          <div className="relative h-[280px] sm:h-[360px] rounded-2xl overflow-hidden border dark:border-white/10">
+            <div className="absolute inset-0 z-0">
+              <Silk speed={3} scale={1} color={isDark ? "#2a1a18" : "#fef5f3"} noiseIntensity={0.8} rotation={0.5} />
+            </div>
+            <div className="relative z-10 h-full flex items-center justify-center">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 px-6 sm:px-12 w-full">
+                {[
+                  { value: "7", label: "Workspaces" },
+                  { value: "26", label: "Members" },
+                  { value: "200+", label: "Goals" },
+                  { value: "400+", label: "Items" },
+                ].map((stat) => (
+                  <div key={stat.label} className="text-center">
+                    <div className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums" style={{ color: isDark ? "#f0e8e6" : "#1a1210" }}>
+                      {stat.value}
+                    </div>
+                    <div className="text-xs sm:text-sm mt-1 opacity-60" style={{ color: isDark ? "#a69590" : "#6b5b56" }}>
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
