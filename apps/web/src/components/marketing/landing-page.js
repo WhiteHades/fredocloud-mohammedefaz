@@ -20,6 +20,7 @@ import { AnimatedIcon } from "@/components/ui/animated-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RotatingText from "@/components/RotatingText";
+import DotGrid from "@/components/DotGrid";
 import MagicBento from "@/components/MagicBento";
 import CircularGallery from "@/components/CircularGallery";
 
@@ -34,36 +35,27 @@ const BENTO_CARDS = [
   { emoji: "\uD83D\uDCCA", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
 ];
 
-function statSvg(label, value, bg1, bg2) {
+function statSvg(label, value, bg1) {
   return `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
       <defs>
-        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <radialGradient id="bg" cx="50%" cy="50%" r="70%">
           <stop offset="0%" style="stop-color:${bg1}"/>
-          <stop offset="100%" style="stop-color:${bg2}"/>
-        </linearGradient>
-        <filter id="noise">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
-          <feColorMatrix type="saturate" values="0"/>
-          <feBlend in="SourceGraphic" mode="multiply"/>
-        </filter>
-        <linearGradient id="tx" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95"/>
-          <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.70"/>
-        </linearGradient>
+          <stop offset="100%" style="stop-color:#0d0d0d"/>
+        </radialGradient>
       </defs>
       <rect width="800" height="600" fill="url(#bg)"/>
-      <text x="400" y="240" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="96" fill="url(#tx)" filter="url(#noise)">${value}</text>
-      <text x="400" y="340" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="36" fill="#ffffff" opacity="0.55">${label}</text>
+      <text x="400" y="250" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="700" font-size="100" fill="#f5f0e8">${value}</text>
+      <text x="400" y="350" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="500" font-size="34" fill="#f5f0e8" opacity="0.6">${label}</text>
     </svg>`
   )}`;
 }
 
 const STAT_ITEMS = [
-  { image: statSvg("Workspaces", "7", "#1a1008", "#2d1a0d"), text: "" },
-  { image: statSvg("Members", "26", "#1a1208", "#2d1d0d"), text: "" },
-  { image: statSvg("Goals", "200+", "#1a1408", "#2d220d"), text: "" },
-  { image: statSvg("Items", "400+", "#1a0c08", "#2d150d"), text: "" },
+  { image: statSvg("Workspaces", "7", "#fb2c36"), text: "" },
+  { image: statSvg("Members", "26", "#fb2c36"), text: "" },
+  { image: statSvg("Goals", "200+", "#fb2c36"), text: "" },
+  { image: statSvg("Items", "400+", "#fb2c36"), text: "" },
 ];
 
 const POLISH = [
@@ -187,44 +179,63 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* STATS CIRCULAR GALLERY */}
-      <section className="px-4 pb-16 md:px-6">
-        <div className="mx-auto max-w-4xl">
-          <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden">
-            <CircularGallery
-              items={STAT_ITEMS}
-              bend={3}
-              textColor="#ffffff"
-              borderRadius={0.05}
-              scrollSpeed={2}
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURES - MAGIC BENTO */}
-      <section className="px-4 py-16 md:px-6" id="features">
-        <div className="mx-auto max-w-4xl space-y-8">
-          <div className="text-center space-y-4">
-            <Badge variant="outline" className="dark:border-white/10 dark:bg-white/5 dark:text-white/70">Features</Badge>
-            <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-4xl">
-              Built for teams that move fast.
-            </h2>
-          </div>
-          <MagicBento
-            cards={BENTO_CARDS}
-            enableStars={true}
-            enableSpotlight={true}
-            enableBorderGlow={true}
-            enableTilt={false}
-            enableMagnetism={true}
-            clickEffect={true}
-            glowColor="212, 81, 10"
-            spotlightRadius={250}
-            particleCount={8}
+      {/* STATS + FEATURES with DotGrid background */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 z-0">
+          <DotGrid
+            dotSize={2}
+            gap={29}
+            baseColor="#2F293A"
+            activeColor="#fb2c36"
+            proximity={50}
+            speedTrigger={100}
+            shockRadius={50}
+            shockStrength={1}
+            maxSpeed={8000}
+            resistance={900}
+            returnDuration={1.9}
           />
         </div>
-      </section>
+
+        {/* STATS CIRCULAR GALLERY */}
+        <section className="relative z-10 px-4 pb-16 md:px-6">
+          <div className="mx-auto max-w-4xl">
+            <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden">
+              <CircularGallery
+                items={STAT_ITEMS}
+                bend={3}
+                textColor="#ffffff"
+                borderRadius={0.05}
+                scrollSpeed={2}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* FEATURES - MAGIC BENTO */}
+        <section className="relative z-10 px-4 py-16 md:px-6" id="features">
+          <div className="mx-auto max-w-4xl space-y-8">
+            <div className="text-center space-y-4">
+              <Badge variant="outline" className="dark:border-white/10 dark:bg-white/5 dark:text-white/70">Features</Badge>
+              <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-4xl">
+                Built for teams that move fast.
+              </h2>
+            </div>
+            <MagicBento
+              cards={BENTO_CARDS}
+              enableStars={true}
+              enableSpotlight={true}
+              enableBorderGlow={true}
+              enableTilt={false}
+              enableMagnetism={true}
+              clickEffect={true}
+              glowColor="251, 44, 54"
+              spotlightRadius={250}
+              particleCount={8}
+            />
+          </div>
+        </section>
+      </div>
 
       {/* STACK + POLISH */}
       <section className="px-4 pb-24 md:px-6" id="stack">
