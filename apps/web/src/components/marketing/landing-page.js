@@ -3,21 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
-  ActivityIcon,
-  Buildings,
-  ChartBar,
-  ChartLineUp,
-  Checks,
-  Lightning,
-  LockSimple,
-  Megaphone,
-  PaintBrush,
+  ArrowUpRight,
   SignIn,
-  Target,
-  Timer,
   UserPlus,
   House,
-  ArrowUpRight,
+  ChartLineUp,
+  Lightning,
+  LockSimple,
+  PaintBrush,
+  Timer,
 } from "@phosphor-icons/react";
 
 import { useAuthStore } from "@/stores/auth-store";
@@ -25,19 +19,26 @@ import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 import { AnimatedIcon } from "@/components/ui/animated-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import BlurText from "@/components/BlurText";
 import RotatingText from "@/components/RotatingText";
-import SpotlightCard from "@/components/SpotlightCard";
-import GradientText from "@/components/GradientText";
-import CountUp from "@/components/CountUp";
+import MagicBento from "@/components/MagicBento";
+import CircularGallery from "@/components/CircularGallery";
 
-const FEATURES = [
-  { id: "Workspaces", title: "Multi-workspace control", desc: "Spin up separate workspaces, invite teammates by email, and keep role-aware collaboration boundaries crisp.", icon: Buildings, accent: "#d4510a", anim: "pulse", span: "col-span-1" },
-  { id: "Goals", title: "Goals with real momentum", desc: "Track owners, due dates, milestones, and progress updates without losing the thread.", icon: Target, accent: "#2563eb", anim: "grow", span: "col-span-1 md:col-span-2" },
-  { id: "Announcements", title: "Announcements that stay visible", desc: "Publish rich updates, pin what matters, and keep reactions and comments live for the whole workspace.", icon: Megaphone, accent: "#7c3aed", anim: "wave", span: "col-span-1 md:col-span-2" },
-  { id: "Action Items", title: "Action boards that move fast", desc: "Jump between list and kanban views, assign owners, and keep priorities explicit.", icon: Checks, accent: "#059669", anim: "sweep", span: "col-span-1" },
-  { id: "Realtime", title: "Realtime presence & mentions", desc: "Mentions, presence, and activity feel immediate — the product behaves like a live hub instead of a static shell.", icon: ActivityIcon, accent: "#dc2626", anim: "flicker", span: "col-span-1" },
-  { id: "Analytics", title: "Analytics & exports", desc: "Track totals, completion velocity, overdue work, and export without leaving the dashboard.", icon: ChartBar, accent: "#ca8a04", anim: "grow", span: "col-span-1" },
+const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
+
+const BENTO_CARDS = [
+  { color: "13, 10, 10", title: "Workspaces", description: "Multi-workspace control — invite teammates by email, keep role-aware boundaries crisp.", label: "Multi-team" },
+  { color: "10, 13, 10", title: "Goals", description: "Track owners, due dates, milestones and progress updates without losing the thread.", label: "Milestones" },
+  { color: "10, 10, 20", title: "Announcements", description: "Publish rich updates, pin what matters, keep reactions and comments live.", label: "Pinned" },
+  { color: "15, 10, 13", title: "Action Items", description: "Kanban and list views, assign owners cleanly, explicit priorities.", label: "Kanban" },
+  { color: "20, 12, 10", title: "Realtime", description: "Mentions, presence, activity feel immediate — behaves like a live hub.", label: "Live" },
+  { color: "13, 13, 10", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
+];
+
+const STAT_ITEMS = [
+  { image: "https://picsum.photos/seed/workspaces/800/600?grayscale", text: "7 Workspaces" },
+  { image: "https://picsum.photos/seed/members/800/600?grayscale", text: "26 Members" },
+  { image: "https://picsum.photos/seed/goals/800/600?grayscale", text: "200+ Goals" },
+  { image: "https://picsum.photos/seed/actions/800/600?grayscale", text: "400+ Items" },
 ];
 
 const POLISH = [
@@ -47,66 +48,6 @@ const POLISH = [
   { icon: LockSimple, label: "Role-aware permissions and seeded demo flows", accent: "#6366f1", anim: "pulse" },
   { icon: Timer, label: "Realtime updates tuned to feel immediate", accent: "#ef4444", anim: "tick" },
 ];
-
-const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
-
-function FeatureCard({ feature }) {
-  return (
-    <SpotlightCard className="!border-border !bg-card h-full dark:!border-white/10 dark:!bg-black/40" spotlightColor="rgba(255, 255, 255, 0.08)">
-      <div className="flex flex-col h-full">
-        <div className="mb-4 flex items-center gap-3">
-          <AnimatedIcon icon={feature.icon} accent={feature.accent} animation={feature.anim} size="md" />
-          <Badge variant="secondary" className="text-[10px] uppercase tracking-widest" style={{ backgroundColor: `${feature.accent}10`, color: feature.accent, borderColor: `${feature.accent}30` }}>
-            {feature.id}
-          </Badge>
-        </div>
-        <h3 className="mb-2 text-lg font-semibold font-heading tracking-tight">{feature.title}</h3>
-        <p className="text-sm leading-relaxed text-muted-foreground">{feature.desc}</p>
-      </div>
-    </SpotlightCard>
-  );
-}
-
-function StatCard({ label, value }) {
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    function onEnter() { el.style.transition = "transform 0.2s ease-out, box-shadow 0.2s ease-out"; }
-    function onLeave() { el.style.transition = "transform 0.5s ease-out, box-shadow 0.5s ease-out"; el.style.transform = ""; el.style.boxShadow = ""; }
-    function onMove(e) {
-      const r = el.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      el.style.transform = `perspective(600px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateY(-2px)`;
-      el.style.boxShadow = "0 12px 30px -10px rgba(0,0,0,0.1)";
-    }
-    el.addEventListener("mouseenter", onEnter);
-    el.addEventListener("mouseleave", onLeave);
-    el.addEventListener("mousemove", onMove);
-    return () => { el.removeEventListener("mouseenter", onEnter); el.removeEventListener("mouseleave", onLeave); el.removeEventListener("mousemove", onMove); };
-  }, []);
-
-  return (
-    <div ref={ref} className="rounded-2xl border bg-card p-6 text-center transition-colors dark:border-white/10 dark:bg-black/40" style={{ transformStyle: "preserve-3d", perspective: "600px" }}>
-      <div className="mb-1 font-heading text-3xl font-bold tabular-nums sm:text-4xl" style={{ transform: "translateZ(10px)" }}>
-        <CountUp to={value} from={0} duration={1.5} separator="" />
-        <span className="text-primary">+</span>
-      </div>
-      <div className="text-xs text-muted-foreground">{label}</div>
-    </div>
-  );
-}
-
-function PolishItem({ item }) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-300 hover:bg-muted/50 dark:hover:bg-white/5">
-      <AnimatedIcon icon={item.icon} accent={item.accent} animation={item.anim} size="sm" />
-      <span className="text-sm text-muted-foreground dark:text-white/78">{item.label}</span>
-    </div>
-  );
-}
 
 export function LandingPage() {
   const user = useAuthStore((state) => state.user);
@@ -151,6 +92,7 @@ export function LandingPage() {
           <div className="relative z-10 flex min-h-[92svh] flex-col">
             <header className="px-4 pt-4 md:px-6 md:pt-6">
               <div className="mx-auto flex w-fit items-center gap-2 rounded-full border bg-background/75 px-4 py-2 text-sm shadow-lg backdrop-blur-xl md:gap-6 md:px-8 dark:bg-black/75 dark:border-white/10 dark:text-white">
+                <a href="#tagline" className="hidden text-muted-foreground transition hover:text-foreground md:block dark:text-white/70 dark:hover:text-white">Home</a>
                 <a href="#features" className="hidden text-muted-foreground transition hover:text-foreground md:block dark:text-white/70 dark:hover:text-white">Features</a>
                 <a href="#stack" className="hidden text-muted-foreground transition hover:text-foreground md:block dark:text-white/70 dark:hover:text-white">Stack</a>
                 <a href={API_DOCS_URL} target="_blank" rel="noreferrer" className="hidden text-muted-foreground transition hover:text-foreground md:block dark:text-white/70 dark:hover:text-white">API Docs</a>
@@ -184,7 +126,7 @@ export function LandingPage() {
               </div>
               <div className="md:col-span-4 lg:col-span-5 md:self-end md:pb-2 md:pt-10">
                 <p className="text-sm leading-7 text-muted-foreground md:text-right dark:text-white/76">
-                  A collaborative team hub for shared workspaces, goals, announcements, action items, realtime presence, and analytics.
+                  Collaborative team hub for shared workspaces, goals, announcements, action items, realtime presence, and analytics.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3 md:justify-end">
                   <Button size="lg" asChild><Link href={user ? "/dashboard" : "/login"}><SignIn data-icon="inline-start" /> {user ? "Dashboard" : "Open the App"}</Link></Button>
@@ -199,14 +141,14 @@ export function LandingPage() {
       </section>
 
       {/* ROTATING TAGLINE */}
-      <section className="px-4 py-20 md:px-6">
+      <section className="px-4 py-20 md:px-6" id="tagline">
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-5xl flex flex-wrap items-center justify-center gap-x-3">
             <span className="text-muted-foreground whitespace-nowrap">notFredoHub helps you</span>
-            <span className="inline-flex min-w-[140px] sm:min-w-[180px] justify-start">
+            <span className="inline-flex min-w-[160px] sm:min-w-[200px] justify-start">
               <RotatingText
                 texts={ROTATING_WORDS}
-                mainClassName="text-primary font-bold"
+                mainClassName="font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-600 to-purple-600"
                 rotationInterval={2200}
                 staggerDuration={0.03}
                 staggerFrom="last"
@@ -220,38 +162,42 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* STATS */}
+      {/* STATS CIRCULAR GALLERY */}
       <section className="px-4 pb-16 md:px-6">
-        <div className="mx-auto grid max-w-3xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
-          {[["Workspaces", 7], ["Team Members", 26], ["Goals Tracked", 200], ["Action Items", 400]].map(([label, value]) => (
-            <StatCard key={label} label={label} value={value} />
-          ))}
+        <div className="mx-auto max-w-4xl">
+          <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden">
+            <CircularGallery
+              items={STAT_ITEMS}
+              bend={3}
+              textColor="#ffffff"
+              borderRadius={0.05}
+              scrollSpeed={2}
+            />
+          </div>
         </div>
       </section>
 
-      {/* FEATURES BENTO */}
+      {/* FEATURES - MAGIC BENTO */}
       <section className="px-4 py-16 md:px-6" id="features">
-        <div className="mx-auto max-w-6xl space-y-12">
-          <div className="max-w-2xl space-y-4">
+        <div className="mx-auto max-w-4xl space-y-8">
+          <div className="text-center space-y-4">
             <Badge variant="outline" className="dark:border-white/10 dark:bg-white/5 dark:text-white/70">Features</Badge>
             <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-4xl">
               Built for teams that move fast.
             </h2>
-            <BlurText
-              text="Every collaboration primitive kept close together in one cohesive surface."
-              className="text-base leading-8 text-muted-foreground dark:text-white/68"
-              delay={30}
-              animateBy="words"
-              direction="bottom"
-            />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {FEATURES.map((f) => (
-              <div key={f.id} className={f.span}>
-                <FeatureCard feature={f} />
-              </div>
-            ))}
-          </div>
+          <MagicBento
+            cards={BENTO_CARDS}
+            enableStars={true}
+            enableSpotlight={true}
+            enableBorderGlow={true}
+            enableTilt={false}
+            enableMagnetism={true}
+            clickEffect={true}
+            glowColor="132, 0, 255"
+            spotlightRadius={250}
+            particleCount={8}
+          />
         </div>
       </section>
 
@@ -278,11 +224,14 @@ export function LandingPage() {
               <div>
                 <Badge variant="outline" className="mb-4 dark:border-white/10 dark:bg-white/5 dark:text-white/70">Polish</Badge>
                 <h3 className="font-heading text-2xl mb-3 dark:text-[#f4f0e6]">Built to ship.</h3>
-                <p className="text-sm leading-7 text-muted-foreground mb-6 dark:text-white/62">
-                  Every detail tuned for speed and usability.
-                </p>
+                <p className="text-sm leading-7 text-muted-foreground mb-6 dark:text-white/62">Every detail tuned for speed and usability.</p>
                 <div className="space-y-1">
-                  {POLISH.map((p) => <PolishItem key={p.label} item={p} />)}
+                  {POLISH.map((p) => (
+                    <div key={p.label} className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-all duration-300 hover:bg-muted/50 dark:hover:bg-white/5">
+                      <AnimatedIcon icon={p.icon} accent={p.accent} animation={p.anim} size="sm" />
+                      <span className="text-sm text-muted-foreground dark:text-white/78">{p.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
