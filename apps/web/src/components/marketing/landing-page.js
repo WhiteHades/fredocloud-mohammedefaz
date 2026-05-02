@@ -28,39 +28,74 @@ import { Button } from "@/components/ui/button";
 import BlurText from "@/components/BlurText";
 import RotatingText from "@/components/RotatingText";
 import SpotlightCard from "@/components/SpotlightCard";
+import GradientText from "@/components/GradientText";
 import CountUp from "@/components/CountUp";
 
 const FEATURES = [
-  { id: "Workspaces", title: "Multi-workspace control", desc: "Spin up separate workspaces, invite teammates by email, and keep role-aware collaboration boundaries crisp.", icon: Buildings, accent: "#d4510a", anim: "pulse" },
-  { id: "Goals", title: "Goals with real momentum", desc: "Track owners, due dates, milestones, and progress updates without losing the thread.", icon: Target, accent: "#2563eb", anim: "grow" },
-  { id: "Announcements", title: "Announcements that stay visible", desc: "Publish rich updates, pin what matters, and keep reactions and comments live.", icon: Megaphone, accent: "#7c3aed", anim: "wave" },
-  { id: "Action Items", title: "Action boards that move fast", desc: "Jump between list and kanban views, assign owners, and keep priorities explicit.", icon: Checks, accent: "#059669", anim: "sweep" },
-  { id: "Realtime", title: "Realtime presence & mentions", desc: "Mentions, presence, and activity feel immediate — the product behaves like a live hub.", icon: ActivityIcon, accent: "#dc2626", anim: "flicker" },
-  { id: "Analytics", title: "Analytics with exportability", desc: "Track totals, completion velocity, overdue work, and export without leaving the dashboard.", icon: ChartBar, accent: "#ca8a04", anim: "grow" },
+  { id: "Workspaces", title: "Multi-workspace control", desc: "Spin up separate workspaces, invite teammates by email, and keep role-aware collaboration boundaries crisp.", icon: Buildings, accent: "#d4510a", anim: "pulse", span: "col-span-1" },
+  { id: "Goals", title: "Goals with real momentum", desc: "Track owners, due dates, milestones, and progress updates without losing the thread.", icon: Target, accent: "#2563eb", anim: "grow", span: "col-span-1 md:col-span-2" },
+  { id: "Announcements", title: "Announcements that stay visible", desc: "Publish rich updates, pin what matters, and keep reactions and comments live for the whole workspace.", icon: Megaphone, accent: "#7c3aed", anim: "wave", span: "col-span-1 md:col-span-2" },
+  { id: "Action Items", title: "Action boards that move fast", desc: "Jump between list and kanban views, assign owners, and keep priorities explicit.", icon: Checks, accent: "#059669", anim: "sweep", span: "col-span-1" },
+  { id: "Realtime", title: "Realtime presence & mentions", desc: "Mentions, presence, and activity feel immediate — the product behaves like a live hub instead of a static shell.", icon: ActivityIcon, accent: "#dc2626", anim: "flicker", span: "col-span-1" },
+  { id: "Analytics", title: "Analytics & exports", desc: "Track totals, completion velocity, overdue work, and export without leaving the dashboard.", icon: ChartBar, accent: "#ca8a04", anim: "grow", span: "col-span-1" },
 ];
 
 const POLISH = [
   { icon: PaintBrush, label: "Light, dark, and system appearance controls", accent: "#ec4899", anim: "float" },
-  { icon: Lightning, label: "Command palette navigation", accent: "#f59e0b", anim: "flicker" },
+  { icon: Lightning, label: "Command palette navigation (Ctrl+K)", accent: "#f59e0b", anim: "flicker" },
   { icon: ChartLineUp, label: "Audit and workspace CSV exports", accent: "#10b981", anim: "grow" },
   { icon: LockSimple, label: "Role-aware permissions and seeded demo flows", accent: "#6366f1", anim: "pulse" },
   { icon: Timer, label: "Realtime updates tuned to feel immediate", accent: "#ef4444", anim: "tick" },
 ];
 
-const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build"];
+const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
 
-function FeatureCard({ feature, index }) {
+function FeatureCard({ feature }) {
   return (
-    <SpotlightCard className="!border-border !bg-card dark:!border-white/10 dark:!bg-black/40" spotlightColor="rgba(255, 255, 255, 0.08)">
-      <div className="mb-4 flex items-center gap-3">
-        <AnimatedIcon icon={feature.icon} accent={feature.accent} animation={feature.anim} />
-        <Badge variant="secondary" className="text-[10px] uppercase tracking-widest" style={{ backgroundColor: `${feature.accent}10`, color: feature.accent, borderColor: `${feature.accent}30` }}>
-          {feature.id}
-        </Badge>
+    <SpotlightCard className="!border-border !bg-card h-full dark:!border-white/10 dark:!bg-black/40" spotlightColor="rgba(255, 255, 255, 0.08)">
+      <div className="flex flex-col h-full">
+        <div className="mb-4 flex items-center gap-3">
+          <AnimatedIcon icon={feature.icon} accent={feature.accent} animation={feature.anim} size="md" />
+          <Badge variant="secondary" className="text-[10px] uppercase tracking-widest" style={{ backgroundColor: `${feature.accent}10`, color: feature.accent, borderColor: `${feature.accent}30` }}>
+            {feature.id}
+          </Badge>
+        </div>
+        <h3 className="mb-2 text-lg font-semibold font-heading tracking-tight">{feature.title}</h3>
+        <p className="text-sm leading-relaxed text-muted-foreground">{feature.desc}</p>
       </div>
-      <h3 className="mb-2 text-lg font-semibold font-heading tracking-tight">{feature.title}</h3>
-      <p className="text-sm leading-relaxed text-muted-foreground">{feature.desc}</p>
     </SpotlightCard>
+  );
+}
+
+function StatCard({ label, value }) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    function onEnter() { el.style.transition = "transform 0.2s ease-out, box-shadow 0.2s ease-out"; }
+    function onLeave() { el.style.transition = "transform 0.5s ease-out, box-shadow 0.5s ease-out"; el.style.transform = ""; el.style.boxShadow = ""; }
+    function onMove(e) {
+      const r = el.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      el.style.transform = `perspective(600px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateY(-2px)`;
+      el.style.boxShadow = "0 12px 30px -10px rgba(0,0,0,0.1)";
+    }
+    el.addEventListener("mouseenter", onEnter);
+    el.addEventListener("mouseleave", onLeave);
+    el.addEventListener("mousemove", onMove);
+    return () => { el.removeEventListener("mouseenter", onEnter); el.removeEventListener("mouseleave", onLeave); el.removeEventListener("mousemove", onMove); };
+  }, []);
+
+  return (
+    <div ref={ref} className="rounded-2xl border bg-card p-6 text-center transition-colors dark:border-white/10 dark:bg-black/40" style={{ transformStyle: "preserve-3d", perspective: "600px" }}>
+      <div className="mb-1 font-heading text-3xl font-bold tabular-nums sm:text-4xl" style={{ transform: "translateZ(10px)" }}>
+        <CountUp to={value} from={0} duration={1.5} separator="" />
+        <span className="text-primary">+</span>
+      </div>
+      <div className="text-xs text-muted-foreground">{label}</div>
+    </div>
   );
 }
 
@@ -166,44 +201,40 @@ export function LandingPage() {
       {/* ROTATING TAGLINE */}
       <section className="px-4 py-20 md:px-6">
         <div className="mx-auto max-w-4xl text-center">
-          <h2 className="font-heading text-3xl tracking-tight md:text-5xl">
-            <span className="text-muted-foreground">notFredoHub helps you</span>{" "}
-            <RotatingText
-              texts={ROTATING_WORDS}
-              mainClassName="inline-flex text-primary font-bold"
-              rotationInterval={2500}
-              staggerDuration={0.04}
-              staggerFrom="last"
-              transition={{ type: "spring", damping: 20, stiffness: 220 }}
-              initial={{ y: "100%", opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: "-120%", opacity: 0 }}
-            />
+          <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-5xl flex flex-wrap items-center justify-center gap-x-3">
+            <span className="text-muted-foreground whitespace-nowrap">notFredoHub helps you</span>
+            <span className="inline-flex min-w-[140px] sm:min-w-[180px] justify-start">
+              <RotatingText
+                texts={ROTATING_WORDS}
+                mainClassName="text-primary font-bold"
+                rotationInterval={2200}
+                staggerDuration={0.03}
+                staggerFrom="last"
+                transition={{ type: "spring", damping: 22, stiffness: 250 }}
+                initial={{ y: "100%", opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: "-120%", opacity: 0 }}
+              />
+            </span>
           </h2>
         </div>
       </section>
 
       {/* STATS */}
       <section className="px-4 pb-16 md:px-6">
-        <div className="mx-auto grid max-w-3xl grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="mx-auto grid max-w-3xl grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
           {[["Workspaces", 7], ["Team Members", 26], ["Goals Tracked", 200], ["Action Items", 400]].map(([label, value]) => (
-            <div key={label} className="rounded-2xl border bg-card p-6 text-center dark:border-white/10 dark:bg-black/40">
-              <div className="mb-1 font-heading text-3xl font-bold">
-                <CountUp to={value} from={0} duration={1.5} separator="" className="tabular-nums" />
-                <span className="text-primary">+</span>
-              </div>
-              <div className="text-xs text-muted-foreground">{label}</div>
-            </div>
+            <StatCard key={label} label={label} value={value} />
           ))}
         </div>
       </section>
 
-      {/* FEATURES */}
+      {/* FEATURES BENTO */}
       <section className="px-4 py-16 md:px-6" id="features">
         <div className="mx-auto max-w-6xl space-y-12">
           <div className="max-w-2xl space-y-4">
             <Badge variant="outline" className="dark:border-white/10 dark:bg-white/5 dark:text-white/70">Features</Badge>
-            <h2 className="font-heading text-3xl tracking-tight md:text-4xl">
+            <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-4xl">
               Built for teams that move fast.
             </h2>
             <BlurText
@@ -214,8 +245,12 @@ export function LandingPage() {
               direction="bottom"
             />
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f, i) => <FeatureCard key={f.id} feature={f} index={i} />)}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {FEATURES.map((f) => (
+              <div key={f.id} className={f.span}>
+                <FeatureCard feature={f} />
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -223,7 +258,7 @@ export function LandingPage() {
       {/* STACK + POLISH */}
       <section className="px-4 pb-24 md:px-6" id="stack">
         <div className="mx-auto max-w-6xl">
-          <div className="rounded-2xl border bg-card p-8 md:p-12 dark:border-white/10 dark:bg-black/40">
+          <div className="rounded-2xl border bg-card p-6 sm:p-8 md:p-12 dark:border-white/10 dark:bg-black/40">
             <div className="grid gap-10 lg:grid-cols-2">
               <div>
                 <Badge variant="outline" className="mb-4 dark:border-white/10 dark:bg-white/5 dark:text-white/70">Stack</Badge>
@@ -244,7 +279,7 @@ export function LandingPage() {
                 <Badge variant="outline" className="mb-4 dark:border-white/10 dark:bg-white/5 dark:text-white/70">Polish</Badge>
                 <h3 className="font-heading text-2xl mb-3 dark:text-[#f4f0e6]">Built to ship.</h3>
                 <p className="text-sm leading-7 text-muted-foreground mb-6 dark:text-white/62">
-                  Every detail tuned for speed and usability. From the theme to the command palette, interactions feel immediate.
+                  Every detail tuned for speed and usability.
                 </p>
                 <div className="space-y-1">
                   {POLISH.map((p) => <PolishItem key={p.label} item={p} />)}
