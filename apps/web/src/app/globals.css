@@ -212,3 +212,75 @@
     box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.1);
   }
 }
+
+@layer utilities {
+  /* animated icon keyframes */
+  @keyframes icon-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.85; }
+  }
+  @keyframes icon-grow {
+    0% { transform: scaleY(0.6); }
+    50% { transform: scaleY(1.1); }
+    100% { transform: scaleY(1); }
+  }
+  @keyframes icon-ripple {
+    0% { box-shadow: 0 0 0 0 currentColor; }
+    100% { box-shadow: 0 0 0 6px transparent; }
+  }
+  @keyframes icon-flicker {
+    0%, 100% { opacity: 1; }
+    30% { opacity: 0.5; }
+    50% { opacity: 1; }
+    70% { opacity: 0.4; }
+    90% { opacity: 1; }
+  }
+  @keyframes icon-orbit {
+    0% { transform: rotate(0deg) translateX(0px); }
+    50% { transform: rotate(0deg) translateX(1.5px); }
+    100% { transform: rotate(0deg) translateX(0px); }
+  }
+  @keyframes icon-bounce {
+    0%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-3px); }
+    60% { transform: translateY(1px); }
+  }
+  @keyframes icon-sweep {
+    0% { clip-path: inset(0 100% 0 0); }
+    100% { clip-path: inset(0 0 0 0); }
+  }
+  @keyframes icon-wave {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-1.5px) rotate(-2deg); }
+    75% { transform: translateX(1.5px) rotate(2deg); }
+  }
+  @keyframes icon-tick {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.9) rotate(-5deg); }
+  }
+  @keyframes icon-draw {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+  }
+  @keyframes icon-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+  @keyframes icon-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .icon-pulse { animation: icon-pulse 2s ease-in-out infinite; }
+  .icon-grow { animation: icon-grow 2s ease-out infinite; }
+  .icon-ripple { animation: icon-ripple 2s ease-out infinite; }
+  .icon-flicker { animation: icon-flicker 1.5s ease-in-out infinite; }
+  .icon-orbit { animation: icon-orbit 3s ease-in-out infinite; }
+  .icon-bounce { animation: icon-bounce 1.5s ease-in-out infinite; }
+  .icon-sweep { animation: icon-sweep 2s ease-out infinite; }
+  .icon-wave { animation: icon-wave 2s ease-in-out infinite; }
+  .icon-tick { animation: icon-tick 1s ease-in-out infinite; }
+  .icon-draw { animation: icon-draw 2s ease-out infinite; }
+  .icon-float { animation: icon-float 3s ease-in-out infinite; }
+  .icon-spin { animation: icon-spin 8s linear infinite; }
+}
