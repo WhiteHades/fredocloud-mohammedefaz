@@ -26,19 +26,25 @@ import CircularGallery from "@/components/CircularGallery";
 const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
 
 const BENTO_CARDS = [
-  { color: "13, 10, 10", title: "Workspaces", description: "Multi-workspace control — invite teammates by email, keep role-aware boundaries crisp.", label: "Multi-team" },
-  { color: "10, 13, 10", title: "Goals", description: "Track owners, due dates, milestones and progress updates without losing the thread.", label: "Milestones" },
-  { color: "10, 10, 20", title: "Announcements", description: "Publish rich updates, pin what matters, keep reactions and comments live.", label: "Pinned" },
-  { color: "15, 10, 13", title: "Action Items", description: "Kanban and list views, assign owners cleanly, explicit priorities.", label: "Kanban" },
-  { color: "20, 12, 10", title: "Realtime", description: "Mentions, presence, activity feel immediate — behaves like a live hub.", label: "Live" },
-  { color: "13, 13, 10", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
+  { emoji: "\uD83C\uDFE2", title: "Workspaces", description: "Multi-workspace control — invite teammates by email, keep role-aware boundaries crisp.", label: "Multi-team" },
+  { emoji: "\uD83C\uDFAF", title: "Goals", description: "Track owners, due dates, milestones and progress updates without losing the thread.", label: "Milestones" },
+  { emoji: "\uD83D\uDCE3", title: "Announcements", description: "Publish rich updates, pin what matters, keep reactions and comments live.", label: "Pinned" },
+  { emoji: "\u2705", title: "Action Items", description: "Kanban and list views, assign owners cleanly, explicit priorities.", label: "Kanban" },
+  { emoji: "\u26A1", title: "Realtime", description: "Mentions, presence, activity feel immediate — behaves like a live hub.", label: "Live" },
+  { emoji: "\uD83D\uDCCA", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
 ];
 
+function genGradient(w, h, c1, c2) {
+  return `data:image/svg+xml,${encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${c1}"/><stop offset="100%" style="stop-color:${c2}"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#g)"/></svg>`
+  )}`;
+}
+
 const STAT_ITEMS = [
-  { image: "https://picsum.photos/seed/workspaces/800/600?grayscale", text: "7 Workspaces" },
-  { image: "https://picsum.photos/seed/members/800/600?grayscale", text: "26 Members" },
-  { image: "https://picsum.photos/seed/goals/800/600?grayscale", text: "200+ Goals" },
-  { image: "https://picsum.photos/seed/actions/800/600?grayscale", text: "400+ Items" },
+  { image: genGradient(800, 600, "#d4510a", "#f97316"), text: "7 Workspaces" },
+  { image: genGradient(800, 600, "#2563eb", "#818cf8"), text: "26 Members" },
+  { image: genGradient(800, 600, "#059669", "#34d399"), text: "200+ Goals" },
+  { image: genGradient(800, 600, "#dc2626", "#fb7185"), text: "400+ Items" },
 ];
 
 const POLISH = [
@@ -148,7 +154,7 @@ export function LandingPage() {
             <span className="inline-flex min-w-[160px] sm:min-w-[200px] justify-start">
               <RotatingText
                 texts={ROTATING_WORDS}
-                mainClassName="font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-600 to-purple-600"
+                mainClassName="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#d4510a] via-[#f97316] to-[#d4510a]"
                 rotationInterval={2200}
                 staggerDuration={0.03}
                 staggerFrom="last"
@@ -194,7 +200,7 @@ export function LandingPage() {
             enableTilt={false}
             enableMagnetism={true}
             clickEffect={true}
-            glowColor="132, 0, 255"
+            glowColor="212, 81, 10"
             spotlightRadius={250}
             particleCount={8}
           />

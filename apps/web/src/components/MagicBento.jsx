@@ -603,7 +603,7 @@ const MagicBento = ({
               '--glow-radius': '200px'
             };
 
-            if (enableStars) {
+             if (enableStars) {
               return (
                 <ParticleCard
                   key={index}
@@ -617,6 +617,9 @@ const MagicBento = ({
                   enableMagnetism={enableMagnetism}>
                   <div className="card__header flex justify-between gap-3 relative text-white">
                     <span className="card__label text-base">{card.label}</span>
+                  </div>
+                  <div className="card__visual flex-1 flex items-center justify-center relative">
+                    <span className="text-3xl opacity-20 select-none">{card.emoji || ""}</span>
                   </div>
                   <div className="card__content flex flex-col relative text-white">
                     <h3
@@ -744,6 +747,9 @@ const MagicBento = ({
                 }}>
                 <div className="card__header flex justify-between gap-3 relative text-white">
                   <span className="card__label text-base">{card.label}</span>
+                </div>
+                <div className="card__visual flex-1 flex items-center justify-center relative">
+                  <span className="text-3xl opacity-20 select-none">{card.emoji || ""}</span>
                 </div>
                 <div className="card__content flex flex-col relative text-white">
                   <h3
