@@ -19,7 +19,7 @@
 
 <p align="center">Collaborative team hub. Workspaces, goals, announcements, and action items in real time.</p>
 
-https://github.com/user-attachments/assets/13fef550-8158-45fc-8e3c-3691bb6bb9ee
+https://github.com/user-attachments/assets/7162fa4a-17df-485e-a4bc-ad296800bee5
 
 ### `Live`
 
