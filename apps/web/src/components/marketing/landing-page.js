@@ -22,9 +22,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RotatingText from "@/components/RotatingText";
 import DotGrid from "@/components/DotGrid";
-import Silk from "@/components/Silk";
+import CircularGallery from "@/components/CircularGallery";
 import MagicBento from "@/components/MagicBento";
 import CardSwap, { Card } from "@/components/CardSwap";
+import { useSilkCarouselItems } from "@/lib/silk-images";
 
 const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
 
@@ -55,6 +56,7 @@ export function LandingPage() {
   const [videoReady, setVideoReady] = useState(false);
 
   const isDark = resolvedTheme === "dark";
+  const carouselItems = useSilkCarouselItems(isDark);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -143,7 +145,7 @@ export function LandingPage() {
                 </h1>
               </div>
               <div className="md:col-span-4 lg:col-span-5 md:self-end md:pb-2 md:pt-10">
-                <p className="text-sm leading-7 text-muted-foreground md:text-right dark:text-white/76">
+                <p className="text-sm leading-7 text-foreground/65 md:text-right dark:text-white/76">
                   Collaborative team hub for shared workspaces, goals, announcements, action items, realtime presence, and analytics.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3 md:justify-end">
@@ -161,52 +163,28 @@ export function LandingPage() {
       {/* ROTATING TAGLINE - CSS Grid 3-column for centered layout */}
       <section className="relative z-10 px-4 py-20 md:px-6" id="tagline">
         <div className="mx-auto max-w-4xl">
-          <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-5xl grid" style={{ gridTemplateColumns: "1fr auto 1fr" }}>
-            <span className="text-muted-foreground whitespace-nowrap text-right">notFredoHub helps you{" "}</span>
-            <span className="inline-flex min-w-[160px] sm:min-w-[200px] justify-start">
-              <RotatingText
-                texts={ROTATING_WORDS}
-                mainClassName="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#fb2c36] via-[#fb2c36]/80 to-[#fb2c36]"
-                rotationInterval={2200}
-                staggerDuration={0.03}
-                staggerFrom="last"
-                transition={{ type: "spring", damping: 22, stiffness: 250 }}
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "-120%", opacity: 0 }}
-              />
-            </span>
-            <span />
+          <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-5xl flex flex-wrap items-center justify-center gap-x-2">
+            <span className="text-muted-foreground whitespace-nowrap">notFredoHub helps you</span>
+            <RotatingText
+              texts={ROTATING_WORDS}
+              mainClassName="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#fb2c36] via-[#fb2c36]/80 to-[#fb2c36]"
+              rotationInterval={2200}
+              staggerDuration={0.03}
+              staggerFrom="last"
+              transition={{ type: "spring", damping: 22, stiffness: 250 }}
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "-120%", opacity: 0 }}
+            />
           </h2>
         </div>
       </section>
 
-      {/* STATS with Silk background */}
+      {/* STATS */}
       <section className="relative z-10 px-4 pb-16 md:px-6">
         <div className="mx-auto max-w-4xl">
-          <div className="relative h-[280px] sm:h-[360px] rounded-2xl overflow-hidden border dark:border-white/10">
-            <div className="absolute inset-0 z-0">
-              <Silk speed={3} scale={1} color={isDark ? "#2a1a18" : "#fef5f3"} noiseIntensity={0.8} rotation={0.5} />
-            </div>
-            <div className="relative z-10 h-full flex items-center justify-center">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 px-6 sm:px-12 w-full">
-                {[
-                  { value: "7", label: "Workspaces" },
-                  { value: "26", label: "Members" },
-                  { value: "200+", label: "Goals" },
-                  { value: "400+", label: "Items" },
-                ].map((stat) => (
-                  <div key={stat.label} className="text-center">
-                    <div className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold tabular-nums" style={{ color: isDark ? "#f0e8e6" : "#1a1210" }}>
-                      {stat.value}
-                    </div>
-                    <div className="text-xs sm:text-sm mt-1 opacity-60" style={{ color: isDark ? "#a69590" : "#6b5b56" }}>
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}>
+            <CircularGallery items={carouselItems} bend={3} textColor="#ffffff" borderRadius={0.05} scrollSpeed={2} />
           </div>
         </div>
       </section>
