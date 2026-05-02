@@ -28,7 +28,7 @@ describe("CommandPalette", () => {
 
     expect(screen.queryByTestId("command-dialog")).not.toBeInTheDocument();
 
-    fireEvent.keyDown(window, { ctrlKey: true, key: "k" });
+    fireEvent.keyDown(document, { ctrlKey: true, key: "k" });
 
     expect(screen.getByTestId("command-dialog")).toBeInTheDocument();
   });
@@ -36,10 +36,10 @@ describe("CommandPalette", () => {
   it("closes on escape", () => {
     render(<CommandPalette />);
 
-    fireEvent.keyDown(window, { ctrlKey: true, key: "k" });
+    fireEvent.keyDown(document, { ctrlKey: true, key: "k" });
     expect(screen.getByTestId("command-dialog")).toBeInTheDocument();
 
-    fireEvent.keyDown(window, { ctrlKey: true, key: "k" });
+    fireEvent.keyDown(document, { ctrlKey: true, key: "k" });
     expect(screen.queryByTestId("command-dialog")).not.toBeInTheDocument();
   });
 });
