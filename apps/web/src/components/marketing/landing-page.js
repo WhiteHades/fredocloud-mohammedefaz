@@ -25,16 +25,7 @@ import DotGrid from "@/components/DotGrid";
 import CircularGallery from "@/components/CircularGallery";
 import MagicBento from "@/components/MagicBento";
 import CardSwap, { Card } from "@/components/CardSwap";
-
-const CAROUSEL_LIGHT = "/carousel-light.png";
-const CAROUSEL_DARK = "/carousel-dark.png";
-
-const STAT_DATA = [
-  { value: "7", label: "Workspaces" },
-  { value: "26", label: "Members" },
-  { value: "200+", label: "Goals" },
-  { value: "400+", label: "Items" },
-];
+import { useCarouselItems } from "@/lib/carousel-items";
 
 const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
 
@@ -65,8 +56,7 @@ export function LandingPage() {
   const [videoReady, setVideoReady] = useState(false);
 
   const isDark = resolvedTheme === "dark";
-  const bgImage = isDark ? CAROUSEL_DARK : CAROUSEL_LIGHT;
-  const carouselItems = STAT_DATA.map((s) => ({ image: bgImage, text: s.label }));
+  const carouselItems = useCarouselItems(isDark);
 
   useEffect(() => {
     const v = videoRef.current;
@@ -194,7 +184,7 @@ export function LandingPage() {
       <section className="relative z-10 px-4 pb-16 md:px-6">
         <div className="mx-auto max-w-4xl">
           <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}>
-            <CircularGallery items={carouselItems} bend={3} textColor={isDark ? "#ffffff" : "#1a1210"} borderRadius={0.05} scrollSpeed={2} />
+            <CircularGallery items={carouselItems} bend={3} borderRadius={0.05} scrollSpeed={2} />
           </div>
         </div>
       </section>
