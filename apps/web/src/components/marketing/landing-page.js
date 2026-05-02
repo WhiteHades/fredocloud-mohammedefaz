@@ -34,17 +34,36 @@ const BENTO_CARDS = [
   { emoji: "\uD83D\uDCCA", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
 ];
 
-function genGradient(w, h, c1, c2) {
+function statSvg(label, value, bg1, bg2) {
   return `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:${c1}"/><stop offset="100%" style="stop-color:${c2}"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#g)"/></svg>`
+    `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+      <defs>
+        <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${bg1}"/>
+          <stop offset="100%" style="stop-color:${bg2}"/>
+        </linearGradient>
+        <filter id="noise">
+          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+          <feColorMatrix type="saturate" values="0"/>
+          <feBlend in="SourceGraphic" mode="multiply"/>
+        </filter>
+        <linearGradient id="tx" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.95"/>
+          <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.70"/>
+        </linearGradient>
+      </defs>
+      <rect width="800" height="600" fill="url(#bg)"/>
+      <text x="400" y="240" text-anchor="middle" font-family="sans-serif" font-weight="800" font-size="96" fill="url(#tx)" filter="url(#noise)">${value}</text>
+      <text x="400" y="340" text-anchor="middle" font-family="sans-serif" font-weight="600" font-size="36" fill="#ffffff" opacity="0.55">${label}</text>
+    </svg>`
   )}`;
 }
 
 const STAT_ITEMS = [
-  { image: genGradient(800, 600, "#d4510a", "#f97316"), text: "7 Workspaces" },
-  { image: genGradient(800, 600, "#2563eb", "#818cf8"), text: "26 Members" },
-  { image: genGradient(800, 600, "#059669", "#34d399"), text: "200+ Goals" },
-  { image: genGradient(800, 600, "#dc2626", "#fb7185"), text: "400+ Items" },
+  { image: statSvg("Workspaces", "7", "#1a1008", "#2d1a0d"), text: "" },
+  { image: statSvg("Members", "26", "#1a1208", "#2d1d0d"), text: "" },
+  { image: statSvg("Goals", "200+", "#1a1408", "#2d220d"), text: "" },
+  { image: statSvg("Items", "400+", "#1a0c08", "#2d150d"), text: "" },
 ];
 
 const POLISH = [
