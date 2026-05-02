@@ -187,6 +187,7 @@ async function sendMentionEmail({ to, workspaceName, announcementTitle, commentB
 
 module.exports = {
   hasEmailTransport,
+  sendEmail,
   sendInvitationEmail,
   sendMentionEmail,
 };
