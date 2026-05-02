@@ -138,14 +138,14 @@ const RotatingText = forwardRef((props, ref) => {
         <motion.span
           key={currentTextIndex}
           className={cn(
-            splitBy === 'lines' ? 'flex flex-col w-full' : 'flex flex-wrap whitespace-pre-wrap relative'
+            splitBy === 'lines' ? 'flex flex-col w-full' : 'inline-block whitespace-pre-wrap relative'
           )}
           layout
           aria-hidden="true">
           {elements.map((wordObj, wordIndex, array) => {
             const previousCharsCount = array.slice(0, wordIndex).reduce((sum, word) => sum + word.characters.length, 0);
             return (
-              <span key={wordIndex} className={cn('inline-flex', splitLevelClassName)}>
+              <span key={wordIndex} className={cn('inline', splitLevelClassName)}>
                 {wordObj.characters.map((char, charIndex) => (
                   <motion.span
                     key={charIndex}

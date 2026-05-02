@@ -32,7 +32,8 @@ export function LandingPage() {
   const { resolvedTheme } = useTheme();
   const heroRef = useRef(null);
   const videoRef = useRef(null);
-  const [videoReady, setVideoReady] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
 
   const isDark = resolvedTheme === "dark";
   const carouselItems = useCarouselItems(isDark);
@@ -40,8 +41,15 @@ export function LandingPage() {
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    setVideoReady(v.readyState >= 3);
-    v.addEventListener("canplaythrough", () => setVideoReady(true), { once: true });
+    const onReady = () => setVideoLoaded(true);
+    const onError = () => setVideoError(true);
+    if (v.readyState >= 2) onReady();
+    v.addEventListener("canplay", onReady, { once: true });
+    v.addEventListener("error", onError, { once: true });
+    return () => {
+      v.removeEventListener("canplay", onReady);
+      v.removeEventListener("error", onError);
+    };
   }, []);
 
   useEffect(() => {
@@ -82,11 +90,13 @@ export function LandingPage() {
       {/* HERO */}
       <section className="relative z-10 px-4 pb-4 pt-4 md:px-6 md:pb-6">
         <div className="relative min-h-[92svh] overflow-hidden rounded-[2rem] border bg-card shadow-2xl dark:bg-black dark:border-white/10">
-          <video ref={videoRef} autoPlay loop muted playsInline preload="auto" className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out dark:opacity-70" style={{ opacity: videoReady ? undefined : 0 }}>
-            <source src="/ascii-art.mp4" type="video/mp4" />
-          </video>
+          {videoError ? null : (
+            <video ref={videoRef} autoPlay loop muted playsInline preload="auto" className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out dark:opacity-70 ${videoLoaded ? "opacity-100" : "opacity-0"}`}>
+              <source src="/ascii-art.mp4" type="video/mp4" />
+            </video>
+          )}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_40%)] dark:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.12),transparent_40%)]" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/20 to-background/80 dark:from-black/40 dark:via-black/20 dark:to-black/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background/85 dark:from-black/60 dark:via-black/30 dark:to-black/85" />
 
           <div className="relative z-10 flex min-h-[92svh] flex-col">
             <header className="px-4 pt-4 md:px-6 md:pt-6">
@@ -163,7 +173,11 @@ export function LandingPage() {
       <section className="relative z-10 px-4 pb-16 md:px-6">
         <div className="mx-auto max-w-4xl">
           <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}>
-            <CircularGallery items={carouselItems} bend={3} borderRadius={0.05} scrollSpeed={2} />
+            {carouselItems === null ? (
+              <div className="flex h-full items-center justify-center text-muted-foreground text-sm">Loading stats...</div>
+            ) : (
+              <CircularGallery items={carouselItems} bend={3} borderRadius={0.05} scrollSpeed={2} />
+            )}
           </div>
         </div>
       </section>

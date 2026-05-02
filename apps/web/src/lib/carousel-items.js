@@ -31,6 +31,23 @@ function bakeTextOnImage(bgSrc, value, label, isDark) {
 
       resolve(canvas.toDataURL("image/png"));
     };
+    img.onerror = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1600;
+      canvas.height = 1200;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = isDark ? "#1c1c1c" : "#f5f5f5";
+      ctx.fillRect(0, 0, 1600, 1200);
+      ctx.fillStyle = isDark ? "#ffffff" : "#333333";
+      ctx.font = "bold 280px system-ui, -apple-system, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(value, 800, 510);
+      ctx.font = "72px system-ui, -apple-system, sans-serif";
+      ctx.fillStyle = isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.5)";
+      ctx.fillText(label, 800, 660);
+      resolve(canvas.toDataURL("image/png"));
+    };
     img.src = bgSrc;
   });
 }
@@ -43,9 +60,10 @@ const STAT_DATA = [
 ];
 
 export function useCarouselItems(isDark) {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState(null);
 
   useEffect(() => {
+    setItems(null);
     const bgSrc = isDark ? "/carousel-dark.png" : "/carousel-light.png";
     let cancelled = false;
 
