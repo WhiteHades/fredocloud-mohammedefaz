@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const { Router } = require("express");
 const multer = require("multer");
 
-const { normalizeEmail } = require("@notfredohub/shared");
+const { normalizeEmail } = require("../../lib/shared-helpers");
 
 const {
   REFRESH_COOKIE_NAME,

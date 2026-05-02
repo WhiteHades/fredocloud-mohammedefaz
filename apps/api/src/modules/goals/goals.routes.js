@@ -1,6 +1,6 @@
 const { Router } = require("express");
 
-const { parseDateValue } = require("@notfredohub/shared");
+const { parseDateValue } = require("../../lib/shared-helpers");
 const { recordAuditEvent } = require("../../lib/audit");
 const { prisma } = require("../../lib/prisma");
 const { emitWorkspaceEvent } = require("../../lib/realtime");

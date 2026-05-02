@@ -1,6 +1,6 @@
 const { Router } = require("express");
 
-const { parseDateString, toCsvCell } = require("@notfredohub/shared");
+const { parseDateString, toCsvCell } = require("../../lib/shared-helpers");
 const { recordAuditEvent } = require("../../lib/audit");
 const { config } = require("../../lib/env");
 const { sendInvitationEmail } = require("../../lib/email");
