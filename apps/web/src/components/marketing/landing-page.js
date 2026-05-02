@@ -3,28 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "next-themes";
-import {
-  ArrowUpRight,
-  SignIn,
-  UserPlus,
-  House,
-  ChartLineUp,
-  Lightning,
-  LockSimple,
-  PaintBrush,
-  Timer,
-} from "@phosphor-icons/react";
+import { ArrowUpRight, SignIn, UserPlus, House } from "@phosphor-icons/react";
 
 import { useAuthStore } from "@/stores/auth-store";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
-import { AnimatedIcon } from "@/components/ui/animated-icon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import RotatingText from "@/components/RotatingText";
 import DotGrid from "@/components/DotGrid";
 import CircularGallery from "@/components/CircularGallery";
 import MagicBento from "@/components/MagicBento";
-import CardSwap, { Card } from "@/components/CardSwap";
+import Carousel from "@/components/Carousel";
 import { useCarouselItems } from "@/lib/carousel-items";
 
 const ROTATING_WORDS = ["organise", "collaborate", "ship", "grow", "decide", "build", "plan", "execute"];
@@ -37,16 +26,6 @@ const BENTO_CARDS = [
   { emoji: "\u26A1", title: "Realtime", description: "Mentions, presence, activity feel immediate — behaves like a live hub.", label: "Live" },
   { emoji: "\uD83D\uDCCA", title: "Analytics", description: "Track totals, velocity, overdue work, export without leaving dashboard.", label: "Export" },
 ];
-
-const POLISH = [
-  { icon: PaintBrush, label: "Light, dark, and system appearance controls", accent: "#ec4899", anim: "float" },
-  { icon: Lightning, label: "Command palette navigation (Ctrl+K)", accent: "#f59e0b", anim: "flicker" },
-  { icon: ChartLineUp, label: "Audit and workspace CSV exports", accent: "#10b981", anim: "grow" },
-  { icon: LockSimple, label: "Role-aware permissions and seeded demo flows", accent: "#6366f1", anim: "pulse" },
-  { icon: Timer, label: "Realtime updates tuned to feel immediate", accent: "#ef4444", anim: "tick" },
-];
-
-const STACK_LABELS = ["Next.js", "Express + Prisma", "PostgreSQL", "Zustand", "Socket.IO", "Cloudinary", "Recharts", "Railway"];
 
 export function LandingPage() {
   const user = useAuthStore((state) => state.user);
@@ -213,56 +192,38 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* CARD SWAP - centered, themed, responsive */}
+      {/* CAROUSEL */}
       <section className="relative z-10 px-4 pb-24 md:px-6" id="stack">
-        <div className="mx-auto max-w-lg min-h-[380px] sm:min-h-[420px] flex items-center justify-center">
-          <CardSwap
-            width={380}
-            height={360}
-            cardDistance={40}
-            verticalDistance={50}
-            delay={2000}
+        <div className="mx-auto max-w-md flex justify-center">
+          <Carousel
+            baseWidth={360}
+            autoplay
+            autoplayDelay={2500}
             pauseOnHover={true}
-          >
-            <Card className="p-5 sm:p-6 flex flex-col justify-center gap-3">
-              <Badge variant="outline" className="w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Stack</Badge>
-              <h3 className="font-heading text-xl">Modern full-stack stack.</h3>
-              <p className="text-xs leading-6 text-muted-foreground">
-                Turborepo monorepo, Next.js, Express, Prisma/Postgres, Zustand, Socket.IO, Cloudinary, Recharts, Railway.
-              </p>
-              <div className="grid grid-cols-4 gap-1.5">
-                {STACK_LABELS.map((label) => (
-                  <div key={label} className="rounded-lg border bg-muted/30 px-2 py-1.5 text-[10px] text-center text-muted-foreground dark:border-white/8 dark:bg-white/[0.02] dark:text-white/78">
-                    {label}
-                  </div>
-                ))}
-              </div>
-            </Card>
+            loop
+            round={false}
+            items={[
+              {
+                id: 1,
+                title: "Modern full-stack stack",
+                description: "Turborepo, Next.js, Express, Prisma/Postgres, Zustand, Socket.IO, Cloudinary, Recharts, Railway.",
+                icon: <span className="text-xs font-mono">01</span>,
+              },
+              {
+                id: 2,
+                title: "Built to ship",
+                description: "Light/dark/system theme, command palette, audit & CSV exports, role-aware permissions, realtime updates.",
 
-            <Card className="p-5 sm:p-6 pt-8 flex flex-col justify-center gap-3">
-              <Badge variant="outline" className="w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Polish</Badge>
-              <h3 className="font-heading text-xl">Built to ship.</h3>
-              <p className="text-xs leading-6 text-muted-foreground">Every detail tuned for speed and usability.</p>
-              <div className="space-y-1.5">
-                {POLISH.map((p) => (
-                  <div key={p.label} className="flex items-center gap-2 rounded-lg px-2 py-1.5 transition-all duration-300 hover:bg-muted/50 dark:hover:bg-white/5">
-                    <AnimatedIcon icon={p.icon} accent={p.accent} animation={p.anim} size="sm" />
-                    <span className="text-xs text-muted-foreground dark:text-white/78">{p.label}</span>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            <Card className="p-5 sm:p-6 flex flex-col items-center justify-center text-center gap-4">
-              <h3 className="font-heading text-xl">Ready to start?</h3>
-              <p className="text-sm text-muted-foreground">Join teams already shipping with notFredoHub.</p>
-              <Button size="lg" asChild>
-                <Link href={user ? "/dashboard" : "/login"}>
-                  {user ? "Go to Dashboard" : "Try the demo"} <ArrowUpRight data-icon="inline-end" />
-                </Link>
-              </Button>
-            </Card>
-          </CardSwap>
+                icon: <span className="text-xs font-mono">02</span>,
+              },
+              {
+                id: 3,
+                title: "Ready to start?",
+                description: "Join teams already shipping with notFredoHub.",
+                icon: <span className="text-xs font-mono">03</span>,
+              },
+            ]}
+          />
         </div>
       </section>
     </main>
