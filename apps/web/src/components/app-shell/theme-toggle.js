@@ -10,8 +10,13 @@ const THEME_LABELS = { light: "Light", dark: "Dark" };
 
 export function ThemeToggle({ className = "" }) {
   const { resolvedTheme, setTheme, theme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [display, setDisplay] = useState(theme || "light");
   const prevDisplay = useRef(display);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     prevDisplay.current = display;
@@ -33,14 +38,14 @@ export function ThemeToggle({ className = "" }) {
   const wasActive = prevDisplay.current;
 
   const iconStyle = (name) => ({
-    opacity: display === name ? 1 : 0,
+    opacity: mounted && display === name ? 1 : 0,
     transitionDelay: wasActive === name ? "0ms" : "70ms",
-    transform: display === name
+    transform: mounted && display === name
       ? "scale(1) rotate(0deg)"
       : name === "dark"
         ? "scale(0.25) rotate(90deg)"
         : "scale(0.25) rotate(-90deg)",
-    filter: display === name ? "blur(0)" : "blur(2px)",
+    filter: mounted && display === name ? "blur(0)" : "blur(2px)",
   });
 
   return (
