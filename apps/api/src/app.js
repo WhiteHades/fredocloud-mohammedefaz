@@ -18,6 +18,8 @@ const {
 const { goalDetailRouter, goalsRouter } = require("./modules/goals/goals.routes");
 const { workspacesRouter } = require("./modules/workspaces/workspaces.routes");
 const { config } = require("./lib/env");
+const { hasEmailTransport, sendEmail } = require("./lib/email");
+const { requireAuth } = require("./middleware/require-auth");
 const { specification } = require("./lib/openapi");
 
 const allowedOrigins = [
@@ -72,6 +74,22 @@ app.get("/api/health", (_request, response) => {
 
 app.get("/", (_request, response) => {
   response.redirect(301, config.clientUrl);
+});
+
+app.post("/api/test/email", requireAuth, async (request, response) => {
+  if (!hasEmailTransport()) {
+    return response.status(503).json({ error: "Email is not configured. Set RESEND_API_KEY and SMTP_FROM." });
+  }
+
+  const to = request.body.to || request.auth.email;
+
+  const result = await sendEmail({
+    to,
+    subject: "notFredoHub email test",
+    html: `<p>Hi! This is a test email from <strong>notFredoHub</strong>. If you're reading this, email delivery is working. Sent at ${new Date().toISOString()}.</p>`,
+  });
+
+  return response.status(200).json({ success: true, to, ...result });
 });
 
 module.exports = { app };
