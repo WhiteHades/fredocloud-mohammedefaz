@@ -11,6 +11,10 @@
 
 <br>
 
+<p align="center"><a href="https://notfredohub.mohammedefaz.com/walkthrough.mp4">Watch demo walkthrough (3:52)</a></p>
+
+<br>
+
 ### `Live`
 
 | Service | URL |
