@@ -11,7 +11,7 @@
 
 <br>
 
-## Live
+### Live
 
 | Service | URL |
 |---|---|
@@ -24,7 +24,7 @@
 
 <br>
 
-## Features
+### Features
 
 - Email/password authentication with cookie JWT sessions
 - Multi-workspace creation, switching, invitations, and role-based membership
@@ -49,7 +49,7 @@
 
 <br>
 
-## Stack
+### Stack
 
 | Area | Technology |
 |---|---|
@@ -66,7 +66,7 @@
 
 <br>
 
-## Layout
+### Layout
 
 ```text
 apps/
@@ -78,7 +78,7 @@ packages/
 
 <br>
 
-## Run locally
+### Run locally
 
 You need Node.js, npm, and a running PostgreSQL instance.
 
@@ -107,7 +107,7 @@ Open [`http://localhost:3000`](http://localhost:3000) and log in with `demo@notf
 
 <br>
 
-## Scripts
+### Scripts
 
 | Command | Purpose |
 |---|---|
@@ -121,9 +121,9 @@ Open [`http://localhost:3000`](http://localhost:3000) and log in with `demo@notf
 
 <br>
 
-## Environment
+### Environment
 
-### API (`apps/api/.env`)
+#### API (`apps/api/.env`)
 
 | Variable | Required | Purpose |
 |---|---|---|
@@ -136,7 +136,7 @@ Open [`http://localhost:3000`](http://localhost:3000) and log in with `demo@notf
 
 Full list in `apps/api/.env.example`.
 
-### Web (`apps/web/.env.local`)
+#### Web (`apps/web/.env.local`)
 
 | Variable | Required | Purpose |
 |---|---|---|
