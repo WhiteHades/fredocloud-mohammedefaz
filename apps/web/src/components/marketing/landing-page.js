@@ -56,17 +56,17 @@ function statSvg(label, value, bgCenter, bgEdge, textColor, subColor) {
 function buildStatItems(isDark) {
   if (isDark) {
     return [
-      { image: statSvg("Workspaces", "7", "#2a1f1f", "#141010", "#e8e0d8", "#9e958b"), text: "" },
-      { image: statSvg("Members", "26", "#2a201f", "#141010", "#e8e0d8", "#9e958b"), text: "" },
-      { image: statSvg("Goals", "200+", "#2a221f", "#141010", "#e8e0d8", "#9e958b"), text: "" },
-      { image: statSvg("Items", "400+", "#2a1e1f", "#141010", "#e8e0d8", "#9e958b"), text: "" },
+      { image: statSvg("Workspaces", "7", "#2a1a18", "#140c0c", "#f0e8e6", "#a69590"), text: "" },
+      { image: statSvg("Members", "26", "#2a1b18", "#140c0c", "#f0e8e6", "#a69590"), text: "" },
+      { image: statSvg("Goals", "200+", "#2a1d18", "#140c0c", "#f0e8e6", "#a69590"), text: "" },
+      { image: statSvg("Items", "400+", "#2a1918", "#140c0c", "#f0e8e6", "#a69590"), text: "" },
     ];
   }
   return [
-    { image: statSvg("Workspaces", "7", "#f5f0e8", "#e8e4dc", "#1a1816", "#6b6762"), text: "" },
-    { image: statSvg("Members", "26", "#f5f0e8", "#e8e4dc", "#1a1816", "#6b6762"), text: "" },
-    { image: statSvg("Goals", "200+", "#f5f0e8", "#e8e4dc", "#1a1816", "#6b6762"), text: "" },
-    { image: statSvg("Items", "400+", "#f5f0e8", "#e8e4dc", "#1a1816", "#6b6762"), text: "" },
+    { image: statSvg("Workspaces", "7", "#fef5f3", "#fde8e3", "#1a1210", "#6b5b56"), text: "" },
+    { image: statSvg("Members", "26", "#fef5f3", "#fde8e3", "#1a1210", "#6b5b56"), text: "" },
+    { image: statSvg("Goals", "200+", "#fef5f3", "#fde8e3", "#1a1210", "#6b5b56"), text: "" },
+    { image: statSvg("Items", "400+", "#fef5f3", "#fde8e3", "#1a1210", "#6b5b56"), text: "" },
   ];
 }
 
@@ -196,7 +196,7 @@ export function LandingPage() {
       <section className="relative z-10 px-4 py-20 md:px-6" id="tagline">
         <div className="mx-auto max-w-4xl">
           <h2 className="font-heading text-2xl tracking-tight sm:text-3xl md:text-5xl grid" style={{ gridTemplateColumns: "1fr auto 1fr" }}>
-            <span className="text-muted-foreground whitespace-nowrap text-right">notFredoHub helps you</span>
+            <span className="text-muted-foreground whitespace-nowrap text-right">notFredoHub helps you{" "}</span>
             <span className="inline-flex min-w-[160px] sm:min-w-[200px] justify-start">
               <RotatingText
                 texts={ROTATING_WORDS}
@@ -218,7 +218,7 @@ export function LandingPage() {
       {/* STATS */}
       <section className="relative z-10 px-4 pb-16 md:px-6">
         <div className="mx-auto max-w-4xl">
-          <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden">
+          <div className="h-[300px] sm:h-[400px] rounded-2xl overflow-hidden" style={{ maskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)", WebkitMaskImage: "linear-gradient(to right, transparent, black 15%, black 85%, transparent)" }}>
             <CircularGallery items={statItems} bend={3} textColor="#ffffff" borderRadius={0.05} scrollSpeed={2} />
           </div>
         </div>
@@ -256,7 +256,7 @@ export function LandingPage() {
             height={360}
             cardDistance={40}
             verticalDistance={50}
-            delay={3000}
+            delay={2000}
             pauseOnHover={true}
           >
             <Card className="p-5 sm:p-6 flex flex-col justify-center gap-3">
@@ -274,7 +274,7 @@ export function LandingPage() {
               </div>
             </Card>
 
-            <Card className="p-5 sm:p-6 flex flex-col justify-center gap-3">
+            <Card className="p-5 sm:p-6 pt-8 flex flex-col justify-center gap-3">
               <Badge variant="outline" className="w-fit dark:border-white/10 dark:bg-white/5 dark:text-white/70">Polish</Badge>
               <h3 className="font-heading text-xl">Built to ship.</h3>
               <p className="text-xs leading-6 text-muted-foreground">Every detail tuned for speed and usability.</p>

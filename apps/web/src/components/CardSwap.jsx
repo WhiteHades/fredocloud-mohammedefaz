@@ -76,61 +76,70 @@ const CardSwap = ({
 
   useEffect(() => {
     const total = refs.length;
-    refs.forEach(
-      (r, i) => placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount)
-    );
+    if (total < 2) return;
 
-    const swap = () => {
-      if (order.current.length < 2) return;
-
-      const [front, ...rest] = order.current;
-      const elFront = refs[front].current;
-      const tl = gsap.timeline();
-      tlRef.current = tl;
-
-      tl.to(elFront, {
-        y: '+=500',
-        duration: config.durDrop,
-        ease: config.ease
+    const frame = requestAnimationFrame(() => {
+      refs.forEach((r, i) => {
+        if (r.current) placeNow(r.current, makeSlot(i, cardDistance, verticalDistance, total), skewAmount);
       });
 
-      tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
-      rest.forEach((idx, i) => {
-        const el = refs[idx].current;
-        const slot = makeSlot(i, cardDistance, verticalDistance, refs.length);
-        tl.set(el, { zIndex: slot.zIndex }, 'promote');
-        tl.to(el, {
-          x: slot.x,
-          y: slot.y,
-          z: slot.z,
-          duration: config.durMove,
+      const swap = () => {
+        if (order.current.length < 2) return;
+
+        const [front, ...rest] = order.current;
+        const elFront = refs[front].current;
+        if (!elFront) return;
+
+        const tl = gsap.timeline();
+        tlRef.current = tl;
+
+        tl.to(elFront, {
+          y: '+=500',
+          duration: config.durDrop,
           ease: config.ease
-        }, `promote+=${i * 0.15}`);
-      });
+        });
 
-      const backSlot = makeSlot(refs.length - 1, cardDistance, verticalDistance, refs.length);
-      tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
-      tl.call(() => {
-        gsap.set(elFront, { zIndex: backSlot.zIndex });
-      }, undefined, 'return');
-      tl.to(elFront, {
-        x: backSlot.x,
-        y: backSlot.y,
-        z: backSlot.z,
-        duration: config.durReturn,
-        ease: config.ease
-      }, 'return');
+        tl.addLabel('promote', `-=${config.durDrop * config.promoteOverlap}`);
+        rest.forEach((idx, i) => {
+          const el = refs[idx].current;
+          if (!el) return;
+          const slot = makeSlot(i, cardDistance, verticalDistance, refs.length);
+          tl.set(el, { zIndex: slot.zIndex }, 'promote');
+          tl.to(el, {
+            x: slot.x,
+            y: slot.y,
+            z: slot.z,
+            duration: config.durMove,
+            ease: config.ease
+          }, `promote+=${i * 0.15}`);
+        });
 
-      tl.call(() => {
-        order.current = [...rest, front];
-      });
-    };
+        const backSlot = makeSlot(refs.length - 1, cardDistance, verticalDistance, refs.length);
+        tl.addLabel('return', `promote+=${config.durMove * config.returnDelay}`);
+        tl.call(() => {
+          gsap.set(elFront, { zIndex: backSlot.zIndex });
+        }, undefined, 'return');
+        tl.to(elFront, {
+          x: backSlot.x,
+          y: backSlot.y,
+          z: backSlot.z,
+          duration: config.durReturn,
+          ease: config.ease
+        }, 'return');
 
-    swap();
-    intervalRef.current = window.setInterval(swap, delay);
+        tl.call(() => {
+          order.current = [...rest, front];
+        });
+      };
+
+      swap();
+      clearInterval(intervalRef.current);
+      intervalRef.current = window.setInterval(swap, delay);
+    });
 
     if (pauseOnHover) {
       const node = container.current;
+      if (!node) return;
       const pause = () => {
         tlRef.current?.pause();
         clearInterval(intervalRef.current);
@@ -145,9 +154,15 @@ const CardSwap = ({
         node.removeEventListener('mouseenter', pause);
         node.removeEventListener('mouseleave', resume);
         clearInterval(intervalRef.current);
+        cancelAnimationFrame(frame);
+        tlRef.current?.kill();
       };
     }
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      clearInterval(intervalRef.current);
+      cancelAnimationFrame(frame);
+      tlRef.current?.kill();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, easing]);
 
