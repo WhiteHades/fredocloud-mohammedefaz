@@ -270,7 +270,7 @@ export function AnnouncementsPanel({ activeMembership, lastRealtimeEvent }) {
                             variant="ghost"
                             size="sm"
                             onClick={() => handleReaction(ann.id, emoji)}
-                            className="text-base hover:bg-accent"
+                            className="text-base min-w-[44px] min-h-[44px] hover:bg-accent"
                           >
                             {emoji}
                             {count > 0 && <span className="ml-1 text-xs tabular-nums">{count}</span>}
@@ -293,9 +293,9 @@ export function AnnouncementsPanel({ activeMembership, lastRealtimeEvent }) {
                       <p className="text-xs text-muted-foreground">{c.author?.displayName || "User"} · {new Date(c.createdAt).toLocaleString()}</p>
                     </div>
                   ))}
-                  <form onSubmit={(e) => handleComment(e, ann.id)} className="flex gap-2">
-                    <Input name="content" placeholder="Add a comment..." required className="h-9" />
-                    <Button type="submit" size="sm"><Chat /></Button>
+                  <form onSubmit={(e) => handleComment(e, ann.id)} className="flex flex-wrap gap-2">
+                    <Input name="content" placeholder="Add a comment..." required className="h-9 min-w-0 flex-1" />
+                    <Button type="submit" size="sm" className="min-w-[44px]"><Chat /></Button>
                   </form>
                 </div>
               </CardContent>

@@ -137,9 +137,9 @@ export function ActionItemsPanel({ activeMembership, refreshKey }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-semibold font-heading">Action Items</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Tabs value={view} onValueChange={setView}>
             <TabsList>
               <TabsTrigger value="board"><Kanban /> Board</TabsTrigger>
@@ -241,7 +241,7 @@ export function ActionItemsPanel({ activeMembership, refreshKey }) {
                       </div>
                       <div className="mt-2 flex flex-wrap gap-1">
                         {STATUSES.filter((s) => s !== status).map((s) => (
-                          <Button key={s} variant="ghost" size="xs" className="h-6 text-xs" onClick={() => handleStatusChange(item.id, s)}>
+                          <Button key={s} variant="ghost" size="xs" className="h-6 text-xs min-h-[44px]" onClick={() => handleStatusChange(item.id, s)}>
                             → {s.replace("_", " ")}
                           </Button>
                         ))}
@@ -273,7 +273,7 @@ export function ActionItemsPanel({ activeMembership, refreshKey }) {
                   <div className="flex gap-1 shrink-0">
                     {STATUSES.map((s) => (
                       item.status !== s && (
-                        <Button key={s} variant="ghost" size="xs" className="h-7 text-xs" onClick={() => handleStatusChange(item.id, s)}>
+                        <Button key={s} variant="ghost" size="xs" className="h-7 text-xs min-h-[44px]" onClick={() => handleStatusChange(item.id, s)}>
                           {s.replace("_", " ")}
                         </Button>
                       )

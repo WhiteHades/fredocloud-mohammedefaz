@@ -275,10 +275,10 @@ export function GoalsPanel({ activeMembership, refreshKey }) {
                 <Separator />
                 <form onSubmit={handleAddMilestone} className="flex flex-col gap-2">
                   <Input name="title" placeholder="Milestone title" required />
-                  <div className="flex gap-2">
-                    <Input name="progress" type="number" min="0" max="100" defaultValue="0" className="w-24" />
-                    <Input name="dueDate" type="date" />
-                    <Button type="submit" size="sm"><Plus /></Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Input name="progress" type="number" min="0" max="100" defaultValue="0" className="min-w-[80px] flex-1" />
+                    <Input name="dueDate" type="date" className="min-w-0 flex-1" />
+                    <Button type="submit" size="sm" className="min-w-[44px]"><Plus /></Button>
                   </div>
                 </form>
               </CardContent>
