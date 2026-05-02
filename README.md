@@ -38,7 +38,7 @@
 - Immutable audit timeline with CSV export
 
 **Bonus:**
-- Dark/light theme with system preference detection
+- Dark/light theme toggle
 - Email notifications (Nodemailer hooks)
 - Command palette (`Ctrl+K`)
 - Unit & integration tests (Jest + Supertest + RTL)
@@ -147,7 +147,7 @@ Full list in `apps/api/.env.example`.
 
 - **Design system:** shadcn/ui Luma (Radix primitives)
 - **Layout:** Collapsible sidebar with workspace switcher, card-based dashboard grid
-- **Theme:** Light, dark, and system appearance with visible toggle, OKLCH color system
+- **Theme:** Light and dark with toggle, OKLCH color system, dark default
 - **Fonts:** Geist (headings), IBM Plex Sans (body), Geist Mono (code)
 - **Animations:** transitions-dev CSS transitions, anime.js entrance animations
 - **Icons:** Phosphor Icons (consistent stroke style)

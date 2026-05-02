@@ -8,8 +8,7 @@ export function Providers({ children }) {
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="light"
-      enableSystem
+      defaultTheme="dark"
       disableTransitionOnChange
     >
       <TooltipProvider>

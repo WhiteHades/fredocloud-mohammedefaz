@@ -149,7 +149,7 @@ export function SettingsPanel({
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Appearance</CardTitle>
-            <CardDescription>Switch between light, dark, and system modes.</CardDescription>
+            <CardDescription>Switch between light and dark modes.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <ThemeToggle align="start" buttonClassName="w-fit" />

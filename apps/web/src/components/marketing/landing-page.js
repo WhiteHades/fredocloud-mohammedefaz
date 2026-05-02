@@ -208,7 +208,7 @@ export function LandingPage() {
               {
                 id: 2,
                 title: "Built to ship",
-                description: "Light/dark/system theme, command palette, audit & CSV exports, role-aware permissions, realtime updates.",
+                description: "Light/dark theme, command palette, audit & CSV exports, role-aware permissions, realtime updates.",
 
                 icon: <span className="text-xs font-mono">02</span>,
               },

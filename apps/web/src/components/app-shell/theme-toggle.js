@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Desktop } from "@phosphor-icons/react";
+import { Sun, Moon } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
-const THEME_LABELS = { light: "Light", dark: "Dark", system: "System" };
+const THEME_LABELS = { light: "Light", dark: "Dark" };
 
 export function ThemeToggle({ className = "" }) {
   const { resolvedTheme, setTheme, theme } = useTheme();
@@ -24,7 +24,7 @@ export function ThemeToggle({ className = "" }) {
   }, [theme]);
 
   const cycle = useCallback(() => {
-    const order = ["light", "dark", "system"];
+    const order = ["light", "dark"];
     const current = order.indexOf(display || "light");
     setTheme(order[(current + 1) % order.length]);
   }, [setTheme, display]);
@@ -39,9 +39,7 @@ export function ThemeToggle({ className = "" }) {
       ? "scale(1) rotate(0deg)"
       : name === "dark"
         ? "scale(0.25) rotate(90deg)"
-        : name === "light"
-          ? "scale(0.25) rotate(-90deg)"
-          : "scale(0.25) rotate(0deg)",
+        : "scale(0.25) rotate(-90deg)",
     filter: display === name ? "blur(0)" : "blur(2px)",
   });
 
@@ -65,11 +63,6 @@ export function ThemeToggle({ className = "" }) {
               weight="fill"
               className="theme-toggle-moon absolute inset-0 size-5 transition-all duration-[var(--icon-swap-dur)] ease-out"
               style={iconStyle("dark")}
-            />
-            <Desktop
-              weight="fill"
-              className="theme-toggle-system absolute inset-0 size-5 transition-all duration-[var(--icon-swap-dur)] ease-out"
-              style={iconStyle("system")}
             />
           </span>
         </Button>
